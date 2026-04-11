@@ -1,0 +1,1838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ProstaCare India — Prostate Cancer Clinical Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&amp;family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #FFFFFF;
+  --bg-card:  #FFFFFF;
+  --bg-raised:#F6F8FC;
+  --bg-high:  #EEF4FF;
+  --border:   rgba(33,56,84,0.08);
+  --border-m: rgba(33,56,84,0.14);
+  --border-s: rgba(33,56,84,0.22);
+  --teal:     #1E9B61;
+  --teal-d:   #177B4C;
+  --teal-m:   rgba(30,155,97,0.10);
+  --teal-b:   rgba(30,155,97,0.24);
+  --amber:    #D58A1C;
+  --amber-m:  rgba(213,138,28,0.11);
+  --amber-b:  rgba(213,138,28,0.25);
+  --red:      #D34B52;
+  --red-m:    rgba(211,75,82,0.10);
+  --red-b:    rgba(211,75,82,0.22);
+  --blue:     #6E7EEB;
+  --blue-m:   rgba(110,126,235,0.10);
+  --blue-b:   rgba(110,126,235,0.22);
+  --pink-m:   rgba(196,118,184,0.10);
+  --pink-b:   rgba(196,118,184,0.22);
+  --accent-orange: #F2A14A;
+  --accent-green:  #4DB57A;
+  --accent-blue:   #7D8CF0;
+  --tp:       #233547;
+  --ts:       #617386;
+  --tm:       #8C9EB2;
+  --r:        8px;
+  --r-lg:     12px;
+  --r-xl:     16px;
+  --ff:       'IBM Plex Sans', sans-serif;
+  --fh:       'Syne', sans-serif;
+  --fm:       'IBM Plex Mono', monospace;
+  --sidebar:  220px;
+  --header:   58px;
+  --shadow:   0 12px 32px rgba(54,78,106,0.08);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { height: 100%; }
+body {
+  background:
+    radial-gradient(circle at top left, rgba(242,161,74,0.10), transparent 28%),
+    radial-gradient(circle at top right, rgba(125,140,240,0.10), transparent 26%),
+    linear-gradient(180deg, #FFFDF8 0%, var(--bg) 32%, #F9FBFF 100%);
+  color: var(--tp);
+  font-family: var(--ff);
+  font-size: 14px;
+  line-height: 1.5;
+  height: 100%;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(99,120,146,0.22); border-radius: 3px; }
+
+#app-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--header);
+  background: rgba(255,255,255,0.94);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  padding: 0 1.5rem;
+  gap: 1.25rem;
+  z-index: 100;
+}
+.hdr-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--fh);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--tp);
+  letter-spacing: -0.3px;
+  white-space: nowrap;
+}
+.hdr-brand-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: var(--teal-m);
+  border: 1px solid var(--teal-b);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.hdr-brand-icon svg { width: 16px; height: 16px; fill: var(--teal); }
+.hdr-sep { width: 1px; height: 28px; background: var(--border-m); flex-shrink: 0; }
+.hdr-pt-mini {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+.hdr-pt-av {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--teal-m);
+  border: 1px solid var(--teal-b);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--teal);
+  flex-shrink: 0;
+}
+.hdr-pt-name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.hdr-pt-name { font-size: 13px; font-weight: 600; color: var(--tp); }
+.hdr-pt-sub {
+  font-size: 11px;
+  color: var(--ts);
+  margin-top: 1px;
+  font-family: var(--fm);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.hdr-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.hdr-doc { text-align: right; }
+.hdr-doc-name { font-size: 12px; font-weight: 500; color: var(--tp); }
+.hdr-doc-sub { font-size: 11px; color: var(--ts); }
+.hdr-btn {
+  padding: 6px 14px;
+  border-radius: var(--r);
+  background: var(--teal-m);
+  border: 1px solid var(--teal-b);
+  color: var(--teal);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: var(--ff);
+  transition: background 0.15s;
+}
+.hdr-btn:hover { background: var(--teal-m); }
+
+#sidebar {
+  position: fixed;
+  top: var(--header);
+  left: 0;
+  bottom: 0;
+  width: var(--sidebar);
+  background: rgba(255,255,255,0.92);
+  border-right: 1px solid var(--border);
+  backdrop-filter: blur(12px);
+  padding: 1.25rem 0.75rem;
+  overflow-y: auto;
+  z-index: 90;
+}
+.sb-section { margin-bottom: 1.5rem; }
+.sb-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--tm);
+  padding: 0 0.75rem;
+  margin-bottom: 0.5rem;
+}
+.sb-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: var(--r);
+  font-size: 13px;
+  color: var(--ts);
+  cursor: pointer;
+  transition: all 0.15s;
+  margin-bottom: 2px;
+  border: 1px solid transparent;
+}
+.sb-item:hover { background: var(--bg-raised); color: var(--tp); }
+.sb-item.active {
+  background: var(--teal-m);
+  border-color: var(--teal-b);
+  color: var(--teal);
+  font-weight: 500;
+}
+.sb-icon { width: 16px; height: 16px; opacity: 0.6; flex-shrink: 0; }
+.sb-item.active .sb-icon { opacity: 1; }
+.sb-badge {
+  margin-left: auto;
+  background: var(--red-m);
+  color: var(--red);
+  border: 1px solid var(--red-b);
+  border-radius: 10px;
+  padding: 1px 7px;
+  font-size: 10px;
+  font-weight: 600;
+}
+.sb-pt-card {
+  background: linear-gradient(180deg, rgba(125,140,240,0.08) 0%, rgba(255,255,255,0.98) 42%, #FFFFFF 100%);
+  border: 1px solid var(--border-m);
+  border-radius: var(--r-lg);
+  padding: 12px;
+  margin-bottom: 1.25rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.sb-pt-av {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--teal-m);
+  border: 1px solid var(--teal-b);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--teal);
+  margin-bottom: 8px;
+}
+.sb-pt-name { font-size: 13px; font-weight: 600; color: var(--tp); margin-bottom: 2px; }
+.sb-pt-id { font-size: 10px; color: var(--ts); font-family: var(--fm); }
+.sb-divider { height: 1px; background: var(--border); margin: 0.5rem 0; }
+
+#main {
+  margin-left: var(--sidebar);
+  margin-top: var(--header);
+  padding: 1.5rem 1.75rem;
+  min-height: calc(100vh - var(--header));
+}
+
+.pt-banner {
+  background: linear-gradient(180deg, rgba(77,181,122,0.10) 0%, rgba(255,255,255,0.98) 32%, #FFFFFF 100%);
+  border: 1px solid var(--border-m);
+  border-radius: var(--r-xl);
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+  animation: fadeUp 0.4s ease both;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.pt-banner::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--accent-green), var(--accent-blue));
+}
+.pt-av-lg {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--teal-m);
+  border: 2px solid var(--teal-b);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--teal);
+  flex-shrink: 0;
+}
+.pt-info { flex: 1; min-width: 200px; }
+.pt-name-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+.pt-name { font-family: var(--fh); font-size: 18px; font-weight: 600; color: var(--tp); }
+.pt-sub { font-size: 11px; color: var(--ts); font-family: var(--fm); line-height: 1.6; }
+.pt-stats { display: flex; gap: 10px; flex-wrap: wrap; }
+.privacy-toggle {
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid var(--border-s);
+  background: rgba(255,255,255,0.94);
+  color: var(--ts);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+.privacy-toggle:hover {
+  color: var(--blue);
+  border-color: var(--blue-b);
+  background: var(--blue-m);
+}
+.privacy-toggle svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.privacy-toggle .icon-open { display: none; }
+.privacy-toggle[data-state="visible"] .icon-open { display: block; }
+.privacy-toggle[data-state="visible"] .icon-closed { display: none; }
+.name-privacy {
+  transition: color 0.18s ease, text-shadow 0.18s ease, opacity 0.18s ease;
+  text-shadow: none;
+}
+.name-privacy.is-masked {
+  color: transparent !important;
+  text-shadow: 0 0 8px rgba(35, 53, 71, 0.42);
+  user-select: none;
+}
+input.name-privacy.is-masked {
+  caret-color: transparent;
+}
+input.name-privacy.is-masked::selection {
+  background: transparent;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.stat-pill {
+  background: var(--bg-raised);
+  border: 1px solid var(--border-m);
+  border-radius: var(--r);
+  padding: 6px 14px;
+}
+.stat-pill .sv {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--tp);
+  font-family: var(--fm);
+  display: block;
+}
+.stat-pill .sk {
+  font-size: 10px;
+  color: var(--ts);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  display: block;
+  margin-top: 1px;
+}
+.stat-pill.warn .sv { color: var(--amber); }
+.stat-pill.danger .sv { color: var(--red); }
+.stat-pill.ok .sv { color: var(--teal); }
+
+.alert-banner {
+  background: linear-gradient(180deg, rgba(211,75,82,0.11) 0%, rgba(255,255,255,0.94) 100%);
+  border: 1px solid var(--red-b);
+  border-radius: var(--r-lg);
+  padding: 11px 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 1rem;
+  animation: fadeUp 0.4s 0.05s ease both;
+  box-shadow: var(--shadow);
+}
+.alert-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--red); margin-top: 5px; flex-shrink: 0; }
+.alert-title { font-size: 13px; font-weight: 600; color: var(--red); margin-bottom: 2px; }
+.alert-body { font-size: 12px; color: var(--ts); line-height: 1.5; }
+.alert-link { color: var(--red); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+
+.content-section { display: none; animation: fadeUp 0.3s ease both; }
+.content-section.active { display: block; }
+
+.card {
+  background: linear-gradient(180deg, rgba(255,255,255,0.98) 0%, #FFFFFF 100%);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.card + .card { margin-top: 0; }
+.card::before,
+.metric-card::before,
+.sb-pt-card::before,
+.chart-wrap::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  border-radius: 999px;
+}
+.card:nth-of-type(3n+1)::before,
+.metric-card:nth-child(3n+1)::before { background: var(--accent-orange); }
+.card:nth-of-type(3n+2)::before,
+.metric-card:nth-child(3n+2)::before { background: var(--accent-green); }
+.card:nth-of-type(3n)::before,
+.metric-card:nth-child(3n)::before { background: var(--accent-blue); }
+.sb-pt-card::before { background: linear-gradient(90deg, var(--accent-orange), var(--accent-blue)); }
+.chart-wrap::before { background: linear-gradient(90deg, var(--accent-blue), var(--accent-green)); }
+.card-title {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--tm);
+  padding-bottom: 10px;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.card-title-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--teal);
+  flex-shrink: 0;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 12px;
+  margin-bottom: 1rem;
+}
+.form-grid-3 { grid-template-columns: repeat(3, 1fr); }
+.form-grid-2 { grid-template-columns: repeat(2, 1fr); }
+.fg { display: flex; flex-direction: column; gap: 5px; }
+.fl {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ts);
+  letter-spacing: .02em;
+}
+.rs { color: var(--red); }
+input[type=text],
+input[type=date],
+input[type=tel],
+input[type=number],
+input[type=email],
+select,
+textarea {
+  background: var(--bg-raised);
+  border: 1px solid var(--border-m);
+  border-radius: var(--r);
+  color: var(--tp);
+  font-family: var(--ff);
+  font-size: 13px;
+  padding: 8px 12px;
+  outline: none;
+  transition: border-color 0.15s, background 0.15s;
+  width: 100%;
+  -webkit-appearance: none;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: var(--teal-b);
+  background: var(--bg-high);
+  box-shadow: 0 0 0 3px var(--teal-m);
+}
+select { cursor: pointer; }
+input[readonly] {
+  background: var(--bg-raised);
+  border-color: var(--border);
+  color: var(--ts);
+  cursor: default;
+}
+input[readonly]:focus { border-color: var(--border); box-shadow: none; }
+select option { background: var(--bg-card); }
+
+.chip-group { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 5px; }
+.chip {
+  padding: 5px 13px;
+  border: 1px solid var(--border-m);
+  border-radius: 20px;
+  font-size: 12px;
+  cursor: pointer;
+  background: var(--bg-raised);
+  color: var(--ts);
+  transition: all 0.15s;
+  user-select: none;
+  font-family: var(--ff);
+}
+.chip:hover { border-color: var(--border-s); color: var(--tp); }
+.chip.sel {
+  background: linear-gradient(180deg, rgba(30,155,97,0.10) 0%, rgba(255,255,255,0.95) 100%);
+  border-color: var(--teal-b);
+  color: var(--teal);
+  font-weight: 500;
+}
+.chip.sel-red { background: var(--red-m); border-color: var(--red-b); color: var(--red); font-weight: 500; }
+.chip.sel-amber { background: var(--amber-m); border-color: var(--amber-b); color: var(--amber); font-weight: 500; }
+
+.badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 9px;
+  border-radius: 20px;
+  border: 1px solid;
+}
+.b-red { background: var(--red-m); color: var(--red); border-color: var(--red-b); }
+.b-amber { background: var(--amber-m); color: var(--amber); border-color: var(--amber-b); }
+.b-teal { background: var(--teal-m); color: var(--teal); border-color: var(--teal-b); }
+.b-blue { background: var(--blue-m); color: var(--blue); border-color: var(--blue-b); }
+.b-pink { background: var(--pink-m); color: #DC64B4; border-color: var(--pink-b); }
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--teal-d), var(--teal));
+  color: #fff;
+  border: none;
+  border-radius: var(--r);
+  padding: 9px 22px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--ff);
+  transition: background 0.15s;
+  letter-spacing: .01em;
+}
+.btn-primary:hover { background: var(--teal); }
+.btn-ghost {
+  background: rgba(255,255,255,0.92);
+  border: 1px solid var(--border-s);
+  border-radius: var(--r);
+  padding: 9px 18px;
+  font-size: 13px;
+  color: var(--ts);
+  cursor: pointer;
+  font-family: var(--ff);
+  transition: all 0.15s;
+}
+.btn-ghost:hover { border-color: var(--tp); color: var(--tp); }
+.btn-add {
+  font-size: 12px;
+  color: var(--teal);
+  background: none;
+  border: 1px dashed var(--teal-b);
+  border-radius: var(--r);
+  padding: 6px 14px;
+  cursor: pointer;
+  font-family: var(--ff);
+  margin-top: 8px;
+  transition: background 0.15s;
+}
+.btn-add:hover { background: var(--teal-m); }
+
+.data-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.data-table th {
+  text-align: left;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--tm);
+  padding: 7px 10px;
+  border-bottom: 1px solid var(--border);
+}
+.data-table td { padding: 9px 10px; border-bottom: 1px solid var(--border); }
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tbody tr:hover td { background: var(--bg-raised); }
+.data-table input {
+  border: none;
+  background: transparent;
+  font-size: 12px;
+  font-family: var(--fm);
+  color: var(--tp);
+  padding: 0;
+  width: 100%;
+  outline: none;
+}
+.data-table input:focus { color: var(--teal); }
+
+.chart-wrap {
+  background: linear-gradient(180deg, rgba(125,140,240,0.08) 0%, rgba(255,255,255,0.98) 34%, #FFFFFF 100%);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 1rem;
+  margin-bottom: 1rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.chart-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ts);
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  margin-bottom: 0.75rem;
+}
+#psaCanvas { width: 100%; height: 140px; display: block; }
+
+.timeline { position: relative; padding: 1rem 0; }
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 26px;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--border-m);
+}
+.tl-event {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 1.75rem;
+  position: relative;
+}
+.tl-dot {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: 700;
+  text-align: center;
+  flex-shrink: 0;
+  border: 1px solid;
+  z-index: 1;
+  line-height: 1.3;
+  letter-spacing: .02em;
+}
+.tl-dot.done { background: var(--teal-m); border-color: var(--teal-b); color: var(--teal); }
+.tl-dot.now { background: var(--blue-m); border-color: var(--blue-b); color: var(--blue); }
+.tl-dot.up { background: var(--bg-raised); border-color: var(--border-m); color: var(--tm); }
+.tl-body { flex: 1; padding-top: 10px; }
+.tl-title { font-size: 14px; font-weight: 600; color: var(--tp); }
+.tl-title.now { color: var(--blue); }
+.tl-title.up { color: var(--ts); }
+.tl-date { font-size: 11px; color: var(--tm); margin-top: 2px; font-family: var(--fm); }
+.tl-details { font-size: 12px; color: var(--ts); margin-top: 5px; line-height: 1.6; }
+.tl-details.alert { color: var(--red); }
+
+.stepper { display: flex; align-items: flex-start; gap: 0; margin-bottom: 1.5rem; }
+.step { flex: 1; text-align: center; position: relative; }
+.step-circle {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 5px;
+  font-size: 11px;
+  font-weight: 600;
+  border: 1px solid;
+}
+.step-circle.done { background: var(--teal-m); border-color: var(--teal-b); color: var(--teal); }
+.step-circle.now { background: var(--blue-m); border-color: var(--blue-b); color: var(--blue); }
+.step-circle.up { background: var(--bg-raised); border-color: var(--border-m); color: var(--tm); }
+.step-label { font-size: 10px; font-weight: 500; }
+.step-label.done { color: var(--teal); }
+.step-label.now { color: var(--blue); }
+.step-label.up { color: var(--tm); }
+.step-line {
+  position: absolute;
+  top: 13px;
+  left: 50%;
+  right: -50%;
+  height: 1px;
+}
+.step-line.done { background: var(--teal-b); }
+.step-line.up { background: var(--border); }
+.step:last-child .step-line { display: none; }
+
+.nudge-card {
+  border-radius: var(--r-lg);
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  border: 1px solid;
+  box-shadow: var(--shadow);
+}
+.nudge-card.urgent { background: var(--red-m); border-color: var(--red-b); }
+.nudge-card.warning { background: var(--amber-m); border-color: var(--amber-b); }
+.nudge-card.info { background: var(--blue-m); border-color: var(--blue-b); }
+.nudge-card.success { background: var(--teal-m); border-color: var(--teal-b); }
+.nc-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-top: 5px;
+  flex-shrink: 0;
+}
+.nudge-card.urgent .nc-dot { background: var(--red); }
+.nudge-card.warning .nc-dot { background: var(--amber); }
+.nudge-card.info .nc-dot { background: var(--blue); }
+.nudge-card.success .nc-dot { background: var(--teal); }
+.nc-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.nc-title { font-size: 13px; font-weight: 600; }
+.nudge-card.urgent .nc-title { color: var(--red); }
+.nudge-card.warning .nc-title { color: var(--amber); }
+.nudge-card.info .nc-title { color: var(--blue); }
+.nudge-card.success .nc-title { color: var(--teal); }
+.nc-tag {
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.07);
+  color: var(--ts);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.nc-body { font-size: 12px; color: var(--ts); line-height: 1.6; }
+.nc-action {
+  margin-top: 8px;
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--teal);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.split { display: grid; grid-template-columns: 1fr 340px; gap: 1rem; }
+.split-main { min-width: 0; }
+.split-side { min-width: 0; }
+.sticky-side { position: sticky; top: calc(var(--header) + 1.5rem); }
+
+.metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 1rem; }
+.metric-card {
+  background: linear-gradient(180deg, rgba(255,255,255,0.98) 0%, #FFFFFF 100%);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 1rem 1.25rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.metric-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--tm);
+  margin-bottom: 6px;
+}
+.metric-value { font-size: 22px; font-weight: 700; color: var(--tp); font-family: var(--fm); line-height: 1; }
+.metric-unit { font-size: 12px; font-weight: 400; color: var(--ts); margin-left: 4px; }
+.metric-sub { font-size: 11px; color: var(--ts); margin-top: 5px; }
+.metric-card.m-danger { border-color: var(--red-b); }
+.metric-card.m-danger .metric-value { color: var(--red); }
+.metric-card.m-warn { border-color: var(--amber-b); }
+.metric-card.m-warn .metric-value { color: var(--amber); }
+.metric-card.m-ok { border-color: var(--teal-b); }
+.metric-card.m-ok .metric-value { color: var(--teal); }
+
+.form-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 1rem; }
+
+.acked-item {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 12px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--border);
+}
+.acked-item:last-child { border-bottom: none; }
+.ack-check { color: var(--teal); font-size: 13px; font-weight: 700; flex-shrink: 0; }
+.ack-text { color: var(--ts); flex: 1; }
+.ack-date { font-size: 10px; color: var(--tm); font-family: var(--fm); white-space: nowrap; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.content-section.active > * { animation: fadeUp 0.3s ease both; }
+.content-section.active > *:nth-child(2) { animation-delay: .05s; }
+.content-section.active > *:nth-child(3) { animation-delay: .1s; }
+.content-section.active > *:nth-child(4) { animation-delay: .15s; }
+.content-section.active > *:nth-child(5) { animation-delay: .2s; }
+
+.tbl-in {
+  background: transparent;
+  border: none;
+  color: var(--tp);
+  font-family: var(--fm);
+  font-size: 12px;
+  padding: 0;
+  outline: none;
+}
+.tbl-in:focus { color: var(--teal); }
+.psa-high { color: var(--red) !important; }
+
+.divider { height: 1px; background: var(--border); margin: 1rem 0; }
+
+.info-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.info-kv { display: flex; flex-direction: column; gap: 3px; padding: 8px 12px; background: var(--bg-raised); border-radius: var(--r); }
+.info-k { font-size: 10px; color: var(--tm); text-transform: uppercase; letter-spacing: .05em; }
+.info-v { font-size: 13px; font-weight: 500; color: var(--tp); font-family: var(--fm); }
+
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.tag {
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 6px;
+  background: var(--bg-raised);
+  border: 1px solid var(--border-m);
+  color: var(--ts);
+}
+
+.watermark-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 140;
+  overflow: hidden;
+}
+.watermark-stamp {
+  position: absolute;
+  font-family: var(--fh);
+  font-size: clamp(1.15rem, 2.3vw, 2rem);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  word-spacing: 0.18em;
+  text-transform: none;
+  color: rgba(35, 53, 71, 0.065);
+  text-shadow: none;
+  white-space: normal;
+  width: min(88vw, 1120px);
+  text-align: center;
+  line-height: 1.35;
+  transform: rotate(-28deg);
+}
+.watermark-stamp.center {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-28deg);
+}
+
+@media print {
+  #app-header, #sidebar { display: none; }
+  #main { margin: 0; padding: 1rem; }
+  .card { border: 1px solid #ddd !important; break-inside: avoid; }
+}
+
+@media (max-width: 900px) {
+  :root { --sidebar: 0px; --header: 118px; }
+  #sidebar { display: none; }
+  #app-header {
+    height: auto;
+    min-height: var(--header);
+    padding: 0.9rem 1rem;
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+  .hdr-sep, .hdr-doc { display: none; }
+  .hdr-pt-mini, .hdr-right { width: 100%; }
+  .hdr-right { justify-content: space-between; }
+  .hdr-pt-name-row { flex-wrap: wrap; }
+  #main { margin-left: 0; }
+  .split { grid-template-columns: 1fr; }
+  .metrics { grid-template-columns: repeat(2, 1fr); }
+  .form-grid-3, .form-grid-2 { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 640px) {
+  :root { --header: 138px; }
+  #main { padding: 1rem; }
+  .pt-banner, .card { padding: 1rem; }
+  .metrics { grid-template-columns: 1fr; }
+  .form-footer { flex-direction: column; }
+  .form-footer button { width: 100%; }
+  .stepper { overflow-x: auto; padding-bottom: 6px; }
+  .step { min-width: 94px; }
+  .alert-banner { padding: 12px; }
+}
+</style>
+</head>
+<body>
+<div class="watermark-layer" aria-hidden="true">
+  <span class="watermark-stamp center">THB Sample Prostate Ca Screens prepared for NVS Team</span>
+</div>
+<header id="app-header">
+  <div class="hdr-brand" style="gap: 16px;">
+    <a href="https://www.thb.group" target="_blank" style="display: flex; align-items: center;">
+      <img src="https://www.thb.group/images/logo.svg" alt="THB Logo" style="height: 30px;">
+    </a>
+    <div style="display: flex; align-items: center; gap: 8px;">
+      ProstaCare <span style="color:var(--teal);font-size:12px;font-weight:400;">India</span>
+    </div>
+  </div>
+  <div class="hdr-sep"></div>
+  <div class="hdr-pt-mini">
+    <div class="hdr-pt-av">RKS</div>
+    <div>
+      <div class="hdr-pt-name-row">
+        <div class="hdr-pt-name name-privacy is-masked" data-sensitive-name>Ramesh Kumar Sharma</div>
+        <button type="button" class="privacy-toggle" data-name-toggle data-state="hidden" onclick="togglePatientNameVisibility()" aria-label="Show patient details" title="Show patient details" aria-pressed="false">
+          <svg class="icon-closed" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.58 10.58a2 2 0 1 0 2.83 2.83"/><path d="M9.36 5.37A10.94 10.94 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-4.09 4.94"/><path d="M6.23 6.23A13.15 13.15 0 0 0 2 12s3 7 10 7a10.94 10.94 0 0 0 4.21-.83"/></svg>
+          <svg class="icon-open" viewBox="0 0 24 24" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
+          <span class="sr-only">Toggle patient details visibility</span>
+        </button>
+      </div>
+      <div class="hdr-pt-sub">UHID: DL-2024-08742 · ABHA: 78-5432-1234-9876</div>
+    </div>
+  </div>
+  <div class="hdr-right">
+    <div class="hdr-doc">
+      <div class="hdr-doc-name">Dr. Anand Sharma, MCh Urology</div>
+      <div class="hdr-doc-sub">AIIMS New Delhi · Dept. of Urology &amp; Renal Transplant</div>
+    </div>
+    <button class="hdr-btn" onclick="window.print()">Print Summary</button>
+  </div>
+</header>
+
+<aside id="sidebar">
+  <div class="sb-pt-card">
+    <div class="sb-pt-av">RKS</div>
+    <div class="sb-pt-name name-privacy is-masked" data-sensitive-name>Ramesh K. Sharma</div>
+    <div class="sb-pt-id">68 yr · cT3bN1M0 · ISUP 4</div>
+    <div class="divider" style="margin: 8px 0;"></div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;">
+      <span class="badge b-red" style="font-size:10px;">High Risk</span>
+      <span class="badge b-amber" style="font-size:10px;">HSPC</span>
+      <span class="badge b-blue" style="font-size:10px;">CGHS</span>
+    </div>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-label">Patient Record</div>
+    <div class="sb-item active" onclick="showSection('demo', this)">
+      <svg class="sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Demographics
+    </div>
+    <div class="sb-item" onclick="showSection('clin', this)">
+      <svg class="sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414A1 1 0 0 1 19 9.414V19a2 2 0 0 1-2 2z"/></svg>
+      Clinical Assessment
+    </div>
+    <div class="sb-item" onclick="showSection('trt', this)">
+      <svg class="sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/></svg>
+      Treatment Plan
+    </div>
+    <div class="sb-item" onclick="showSection('jrn', this)">
+      <svg class="sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Patient Journey
+    </div>
+    <div class="sb-item" onclick="showSection('nudg', this)">
+      <svg class="sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      Nudges &amp; Alerts
+      <span class="sb-badge" id="sb-badge">5</span>
+    </div>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-label">Quick Metrics</div>
+    <div style="padding: 0 4px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);">
+        <span style="font-size:11px;color:var(--ts);">PSA (latest)</span>
+        <span style="font-size:13px;font-weight:600;color:var(--red);font-family:var(--fm);">42.6 <span style="font-size:10px;font-weight:400;">ng/mL</span></span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);">
+        <span style="font-size:11px;color:var(--ts);">Gleason</span>
+        <span style="font-size:13px;font-weight:600;color:var(--tp);font-family:var(--fm);">4+4=8</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);">
+        <span style="font-size:11px;color:var(--ts);">ADT Duration</span>
+        <span style="font-size:13px;font-weight:600;color:var(--amber);font-family:var(--fm);">4 mo</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;">
+        <span style="font-size:11px;color:var(--ts);">ECOG</span>
+        <span style="font-size:13px;font-weight:600;color:var(--teal);font-family:var(--fm);">1</span>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<main id="main">
+  <div class="pt-banner">
+    <div class="pt-av-lg">RKS</div>
+    <div class="pt-info">
+      <div class="pt-name-row">
+        <span class="pt-name name-privacy is-masked" data-sensitive-name>Ramesh Kumar Sharma</span>
+        <button type="button" class="privacy-toggle" data-name-toggle data-state="hidden" onclick="togglePatientNameVisibility()" aria-label="Show patient details" title="Show patient details" aria-pressed="false">
+          <svg class="icon-closed" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.58 10.58a2 2 0 1 0 2.83 2.83"/><path d="M9.36 5.37A10.94 10.94 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-4.09 4.94"/><path d="M6.23 6.23A13.15 13.15 0 0 0 2 12s3 7 10 7a10.94 10.94 0 0 0 4.21-.83"/></svg>
+          <svg class="icon-open" viewBox="0 0 24 24" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
+          <span class="sr-only">Toggle patient details visibility</span>
+        </button>
+        <span class="badge b-red">High Risk</span>
+        <span class="badge b-amber">HSPC</span>
+        <span class="badge b-blue">CGHS</span>
+        <span class="badge b-pink">ADT Active</span>
+      </div>
+      <div class="pt-sub">
+        68 yrs · Male · Retired | UHID: DL-2024-08742 | ABHA: 78-5432-1234-9876 |
+        Registered: 14 Aug 2024 | AIIMS New Delhi, Dept. of Urology
+      </div>
+    </div>
+    <div class="pt-stats">
+      <div class="stat-pill danger"><span class="sv">42.6 <span style="font-size:11px;font-weight:400;">ng/mL</span></span><span class="sk">PSA</span></div>
+      <div class="stat-pill"><span class="sv">cT3bN1M0</span><span class="sk">Stage</span></div>
+      <div class="stat-pill warn"><span class="sv">ISUP 4</span><span class="sk">Grade Group</span></div>
+      <div class="stat-pill ok"><span class="sv">ECOG 1</span><span class="sk">Performance</span></div>
+    </div>
+  </div>
+
+  <div class="alert-banner" id="alert-banner">
+    <div class="alert-dot"></div>
+    <div>
+      <div class="alert-title">Urgent: 2 clinical actions require immediate attention</div>
+      <div class="alert-body">
+        Bone protection therapy not initiated — patient on ADT for 4 months (fracture risk elevated).
+        PSMA PET-CT not documented for high-risk staging workup.
+        <span class="alert-link" onclick="showSection('nudg')">View all nudges →</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="sec-demo" class="content-section active">
+    <div class="metrics">
+      <div class="metric-card"><div class="metric-label">Date of Birth</div><div class="metric-value" style="font-size:16px;">12 Mar 1956</div><div class="metric-sub">Age: 68 years</div></div>
+      <div class="metric-card"><div class="metric-label">Coverage</div><div class="metric-value" style="font-size:16px;">CGHS</div><div class="metric-sub">Card: CGHS-DL-4421889</div></div>
+      <div class="metric-card"><div class="metric-label">Language</div><div class="metric-value" style="font-size:16px;">Hindi</div><div class="metric-sub">North India region</div></div>
+      <div class="metric-card"><div class="metric-label">Referring Centre</div><div class="metric-value" style="font-size:14px;">AIIMS</div><div class="metric-sub">New Delhi</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><div class="card-title-dot"></div>Personal Information</div>
+      <div class="form-grid">
+        <div class="fg"><label class="fl">Full Name <span class="rs">*</span></label><input class="name-privacy is-masked" data-sensitive-name type="text" value="Ramesh Kumar Sharma" placeholder="As per Aadhaar"></div>
+        <div class="fg"><label class="fl">Date of Birth <span class="rs">*</span></label><input type="date" value="1956-03-12"></div>
+        <div class="fg"><label class="fl">Age (Auto-calculated)</label><input type="text" value="68 years" readonly></div>
+        <div class="fg"><label class="fl">Religion</label><select><option>Hindu</option><option>Muslim</option><option>Christian</option><option>Sikh</option><option>Buddhist</option><option>Jain</option><option>Other</option></select></div>
+        <div class="fg"><label class="fl">Marital Status</label><select><option>Married</option><option>Widower</option><option>Single</option><option>Separated</option></select></div>
+        <div class="fg"><label class="fl">Occupation</label><select><option>Retired</option><option>Farmer</option><option>Govt. Employee</option><option>Business / Self-employed</option><option>Daily Labourer</option><option>Professional</option><option>Other</option></select></div>
+        <div class="fg"><label class="fl">Education Level</label><select><option>Illiterate</option><option>Primary (up to Class 5)</option><option>Secondary (Class 6–10)</option><option>Senior Secondary (Class 12)</option><option selected>Graduate</option><option>Post-graduate</option></select></div>
+        <div class="fg"><label class="fl">Language Preference</label><select><option selected>Hindi</option><option>English</option><option>Tamil</option><option>Telugu</option><option>Bengali</option><option>Marathi</option><option>Kannada</option><option>Malayalam</option><option>Gujarati</option><option>Punjabi</option><option>Odia</option></select></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><div class="card-title-dot"></div>Government Identifiers &amp; Healthcare Coverage</div>
+      <div class="form-grid">
+        <div class="fg"><label class="fl">Aadhaar Number (masked)</label><input type="text" value="XXXX XXXX 9876" placeholder="Last 4 visible"></div>
+        <div class="fg"><label class="fl">ABHA Health Account ID</label><input type="text" value="78-5432-1234-9876" placeholder="14-digit ABHA"></div>
+        <div class="fg"><label class="fl">UHID / MRN</label><input type="text" value="DL-2024-08742"></div>
+        <div class="fg"><label class="fl">Healthcare Coverage <span class="rs">*</span></label>
+          <select>
+            <option>PMJAY (Ayushman Bharat)</option>
+            <option selected>CGHS</option>
+            <option>ESIC</option>
+            <option>State Scheme (Rajya Bima / Aarogyasri)</option>
+            <option>Private Insurance</option>
+            <option>Self-pay</option>
+          </select>
+        </div>
+        <div class="fg"><label class="fl">CGHS Card / Beneficiary No.</label><input type="text" value="CGHS-DL-4421889"></div>
+        <div class="fg"><label class="fl">Referring Hospital / Centre</label>
+          <select>
+            <option selected>AIIMS New Delhi</option>
+            <option>Tata Memorial Centre, Mumbai</option>
+            <option>CMC Vellore</option>
+            <option>PGIMER Chandigarh</option>
+            <option>RGCI Delhi</option>
+            <option>SGPGI Lucknow</option>
+            <option>Government General Hospital</option>
+            <option>Private Urologist / Clinic</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><div class="card-title-dot"></div>Contact &amp; Address Details</div>
+      <div class="form-grid">
+        <div class="fg"><label class="fl">Mobile <span class="rs">*</span></label><input class="name-privacy is-masked" data-sensitive-phone type="tel" value="+91 98765 43210"></div>
+        <div class="fg"><label class="fl">Emergency Contact Number</label><input type="tel" placeholder="+91 XXXXX XXXXX"></div>
+        <div class="fg"><label class="fl">Emergency Contact Name</label><input type="text" placeholder="Full name"></div>
+        <div class="fg"><label class="fl">Relation to Patient</label><select><option>Son</option><option>Daughter</option><option>Spouse</option><option>Brother</option><option>Other</option></select></div>
+        <div class="fg"><label class="fl">State</label>
+          <select>
+            <option selected>Delhi</option><option>Maharashtra</option><option>Tamil Nadu</option><option>Uttar Pradesh</option><option>Karnataka</option><option>West Bengal</option><option>Rajasthan</option><option>Punjab</option><option>Gujarat</option><option>Telangana</option><option>Andhra Pradesh</option><option>Madhya Pradesh</option><option>Bihar</option><option>Other</option>
+          </select>
+        </div>
+        <div class="fg"><label class="fl">District / City</label><input type="text" value="New Delhi"></div>
+        <div class="fg"><label class="fl">PIN Code</label><input type="text" value="110029"></div>
+        <div class="fg"><label class="fl">Email (optional)</label><input type="email" placeholder="patient@example.com"></div>
+      </div>
+    </div>
+    <div class="form-footer">
+      <button class="btn-ghost">Cancel</button>
+      <button class="btn-primary">Save Demographics</button>
+    </div>
+  </div>
+
+  <div id="sec-clin" class="content-section">
+    <div class="card">
+      <div class="card-title"><div class="card-title-dot"></div>Presenting Complaints</div>
+      <div class="form-grid">
+        <div class="fg"><label class="fl">Primary Complaint</label>
+          <select><option selected>LUTS (Lower urinary tract symptoms)</option><option>Haematuria</option><option>Bone pain / backache</option><option>Incidental PSA elevation</option><option>Asymptomatic screening</option><option>Urinary retention</option></select>
+        </div>
+        <div class="fg"><label class="fl">Duration</label><input type="text" value="8 months"></div>
+        <div class="fg"><label class="fl">IPSS Score</label><select><option>0–7 (Mild)</option><option>8–19 (Moderate)</option><option selected>20–35 (Severe)</option></select></div>
+        <div class="fg"><label class="fl">Bowel / Rectal Symptoms</label><select><option selected>None</option><option>Constipation</option><option>Blood in stool</option><option>Tenesmus</option></select></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><div class="card-title-dot"></div>Digital Rectal Examination (DRE)</div>
+      <div class="form-grid-2">
+        <div>
+          <label class="fl">DRE Findings <span class="rs">*</span></label>
+          <div class="chip-group" id="dre-g">
+            <span class="chip" onclick="sc(this, 'dre-g')">Normal</span>
+            <span class="chip" onclick="sc(this, 'dre-g')">Enlarged (BPH)</span>
+            <span class="chip sel" onclick="sc(this, 'dre-g')">Nodule – unilateral</span>
+            <span class="chip" onclick="sc(this, 'dre-g')">Nodule – bilateral</span>
+            <span class="chip" onclick="sc(this, 'dre-g')">Induration / fixity</span>
+            <span class="chip" onclick="sc(this, 'dre-g')">Seminal vesicle ext.</span>
+          </div>
+        </div>
+        <div class="fg" style="align-self:start;margin-top:0;">
+          <label class="fl">Prostate Volume (TRUS / MRI cc)</label>
+          <input type="text" value="62 cc">
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><div class="card-title-dot"></div>PSA History &amp; Trend</div>
+      <div class="chart-wrap">
+        <div class="chart-title">PSA Trend (ng/mL)</div>
+        <canvas id="psaCanvas" height="120"></canvas>
+      </div>
+      <table class="data-table" id="psa-tbl">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>PSA (ng/mL)</th>
+            <th>Free PSA %</th>
+            <th>PSA Density</th>
+            <th>Context / Remarks</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><input class="tbl-in" type="date" value="2023-10-15"></td>
+            <td><input class="tbl-in" type="number" value="18.2" style="width:70px;"></td>
+            <td><input class="tbl-in" type="number" value="12" style="width:50px;"></td>
+            <td><input class="tbl-in" type="text" value="0.29" style="width:55px;"></td>
+            <td><input class="tbl-in" type="text" value="Initial presentation — urology OPD" style="width:100%"></td>
+          </tr>
+          <tr>
+            <td><input class="tbl-in" type="date" value="2024-02-08"></td>
+            <td><input class="tbl-in" type="number" value="31.4" style="width:70px;color:var(--amber);"></td>
+            <td><input class="tbl-in" type="number" value="9" style="width:50px;"></td>
+            <td><input class="tbl-in" type="text" value="0.51" style="width:55px;"></td>
+            <td><input class="tbl-in" type="text" value="Post-biopsy, staging review" style="width:100%"></td>
+          </tr>
+          <tr>
+            <td><input class="tbl-in" type="date" value="2024-08-14"></td>
+            <td><input class="tbl-in psa-high" type="number" value="42.6" style="width:70px;"></td>
+            <td><input class="tbl-in" type="number" value="7" style="width:50px;"></td>
+            <td><input class="tbl-in" type="text" value="0.69" style="width:55px;"></td>
+            <td><input class="tbl-in" type="text" value="Pre-treatment baseline" style="width:100%"></td>
+          </tr>
+        </tbody>
+      </table>
+      <button class="btn-add" onclick="addPSARow()">+ Add PSA Entry</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><div class="card-title-dot"></div>Biopsy Details</div>
+      <div class="form-grid form-grid-3">
+        <div class="fg"><label class="fl">Biopsy Date</label><input type="date" value="2024-04-20"></div>
+        <div class="fg"><label class="fl">Biopsy Type</label>
+          <select><option>12-core TRUS biopsy</option><option selected>MRI-targeted / Fusion biopsy</option><option>Cognitive targeted</option><option>Transperineal biopsy</option><option>TURP chips</option></select>
+        </div>
+        <div class="fg"><label class="fl">PI-RADS Score (mpMRI)</label>
+          <select><option>PI-RADS 1</option><option>PI-RADS 2</option><option>PI-RADS 3</option><option selected>PI-RADS 4</option><option>PI-RADS 5</option><option>Not done</option></select>
+        </div>
+        <div class="fg"><label class="fl">Gleason Score</label>
+          <select id="gs"><option>3+3=6</option><option>3+4=7</option><option>4+3=7</option><option selected>4+4=8</option><option>4+5=9</option><option>5+4=9</option><option>5+5=10</option></select>
+        </div>
+        <div class="fg"><label class="fl">ISUP Grade Group</label>
+          <select><option>Grade 1 (3+3)</option><option>Grade 2 (3+4)</option><option>Grade 3 (4+3)</option><option selected>Grade 4 (4+4)</option><option>Grade 5 (≥4+5)</option></select>
+        </div>
+        <div class="fg"><label class="fl">Cores Positive / Total</label><input type="text" value="10 / 12"></div>
+        <div class="fg"><label class="fl">% Core Involvement</label><input type="text" value="83%"></div>
+        <div class="fg"><label class="fl">Perineural Invasion</label>
+          <select><option>Not assessed</option><option>Absent</option><option selected>Present</option></select>
+        </div>
+        <div class="fg"><label class="fl">ECE (Extracapsular Extension)</label>
+          <select><option>Not assessed</option><option>Absent</option><option selected>Present (radiological)</option></select>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><div class="card-title-dot"></div>TNM Staging &amp; Risk Classification</div>
+      <div class="form-grid form-grid-3">
+        <div class="fg"><label class="fl">Clinical T Stage <span class="rs">*</span></label>
+          <select><option>cT1a</option><option>cT1b</option><option>cT1c</option><option>cT2a</option><option>cT2b</option><option>cT2c</option><option>cT3a</option><option selected>cT3b</option><option>cT4</option></select>
+        </div>
+        <div class="fg"><label class="fl">N Stage</label>
+          <select><option>cN0</option><option selected>cN1</option><option>cNX</option></select>
+        </div>
+        <div class="fg"><label class="fl">M Stage</label>
+          <select><option selected>cM0</option><option>M1a (Non-regional LN)</option><option>M1b (Bone mets)</option><option>M1c (Visceral mets)</option></select>
+        </div>
+        <div class="fg"><label class="fl">EAU Risk Category</label>
+          <select id="risk-s"><option>Low</option><option>Intermediate – Favourable</option><option>Intermediate – Unfavourable</option><option selected>High</option><option>Very High / Locally Advanced</option><option>M1 – Metastatic HSPC</option></select>
+        </div>
+        <div class="fg"><label class="fl">ECOG Performance Status</label>
+          <select><option>0 – Fully active</option><option selected>1 – Restricted strenuous activity</option><option>2 – Ambulatory, self-care only</option><option>3 – Limited self-care</option><option>4 – Completely disabled</option></select>
+        </div>
+        <div class="fg"><label class="fl">Castration Status</label>
+          <select id="cast-s"><option selected>Hormone-sensitive (HSPC)</option><option>Castration-resistant (CRPC)</option><option>Not on ADT</option></select>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><div class="card-title-dot"></div>Imaging &amp; Molecular Workup</div>
+      <div class="form-grid form-grid-3">
+        <div class="fg"><label class="fl">mpMRI Pelvis</label>
+          <select><option>Not done</option><option selected>Done — abnormal</option><option>Done — normal</option></select>
+        </div>
+        <div class="fg"><label class="fl">Bone Scan / SPECT</label>
+          <select id="bone-s"><option selected>Not done</option><option>Done — no metastases</option><option>Done — bone metastases present</option></select>
+        </div>
+        <div class="fg"><label class="fl">PSMA PET-CT</label>
+          <select id="psma-s"><option selected>Not done</option><option>Done — no uptake</option><option>Done — pelvic nodal uptake</option><option>Done — distant metastases</option></select>
+        </div>
+        <div class="fg"><label class="fl">CT Abdomen / Pelvis</label>
+          <select><option>Not done</option><option selected>Done — lymphadenopathy</option><option>Done — normal</option></select>
+        </div>
+        <div class="fg"><label class="fl">DEXA Bone Density</label>
+          <select id="dexa-s"><option selected>Not done</option><option>Normal (T-score ≥ −1)</option><option>Osteopenia (T −1 to −2.5)</option><option>Osteoporosis (T-score &lt; −2.5)</option></select>
+        </div>
+        <div class="fg"><label class="fl">Germline / Somatic Testing</label>
+          <select id="gen-s"><option selected>Not done</option><option>BRCA1/2 — pathogenic variant</option><option>BRCA1/2 — negative</option><option>MSI-H / dMMR</option><option>HRR mutation (non-BRCA)</option><option>Pending</option></select>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><div class="card-title-dot"></div>Comorbidities &amp; Family History</div>
+      <div class="form-grid-2">
+        <div>
+          <label class="fl" style="margin-bottom:6px;display:block;">Active Comorbidities</label>
+          <div class="chip-group" id="cm-g">
+            <span class="chip sel" onclick="tc(this)">Type 2 Diabetes</span>
+            <span class="chip sel" onclick="tc(this)">Hypertension</span>
+            <span class="chip" onclick="tc(this)">CAD / IHD</span>
+            <span class="chip" onclick="tc(this)">CKD (Stage)</span>
+            <span class="chip" onclick="tc(this)">COPD</span>
+            <span class="chip" onclick="tc(this)">Stroke / TIA</span>
+            <span class="chip" onclick="tc(this)">Anaemia</span>
+            <span class="chip" onclick="tc(this)">Osteoporosis</span>
+            <span class="chip" onclick="tc(this)">None significant</span>
+          </div>
+        </div>
+        <div>
+          <label class="fl" style="margin-bottom:6px;display:block;">Family History</label>
+          <div class="chip-group" id="fam-g">
+            <span class="chip" onclick="tc(this)">Prostate Ca (first-degree)</span>
+            <span class="chip sel" onclick="tc(this)">Breast Ca (family)</span>
+            <span class="chip" onclick="tc(this)">Ovarian cancer</span>
+            <span class="chip" onclick="tc(this)">Colon cancer</span>
+            <span class="chip" onclick="tc(this)">Pancreatic cancer</span>
+            <span class="chip" onclick="tc(this)">None known</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="sec-trt" class="content-section">
+    <div class="card">
+      <div class="card-title"><div class="card-title-dot"></div>Treatment Intent &amp; MDT</div>
+      <div style="margin-bottom:1rem;">
+        <label class="fl" style="margin-bottom:7px;display:block;">Treatment Intent</label>
+        <div class="chip-group" id="intent-g">
+          <span class="chip" onclick="sc(this, 'intent-g')">Curative</span>
+          <span class="chip sel" onclick="sc(this, 'intent-g')">Disease control (locally advanced)</span>
+          <span class="chip" onclick="sc(this, 'intent-g')">Palliative / Symptomatic</span>
+          <span class="chip" onclick="sc(this, 'intent-g')">Active surveillance</span>
+          <span class="chip" onclick="sc(this, 'intent-g')">Watchful waiting</span>
+        </div>
+      </div>
+      <div class="form-grid form-grid-3">
+        <div class="fg"><label class="fl">MDT / Tumour Board Status</label><select><option>Pending review</option><option selected>Reviewed — plan agreed</option><option>Not applicable</option></select></div>
+        <div class="fg"><label class="fl">Date of MDT Review</label><input type="date" value="2024-08-20"></div>
+        <div class="fg"><label class="fl">Clinical Trial Eligibility</label><select><option selected>Not screened</option><option>Eligible — under screening</option><option>Enrolled in trial</option><option>Not eligible</option></select></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><div class="card-title-dot"></div>Androgen Deprivation Therapy (ADT)</div>
+      <div class="form-grid form-grid-3">
+        <div class="fg"><label class="fl">ADT Type</label>
+          <select><option>Not on ADT</option><option selected>LHRH Agonist (Leuprolide / Lupride)</option><option>LHRH Agonist (Triptorelin / Decapeptyl)</option><option>LHRH Agonist (Goserelin / Zoladex)</option><option>GnRH Antagonist (Degarelix / Firmagon)</option><option>Bilateral orchidectomy</option></select>
+        </div>
+        <div class="fg"><label class="fl">Formulation / Dose</label>
+          <select><option>Leuprolide 11.25 mg (monthly)</option><option>Leuprolide 22.5 mg depot (3-monthly)</option><option selected>Leuprolide 45 mg depot (6-monthly)</option><option>Goserelin 3.6 mg (monthly)</option><option>Goserelin 10.8 mg (3-monthly)</option></select>
+        </div>
+        <div class="fg"><label class="fl">ADT Start Date</label><input type="date" value="2024-04-01"></div>
+        <div class="fg"><label class="fl">Anti-androgen</label>
+          <select id="aa-s"><option>None</option><option selected>Bicalutamide 50 mg OD (flare cover)</option><option>Bicalutamide 150 mg OD</option><option>Enzalutamide 160 mg OD</option><option>Apalutamide 240 mg OD</option><option>Darolutamide 1200 mg/day</option></select>
+        </div>
+        <div class="fg"><label class="fl">ARSI Intensification</label>
+          <select id="arsi-s"><option selected>Not initiated</option><option>Abiraterone + Prednisone (Zytiga / generic)</option><option>Enzalutamide (Xtandi)</option><option>Apalutamide (Erleada)</option><option>Darolutamide (Nubeqa)</option></select>
+        </div>
+        <div class="fg"><label class="fl">Testosterone Level</label><input type="text" placeholder="Castrate: &lt;50 ng/dL"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><div class="card-title-dot"></div>Chemotherapy</div>
+      <div class="form-grid form-grid-3">
+        <div class="fg"><label class="fl">Chemotherapy Regimen</label>
+          <select><option selected>Not indicated / Not started</option><option>Docetaxel 75 mg/m² q3w</option><option>Cabazitaxel 25 mg/m² q3w</option><option>Docetaxel → Cabazitaxel (sequential)</option></select>
+        </div>
+        <div class="fg"><label class="fl">Number of Cycles Completed</label><input type="number" placeholder="e.g. 6" min="0" max="20"></div>
+        <div class="fg"><label class="fl">Last Cycle Date</label><input type="date"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><div class="card-title-dot"></div>Radiotherapy Plan</div>
+      <div class="form-grid form-grid-3">
+        <div class="fg"><label class="fl">RT Indication</label>
+          <select><option>Not planned</option><option>Definitive RT (prostate ± LN)</option><option selected>Planned — awaiting CGHS approval</option><option>Salvage RT (post-RP)</option><option>Palliative RT (bone mets)</option></select>
+        </div>
+        <div class="fg"><label class="fl">RT Modality</label>
+          <select><option selected>IMRT / VMAT</option><option>3D-CRT</option><option>SBRT (5 fractions)</option><option>LDR Brachytherapy</option><option>HDR Brachytherapy boost</option><option>Proton therapy</option></select>
+        </div>
+        <div class="fg"><label class="fl">Target Volume</label>
+          <select><option>Prostate only</option><option selected>Prostate + Whole Pelvis</option><option>Prostate + SV + LN</option></select>
+        </div>
+        <div class="fg"><label class="fl">Dose / Fractionation</label>
+          <select><option>60 Gy / 20 fx (moderate hypofractionation)</option><option selected>78 Gy / 39 fx (conventional)</option><option>36.25 Gy / 5 fx (SBRT)</option><option>Other / to be defined</option></select>
+        </div>
+        <div class="fg"><label class="fl">RT Facility</label>
+          <select><option selected>AIIMS New Delhi</option><option>Tata Memorial Centre</option><option>RGCI Delhi</option><option>Max Cancer Centre</option><option>Fortis</option><option>Govt. Regional Cancer Centre</option></select>
+        </div>
+        <div class="fg"><label class="fl">Planned RT Start Date</label><input type="date" value="2024-10-01"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><div class="card-title-dot"></div>Bone Health &amp; Supportive Care</div>
+      <div class="form-grid form-grid-3">
+        <div class="fg"><label class="fl">Bone Protection Therapy <span class="rs">*</span></label>
+          <select id="bp-s"><option selected>Not started</option><option>Zoledronic acid 4 mg IV q3m</option><option>Denosumab 120 mg SC q4w</option><option>Denosumab 60 mg SC q6m (osteoporosis)</option><option>Not indicated</option></select>
+        </div>
+        <div class="fg"><label class="fl">Calcium &amp; Vitamin D</label>
+          <select><option selected>Not prescribed</option><option>Calcium 500 mg + Vit D3 1000 IU OD</option><option>Calcium 1000 mg + Vit D3 OD</option></select>
+        </div>
+        <div class="fg"><label class="fl">Next Follow-up PSA Date</label><input type="date" id="fup-d"></div>
+        <div class="fg"><label class="fl">Testosterone Monitoring</label>
+          <select><option selected>Not checked this cycle</option><option>Castrate confirmed (&lt;50 ng/dL)</option><option>Non-castrate — action needed</option></select>
+        </div>
+        <div class="fg"><label class="fl">Psychosocial Screening (PHQ-9)</label>
+          <select><option selected>Not done</option><option>Minimal (0–4)</option><option>Mild (5–9)</option><option>Moderate (10–14)</option><option>Severe (≥15) — refer</option></select>
+        </div>
+        <div class="fg"><label class="fl">Nutritional Assessment</label>
+          <select><option selected>Not done</option><option>Normal</option><option>At risk — dietitian referral made</option><option>Malnourished</option></select>
+        </div>
+      </div>
+    </div>
+    <div class="form-footer">
+      <button class="btn-ghost">Clear</button>
+      <button class="btn-primary" onclick="computeNudges()">Save &amp; Refresh Nudges</button>
+    </div>
+  </div>
+
+  <div id="sec-jrn" class="content-section">
+    <div class="card">
+      <div class="card-title"><div class="card-title-dot"></div>Care Pathway Progress</div>
+      <div class="stepper">
+        <div class="step"><div class="step-circle done">1</div><div class="step-label done">Diagnosis</div><div class="step-line done"></div></div>
+        <div class="step"><div class="step-circle done">2</div><div class="step-label done">Staging</div><div class="step-line done"></div></div>
+        <div class="step"><div class="step-circle done">3</div><div class="step-label done">MDT Review</div><div class="step-line done"></div></div>
+        <div class="step"><div class="step-circle now">4</div><div class="step-label now">Treatment</div><div class="step-line up"></div></div>
+        <div class="step"><div class="step-circle up">5</div><div class="step-label up">Response Assess.</div><div class="step-line up"></div></div>
+        <div class="step"><div class="step-circle up">6</div><div class="step-label up">Long-term F/U</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><div class="card-title-dot"></div>Detailed Event Timeline</div>
+      <div class="timeline">
+        <div class="tl-event">
+          <div class="tl-dot done">OCT<br>2023</div>
+          <div class="tl-body">
+            <div class="tl-title">Initial Presentation</div>
+            <div class="tl-date">15 October 2023 — Urology OPD, AIIMS New Delhi</div>
+            <div class="tl-details">Severe LUTS (IPSS 24) for 8 months. DRE: right lobe nodule palpable. PSA: 18.2 ng/mL, Free PSA 12%. Referred for mpMRI pelvis and targeted biopsy.</div>
+          </div>
+        </div>
+        <div class="tl-event">
+          <div class="tl-dot done">DEC<br>2023</div>
+          <div class="tl-body">
+            <div class="tl-title">mpMRI Pelvis &amp; MRI-targeted Biopsy</div>
+            <div class="tl-date">10 December 2023</div>
+            <div class="tl-details">PI-RADS 4 lesion right apex. MRI-targeted fusion biopsy: 10/12 cores positive. Gleason 4+4=8, ISUP Grade 4. ECE bilaterally. Perineural invasion present.</div>
+          </div>
+        </div>
+        <div class="tl-event">
+          <div class="tl-dot done">FEB<br>2024</div>
+          <div class="tl-body">
+            <div class="tl-title">Staging Workup</div>
+            <div class="tl-date">8 February 2024</div>
+            <div class="tl-details">CT abdomen/pelvis: bilateral pelvic lymphadenopathy (cN1). Bone scan: not done (CGHS pre-auth pending). PSA: 31.4 ng/mL. Final stage: cT3bN1M0.</div>
+          </div>
+        </div>
+        <div class="tl-event">
+          <div class="tl-dot done">MAR<br>2024</div>
+          <div class="tl-body">
+            <div class="tl-title">MDT Tumour Board</div>
+            <div class="tl-date">5 March 2024 — AIIMS Oncology MDT</div>
+            <div class="tl-details">Plan: Long-course ADT (2–3 years) + definitive IMRT (prostate + whole pelvis, 78 Gy). ARSI intensification to be reviewed at 3-month mark. CGHS pre-auth initiated for RT.</div>
+          </div>
+        </div>
+        <div class="tl-event">
+          <div class="tl-dot done">APR<br>2024</div>
+          <div class="tl-body">
+            <div class="tl-title">ADT Initiated — Leuprolide 45 mg Depot</div>
+            <div class="tl-date">1 April 2024</div>
+            <div class="tl-details">Bicalutamide 50 mg OD started 7 days prior (testosterone flare cover). Leuprolide 45 mg depot (6-monthly) administered. Side effects: hot flushes, mild fatigue reported.</div>
+          </div>
+        </div>
+        <div class="tl-event">
+          <div class="tl-dot now">NOW<br>AUG 24</div>
+          <div class="tl-body">
+            <div class="tl-title now">Current Status — Awaiting RT Start</div>
+            <div class="tl-date">August 2024 · 4 months on ADT</div>
+            <div class="tl-details alert">PSA 42.6 ng/mL (pre-ADT baseline expected to decline). CGHS RT approval still pending. Bone scan not performed. No bone protection therapy initiated. PSMA PET-CT recommended but not done.</div>
+          </div>
+        </div>
+        <div class="tl-event">
+          <div class="tl-dot up">OCT<br>2024</div>
+          <div class="tl-body">
+            <div class="tl-title up">Planned — RT Start (IMRT)</div>
+            <div class="tl-date">~1 October 2024 (planned, subject to CGHS approval)</div>
+            <div class="tl-details">IMRT/VMAT 78 Gy / 39 fx — prostate + whole pelvis. Duration ~8 weeks. Concurrent with ADT continuation. Weekly on-treatment reviews.</div>
+          </div>
+        </div>
+        <div class="tl-event">
+          <div class="tl-dot up">JAN<br>2025</div>
+          <div class="tl-body">
+            <div class="tl-title up">Planned — First Response Assessment</div>
+            <div class="tl-date">January 2025 (scheduled)</div>
+            <div class="tl-details">PSA + Testosterone check. Assess ARSI intensification (abiraterone/enzalutamide). Clinical exam. Repeat imaging if inadequate PSA response.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><div class="card-title-dot"></div>Add New Journey Event</div>
+      <div class="form-grid form-grid-3">
+        <div class="fg"><label class="fl">Event Type</label>
+          <select><option>Outpatient Visit</option><option>Lab / PSA</option><option>Imaging</option><option>Biopsy / Procedure</option><option>Treatment Initiation</option><option>Treatment Change</option><option>Hospital Admission</option><option>MDT Review</option><option>Adverse Event</option><option>Palliative Referral</option></select>
+        </div>
+        <div class="fg"><label class="fl">Event Date</label><input type="date"></div>
+        <div class="fg"><label class="fl">Notes</label><input type="text" placeholder="Brief description"></div>
+      </div>
+      <button class="btn-add">+ Add to Timeline</button>
+    </div>
+  </div>
+
+  <div id="sec-nudg" class="content-section">
+    <div id="nudge-container"></div>
+
+    <div class="card" style="margin-top:1rem;">
+      <div class="card-title"><div class="card-title-dot" style="background:var(--teal);"></div>Acknowledged Nudges — Completed Actions</div>
+      <div class="acked-item"><span class="ack-check">✓</span><span class="ack-text">Biopsy ordered after PSA &gt;10 ng/mL threshold crossed — targeted biopsy performed</span><span class="ack-date">14 Dec 2023</span></div>
+      <div class="acked-item"><span class="ack-check">✓</span><span class="ack-text">MDT tumour board referral initiated for Gleason ≥8 tumour</span><span class="ack-date">5 Mar 2024</span></div>
+      <div class="acked-item"><span class="ack-check">✓</span><span class="ack-text">Testosterone flare cover — bicalutamide started 7 days before LHRH agonist</span><span class="ack-date">25 Mar 2024</span></div>
+      <div class="acked-item"><span class="ack-check">✓</span><span class="ack-text">CGHS pre-authorisation for ADT and RT initiated at AIIMS</span><span class="ack-date">2 Apr 2024</span></div>
+    </div>
+  </div>
+</main>
+
+<script>
+const SECTIONS = ["demo", "clin", "trt", "jrn", "nudg"];
+
+function showSection(id, el) {
+  SECTIONS.forEach((sectionId) => {
+    const section = document.getElementById("sec-" + sectionId);
+    if (section) {
+      section.classList.toggle("active", sectionId === id);
+    }
+  });
+
+  document.querySelectorAll(".sb-item").forEach((item) => item.classList.remove("active"));
+
+  if (el) {
+    el.classList.add("active");
+  } else {
+    const items = document.querySelectorAll(".sb-item");
+    const target = Array.from(items).find((item) =>
+      item.getAttribute("onclick")?.includes("showSection('" + id + "'")
+    );
+    if (target) {
+      target.classList.add("active");
+    }
+  }
+
+  if (id === "nudg") {
+    computeNudges();
+  }
+}
+
+function sc(el, gid) {
+  document.querySelectorAll("#" + gid + " .chip").forEach((chip) => chip.classList.remove("sel"));
+  el.classList.add("sel");
+}
+
+function tc(el) {
+  el.classList.toggle("sel");
+}
+
+function gv(id) {
+  const e = document.getElementById(id);
+  return e ? e.value : "";
+}
+
+let isPatientNameVisible = false;
+
+function setPatientNameVisibility(visible) {
+  isPatientNameVisible = visible;
+
+  document.querySelectorAll("[data-sensitive-name], [data-sensitive-phone]").forEach((node) => {
+    node.classList.toggle("is-masked", !visible);
+  });
+
+  document.querySelectorAll("[data-name-toggle]").forEach((button) => {
+    const label = visible ? "Hide patient details" : "Show patient details";
+    button.dataset.state = visible ? "visible" : "hidden";
+    button.setAttribute("aria-label", label);
+    button.setAttribute("title", label);
+    button.setAttribute("aria-pressed", String(visible));
+  });
+}
+
+function togglePatientNameVisibility() {
+  setPatientNameVisibility(!isPatientNameVisible);
+}
+
+function addPSARow() {
+  const tbody = document.querySelector("#psa-tbl tbody");
+  const row = document.createElement("tr");
+  row.innerHTML = `<td><input class="tbl-in" type="date"></td>
+    <td><input class="tbl-in" type="number" placeholder="—" style="width:70px;"></td>
+    <td><input class="tbl-in" type="number" placeholder="—" style="width:50px;"></td>
+    <td><input class="tbl-in" type="text" placeholder="—" style="width:55px;"></td>
+    <td><input class="tbl-in" type="text" placeholder="Enter remarks" style="width:100%"></td>`;
+  tbody.appendChild(row);
+}
+
+function computeNudges() {
+  const risk = gv("risk-s");
+  const bone = gv("bone-s");
+  const psma = gv("psma-s");
+  const boneProtection = gv("bp-s");
+  const dexa = gv("dexa-s");
+  const genetics = gv("gen-s");
+  const castrationStatus = gv("cast-s");
+  const arsi = gv("arsi-s");
+  const followUpDate = gv("fup-d");
+
+  const nudges = [];
+
+  if (bone === "Not done" && (risk.includes("High") || risk.includes("Very") || risk.includes("M1"))) {
+    nudges.push({
+      t: "urgent",
+      h: "Bone scan / SPECT not performed",
+      b: "EAU guidelines mandate bone scintigraphy for PSA &gt;20 ng/mL, Gleason ≥8, or cT3+ disease. PSMA PET-CT is preferred where available (AIIMS, Tata Memorial, ACTREC, SGPGI) due to superior sensitivity. CGHS and PMJAY both cover SPECT bone scan — initiate pre-authorisation request immediately.",
+      tag: "Action required"
+    });
+  }
+
+  if (psma === "Not done" && (risk.includes("High") || risk.includes("Very"))) {
+    nudges.push({
+      t: "urgent",
+      h: "PSMA PET-CT not done — staging incomplete",
+      b: "PSMA PET-CT has superior sensitivity over CT + bone scan for pelvic nodal and distant staging in high-risk prostate cancer. Significantly impacts RT field design (whole pelvis vs. prostate only). Available at AIIMS New Delhi, Tata Memorial Mumbai, ACTREC, and SGPGI Lucknow. CGHS empanelment applicable.",
+      tag: "Action required"
+    });
+  }
+
+  if (boneProtection === "Not started") {
+    nudges.push({
+      t: "urgent",
+      h: "Bone protection therapy not initiated — ADT 4+ months",
+      b: "Long-term ADT causes bone mineral density loss of 2–5% per year. Risk of osteoporotic fracture is significantly elevated. Recommended: Zoledronic acid 4 mg IV q3–6 months OR Denosumab 60 mg SC q6m (osteoporosis prevention). DEXA scan should be performed first. Minimum standard: Calcium 500 mg + Vitamin D3 1000 IU daily.",
+      tag: "Action required"
+    });
+  }
+
+  if (dexa === "Not done") {
+    nudges.push({
+      t: "warning",
+      h: "DEXA scan not performed",
+      b: "Baseline bone mineral density (DEXA) should be assessed before or at initiation of long-term ADT. Results guide choice and urgency of bone-protective agent. Available at AIIMS, PGIMER, major government hospitals — covered under CGHS. Can be co-requested with staging workup.",
+      tag: "Recommendation"
+    });
+  }
+
+  if (genetics === "Not done") {
+    nudges.push({
+      t: "warning",
+      h: "Germline / somatic genomic testing not ordered",
+      b: "Family history of breast cancer noted in this patient. BRCA1/2 germline testing is recommended for all high-risk prostate cancer patients (EAU / NCCN). Results affect eligibility for PARP inhibitors (olaparib, rucaparib). Testing available at ACTREC, RGCI, and private labs: Strand Life Sciences, MedGenome, Eurofins Clinical Diagnostics.",
+      tag: "Recommendation"
+    });
+  }
+
+  if (castrationStatus === "Hormone-sensitive (HSPC)" && risk.includes("High") && arsi === "Not initiated") {
+    nudges.push({
+      t: "warning",
+      h: "Consider ARSI intensification (ADT + ARSI)",
+      b: "STAMPEDE, ENZAMET, TITAN, and ARASENS trials support ADT intensification with an ARSI for high-risk hormone-sensitive disease. Options: Abiraterone + prednisone (generic available from Sun Pharma / Cipla in India), enzalutamide, or apalutamide. Discuss at next MDT. Verify CGHS formulary coverage before prescribing.",
+      tag: "Recommendation"
+    });
+  }
+
+  if (!followUpDate) {
+    nudges.push({
+      t: "info",
+      h: "Next follow-up PSA visit not scheduled",
+      b: "PSA should be monitored every 3 months during active treatment (first 2 years), then 6-monthly. Also schedule testosterone to confirm castration (&lt;50 ng/dL). Use hospital reminder system or patient contact via Aarogya Setu / hospital app.",
+      tag: "Reminder"
+    });
+  }
+
+  nudges.push({
+    t: "info",
+    h: "Psychosocial &amp; sexual health screening not documented",
+    b: "ADT causes significant sexual dysfunction, hot flushes, fatigue, and mood disturbance. PHQ-9 depression screening not recorded. Consider referral to onco-counsellor or psychiatry. Hindi-language patient support materials available via iCan Cancer Support India and NCI India portal.",
+    tag: "Reminder"
+  });
+
+  const container = document.getElementById("nudge-container");
+  if (!container) {
+    return;
+  }
+
+  container.innerHTML = nudges.map((nudge) => `
+    <div class="nudge-card ${nudge.t}">
+      <div class="nc-dot"></div>
+      <div style="flex:1;min-width:0;">
+        <div class="nc-head">
+          <div class="nc-title">${nudge.h}</div>
+          <span class="nc-tag">${nudge.tag}</span>
+        </div>
+        <div class="nc-body">${nudge.b}</div>
+        <span class="nc-action">Acknowledge &amp; log →</span>
+      </div>
+    </div>`).join("");
+
+  const badge = document.getElementById("sb-badge");
+  if (badge) {
+    badge.textContent = String(nudges.length);
+  }
+
+  const alertBanner = document.getElementById("alert-banner");
+  const urgentCount = nudges.filter((nudge) => nudge.t === "urgent").length;
+  if (alertBanner) {
+    alertBanner.style.display = urgentCount > 0 ? "flex" : "none";
+    const title = alertBanner.querySelector(".alert-title");
+    if (title) {
+      title.textContent = `Urgent: ${urgentCount} action${urgentCount > 1 ? "s" : ""} require${urgentCount === 1 ? "s" : ""} immediate attention`;
+    }
+  }
+}
+
+function drawPSAChart() {
+  const canvas = document.getElementById("psaCanvas");
+  if (!canvas) {
+    return;
+  }
+
+  const dpr = window.devicePixelRatio || 1;
+  const width = canvas.offsetWidth;
+  const height = 130;
+
+  canvas.width = width * dpr;
+  canvas.height = height * dpr;
+  canvas.style.height = height + "px";
+
+  const ctx = canvas.getContext("2d");
+  ctx.scale(dpr, dpr);
+
+  const points = [
+    { x: "Oct 2023", y: 18.2 },
+    { x: "Feb 2024", y: 31.4 },
+    { x: "Aug 2024", y: 42.6 }
+  ];
+  const pad = { t: 15, r: 20, b: 35, l: 50 };
+  const chartWidth = width - pad.l - pad.r;
+  const chartHeight = height - pad.t - pad.b;
+  const minY = 0;
+  const maxY = 55;
+  const xPos = (index) => pad.l + index * (chartWidth / (points.length - 1));
+  const yPos = (value) => pad.t + chartHeight - (value - minY) / (maxY - minY) * chartHeight;
+
+  ctx.strokeStyle = "rgba(180,210,240,0.07)";
+  ctx.lineWidth = 1;
+  [0, 20, 40, 55].forEach((value) => {
+    const y = yPos(value);
+    ctx.beginPath();
+    ctx.moveTo(pad.l, y);
+    ctx.lineTo(pad.l + chartWidth, y);
+    ctx.stroke();
+    ctx.fillStyle = "rgba(127,168,200,0.7)";
+    ctx.font = "10px 'IBM Plex Mono', monospace";
+    ctx.textAlign = "right";
+    ctx.fillText(String(value), pad.l - 6, y + 4);
+  });
+
+  ctx.fillStyle = "rgba(15,202,138,0.06)";
+  ctx.fillRect(pad.l, yPos(4), chartWidth, yPos(0) - yPos(4));
+
+  ctx.beginPath();
+  ctx.moveTo(xPos(0), yPos(points[0].y));
+  points.forEach((point, index) => ctx.lineTo(xPos(index), yPos(point.y)));
+  ctx.lineTo(xPos(points.length - 1), yPos(0));
+  ctx.lineTo(xPos(0), yPos(0));
+  ctx.closePath();
+  const gradient = ctx.createLinearGradient(0, pad.t, 0, height);
+  gradient.addColorStop(0, "rgba(232,69,91,0.28)");
+  gradient.addColorStop(1, "rgba(232,69,91,0.02)");
+  ctx.fillStyle = gradient;
+  ctx.fill();
+
+  ctx.beginPath();
+  points.forEach((point, index) => {
+    if (index === 0) {
+      ctx.moveTo(xPos(index), yPos(point.y));
+    } else {
+      ctx.lineTo(xPos(index), yPos(point.y));
+    }
+  });
+  ctx.strokeStyle = "#E8455B";
+  ctx.lineWidth = 2;
+  ctx.lineJoin = "round";
+  ctx.stroke();
+
+  points.forEach((point, index) => {
+    const x = xPos(index);
+    const y = yPos(point.y);
+    ctx.beginPath();
+    ctx.arc(x, y, 4, 0, Math.PI * 2);
+    ctx.fillStyle = "#E8455B";
+    ctx.fill();
+    ctx.strokeStyle = "#0B1622";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    ctx.fillStyle = "#DCE9F5";
+    ctx.font = "bold 11px 'IBM Plex Mono', monospace";
+    ctx.textAlign = "center";
+    ctx.fillText(String(point.y), x, y - 10);
+
+    ctx.fillStyle = "rgba(127,168,200,0.8)";
+    ctx.font = "10px 'IBM Plex Sans', sans-serif";
+    ctx.fillText(point.x, x, height - 8);
+  });
+
+  ctx.fillStyle = "rgba(15,202,138,0.6)";
+  ctx.font = "9px 'IBM Plex Sans', sans-serif";
+  ctx.textAlign = "left";
+  ctx.fillText("Normal range (0–4)", pad.l + 4, yPos(2) + 3);
+}
+
+window.addEventListener("load", () => {
+  setPatientNameVisibility(false);
+  drawPSAChart();
+  computeNudges();
+  window.addEventListener("resize", () => {
+    window.clearTimeout(window.__psaResizeTimer);
+    window.__psaResizeTimer = window.setTimeout(drawPSAChart, 100);
+  });
+});
+</script>
+</body>
+</html>

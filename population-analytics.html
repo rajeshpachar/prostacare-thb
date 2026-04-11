@@ -1,0 +1,1475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ProstaCare India — Population Analytics Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&amp;family=IBM+Plex+Sans:wght@300;400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#FFFFFF;--bg1:#FFFFFF;--bg2:#FFFFFF;--bg3:#F6F8FC;--bg4:#EEF4FF;
+  --br:rgba(33,56,84,.08);--brm:rgba(33,56,84,.14);--brs:rgba(33,56,84,.22);
+  --teal:#1E9B61;--teal2:#177B4C;--tm:rgba(30,155,97,.10);--tb:rgba(30,155,97,.24);
+  --amber:#D58A1C;--am:rgba(213,138,28,.11);--ab:rgba(213,138,28,.25);
+  --red:#D34B52;--rm:rgba(211,75,82,.10);--rb:rgba(211,75,82,.22);
+  --blue:#6E7EEB;--blm:rgba(110,126,235,.10);--blb:rgba(110,126,235,.22);
+  --purple:#8A78E6;--pm:rgba(138,120,230,.10);--pb:rgba(138,120,230,.20);
+  --pink:#C876B8;--pkm:rgba(200,118,184,.10);
+  --tp:#233547;--ts:#617386;--td:#8C9EB2;
+  --fh:'Syne',sans-serif;--ff:'IBM Plex Sans',sans-serif;--fm:'IBM Plex Mono',monospace;
+  --r:8px;--rl:12px;--rx:16px;
+  --sb:220px;--hh:56px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;background:var(--bg);color:var(--tp);font-family:var(--ff);font-size:14px;overflow-x:hidden;}
+body{
+  background:
+    radial-gradient(circle at top left, rgba(242,161,74,.10), transparent 28%),
+    radial-gradient(circle at top right, rgba(125,140,240,.10), transparent 24%),
+    linear-gradient(180deg, #FFFDF8 0%, var(--bg) 30%, #F9FBFF 100%);
+}
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-thumb{background:rgba(99,120,146,.22);border-radius:2px;}
+a{text-decoration:none;}
+
+/* Watermark */
+.watermark-layer{
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:1000;
+  overflow:hidden;
+}
+.watermark-stamp{
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%) rotate(-28deg);
+  width:min(88vw,1120px);
+  text-align:center;
+  font-family:var(--fh);
+  font-size:clamp(1.1rem,2.2vw,1.95rem);
+  font-weight:700;
+  letter-spacing:.12em;
+  word-spacing:.18em;
+  line-height:1.35;
+  color:rgba(35,53,71,.055);
+  white-space:normal;
+  text-shadow:none;
+}
+
+/* HEADER */
+#hdr{position:fixed;top:0;left:0;right:0;height:var(--hh);background:rgba(255,255,255,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--br);display:flex;align-items:center;padding:0 1.5rem;gap:1rem;z-index:200;}
+.hbrand{font-family:var(--fh);font-size:16px;font-weight:700;color:var(--tp);display:flex;align-items:center;gap:9px;white-space:nowrap;}
+.hbicon{width:28px;height:28px;border-radius:7px;background:var(--tm);border:1px solid var(--tb);display:flex;align-items:center;justify-content:center;}
+.hbicon svg{width:14px;height:14px;fill:var(--teal);}
+.hsep{width:1px;height:24px;background:var(--br);flex-shrink:0;}
+.htitle{font-size:13px;font-weight:500;color:var(--ts);letter-spacing:.01em;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.hright{margin-left:auto;display:flex;align-items:center;gap:12px;min-width:0;}
+.hstat{text-align:right;}
+.hstat strong{display:block;font-size:13px;font-weight:600;color:var(--tp);font-family:var(--fm);}
+.hstat span{font-size:10px;color:var(--ts);}
+.hbtn,.hlink{padding:6px 14px;border-radius:var(--r);background:var(--tm);border:1px solid var(--tb);color:var(--teal);font-size:12px;font-weight:500;cursor:pointer;font-family:var(--ff);display:inline-flex;align-items:center;justify-content:center;}
+.hchip{padding:5px 12px;border-radius:20px;font-size:11px;font-weight:500;cursor:pointer;border:1px solid var(--brm);background:rgba(255,255,255,.96);color:var(--ts);transition:all .15s;}
+.hchip.on{background:var(--tm);border-color:var(--tb);color:var(--teal);}
+
+/* SIDEBAR */
+#sb{position:fixed;top:var(--hh);left:0;bottom:0;width:var(--sb);background:rgba(255,255,255,.92);backdrop-filter:blur(12px);border-right:1px solid var(--br);padding:1rem .75rem;overflow-y:auto;z-index:100;}
+.sbl{font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--td);padding:0 .75rem;margin:.25rem 0 .5rem;}
+.sbi{display:flex;align-items:center;gap:9px;padding:8px 12px;border-radius:var(--r);font-size:13px;color:var(--ts);cursor:pointer;transition:all .15s;margin-bottom:1px;border:1px solid transparent;}
+.sbi:hover{background:var(--bg3);color:var(--tp);}
+.sbi.on{background:var(--tm);border-color:var(--tb);color:var(--teal);font-weight:500;}
+.sbi svg{width:15px;height:15px;opacity:.6;flex-shrink:0;}
+.sbi.on svg{opacity:1;}
+.sbdiv{height:1px;background:var(--br);margin:.75rem .5rem;}
+.sbmini{padding:0 8px;margin-bottom:1rem;}
+.sbmrow{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--br);}
+.sbmrow:last-child{border-bottom:none;}
+.sbmk{font-size:11px;color:var(--ts);}
+.sbmv{font-size:12px;font-weight:600;font-family:var(--fm);}
+.sbmv.red{color:var(--red);} .sbmv.amber{color:var(--amber);} .sbmv.teal{color:var(--teal);}
+
+/* MAIN */
+#main{margin-left:var(--sb);margin-top:var(--hh);padding:1.5rem 1.75rem;min-height:calc(100vh - var(--hh));}
+.section{display:none;animation:fadeUp .3s ease both;}
+.section.on{display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* PAGE HEADER */
+.ph{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:.75rem;}
+.ph h1{font-family:var(--fh);font-size:20px;font-weight:700;color:var(--tp);}
+.ph p{font-size:12px;color:var(--ts);margin-top:3px;}
+.ph-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.btn-outline{padding:7px 15px;border-radius:var(--r);border:1px solid var(--brm);background:rgba(255,255,255,.96);color:var(--ts);font-size:12px;font-weight:500;cursor:pointer;font-family:var(--ff);transition:all .15s;}
+.btn-outline:hover{border-color:var(--brs);color:var(--tp);}
+.btn-teal{padding:7px 15px;border-radius:var(--r);border:none;background:linear-gradient(135deg,var(--teal2),var(--teal));color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--ff);}
+
+/* KPI GRID */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1rem;}
+.kpi{background:linear-gradient(180deg, rgba(255,255,255,.98) 0%, #FFFFFF 100%);border:1px solid var(--br);border-radius:var(--rl);padding:1rem 1.25rem;position:relative;overflow:hidden;box-shadow:0 10px 28px rgba(54,78,106,.08);}
+.kpi::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.kpi.k-blue::after{background:var(--blue);}
+.kpi.k-teal::after{background:var(--teal);}
+.kpi.k-amber::after{background:var(--amber);}
+.kpi.k-red::after{background:var(--red);}
+.kpi.k-purple::after{background:var(--purple);}
+.kpi-label{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--td);margin-bottom:6px;}
+.kpi-val{font-size:26px;font-weight:700;font-family:var(--fm);line-height:1;color:var(--tp);}
+.kpi-sub{font-size:11px;color:var(--ts);margin-top:5px;line-height:1.4;}
+.kpi-delta{display:inline-block;font-size:10px;font-weight:600;padding:1px 6px;border-radius:4px;margin-top:4px;}
+.kpi-delta.up{background:var(--tm);color:var(--teal);}
+.kpi-delta.dn{background:var(--rm);color:var(--red);}
+.kpi-delta.neu{background:var(--am);color:var(--amber);}
+
+/* GRID LAYOUTS */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px;}
+.grid32{display:grid;grid-template-columns:2fr 1fr;gap:12px;margin-bottom:12px;}
+.grid23{display:grid;grid-template-columns:1fr 2fr;gap:12px;margin-bottom:12px;}
+
+/* CARD */
+.card{background:linear-gradient(180deg, rgba(255,255,255,.98) 0%, #FFFFFF 100%);border:1px solid var(--br);border-radius:var(--rx);padding:1.25rem 1.5rem;box-shadow:0 12px 32px rgba(54,78,106,.08);}
+.card-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;padding-bottom:10px;border-bottom:1px solid var(--br);gap:8px;flex-wrap:wrap;}
+.card-title{font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--td);display:flex;align-items:center;gap:7px;}
+.cdot{width:5px;height:5px;border-radius:50%;background:var(--teal);flex-shrink:0;}
+.card-sub{font-size:11px;color:var(--td);}
+.chart-h{position:relative;}
+
+/* BADGES */
+.badge{display:inline-block;font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;border:1px solid;}
+.b-r{background:var(--rm);color:var(--red);border-color:var(--rb);}
+.b-a{background:var(--am);color:var(--amber);border-color:var(--ab);}
+.b-t{background:var(--tm);color:var(--teal);border-color:var(--tb);}
+.b-b{background:var(--blm);color:var(--blue);border-color:var(--blb);}
+.b-p{background:var(--pm);color:var(--purple);border-color:var(--pb);}
+
+/* INSIGHT CARDS */
+.insight{border-radius:var(--rl);padding:13px 16px;margin-bottom:9px;display:flex;gap:11px;align-items:flex-start;border:1px solid;}
+.insight.crit{background:var(--rm);border-color:var(--rb);}
+.insight.warn{background:var(--am);border-color:var(--ab);}
+.insight.info{background:var(--blm);border-color:var(--blb);}
+.insight.ok{background:var(--tm);border-color:var(--tb);}
+.idot{width:7px;height:7px;border-radius:50%;margin-top:5px;flex-shrink:0;}
+.insight.crit .idot{background:var(--red);}
+.insight.warn .idot{background:var(--amber);}
+.insight.info .idot{background:var(--blue);}
+.insight.ok .idot{background:var(--teal);}
+.ititle{font-size:13px;font-weight:600;margin-bottom:3px;}
+.insight.crit .ititle{color:var(--red);}
+.insight.warn .ititle{color:var(--amber);}
+.insight.info .ititle{color:var(--blue);}
+.insight.ok .ititle{color:var(--teal);}
+.ibody{font-size:12px;color:var(--ts);line-height:1.55;}
+.itag{font-size:10px;padding:1px 7px;border-radius:8px;background:rgba(35,53,71,.06);color:var(--td);float:right;margin-left:8px;}
+
+/* PROGRESS BAR */
+.pbar-wrap{margin-bottom:12px;}
+.pbar-label{display:flex;justify-content:space-between;margin-bottom:5px;gap:8px;}
+.pbar-k{font-size:12px;color:var(--ts);}
+.pbar-v{font-size:12px;font-weight:600;font-family:var(--fm);color:var(--tp);}
+.pbar-track{height:7px;background:var(--bg4);border-radius:4px;overflow:hidden;}
+.pbar-fill{height:100%;border-radius:4px;transition:width .6s ease;}
+
+/* TABLE */
+.ptable{width:100%;border-collapse:collapse;font-size:12px;}
+.ptable th{text-align:left;font-size:10px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--td);padding:8px 10px;border-bottom:1px solid var(--br);white-space:nowrap;}
+.ptable td{padding:9px 10px;border-bottom:1px solid var(--br);font-family:var(--fm);}
+.ptable tbody tr:hover td{background:var(--bg3);}
+.ptable tbody tr:last-child td{border-bottom:none;}
+
+/* DONUT LEGEND */
+.dl{display:flex;flex-direction:column;gap:8px;justify-content:center;}
+.dl-item{display:flex;align-items:center;gap:8px;}
+.dl-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0;}
+.dl-label{font-size:12px;color:var(--ts);flex:1;}
+.dl-pct{font-size:12px;font-weight:600;font-family:var(--fm);color:var(--tp);}
+
+/* FUNNEL */
+.funnel{display:flex;flex-direction:column;gap:4px;}
+.funnel-row{display:flex;align-items:center;gap:10px;}
+.funnel-label{font-size:11px;color:var(--ts);width:110px;text-align:right;flex-shrink:0;}
+.funnel-bar{height:26px;border-radius:4px;display:flex;align-items:center;padding:0 10px;font-size:11px;font-weight:600;font-family:var(--fm);color:#fff;transition:width .5s ease;min-width:40px;}
+
+/* HEATMAP */
+.hcell{height:28px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;font-family:var(--fm);cursor:default;transition:transform .1s;}
+.hcell:hover{transform:scale(1.05);}
+
+/* STATE TABLE */
+.state-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--br);}
+.state-row:last-child{border-bottom:none;}
+.state-name{font-size:12px;color:var(--tp);width:100px;flex-shrink:0;}
+.state-bar{flex:1;height:8px;background:var(--bg4);border-radius:4px;overflow:hidden;}
+.state-fill{height:100%;background:var(--blue);border-radius:4px;}
+.state-n{font-size:11px;font-weight:600;font-family:var(--fm);color:var(--ts);width:40px;text-align:right;}
+
+/* CARE GAP */
+.gap-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.gap-card{background:var(--bg3);border:1px solid var(--br);border-radius:var(--rl);padding:.9rem 1rem;text-align:center;}
+.gap-pct{font-size:20px;font-weight:700;font-family:var(--fm);margin-bottom:2px;}
+.gap-label{font-size:10px;color:var(--ts);line-height:1.4;}
+.gap-card.bad .gap-pct{color:var(--red);}
+.gap-card.mid .gap-pct{color:var(--amber);}
+.gap-card.ok .gap-pct{color:var(--teal);}
+
+/* FILTERS */
+.filter-row{display:flex;gap:6px;margin-bottom:1rem;flex-wrap:wrap;}
+.fchip{padding:5px 12px;border-radius:20px;font-size:11px;font-weight:500;border:1px solid var(--brm);background:rgba(255,255,255,.96);color:var(--ts);cursor:pointer;transition:all .15s;}
+.fchip:hover{border-color:var(--brs);color:var(--tp);}
+.fchip.on{background:var(--tm);border-color:var(--tb);color:var(--teal);}
+
+.scroll-x{overflow-x:auto;}
+.scroll-y{overflow-y:auto;}
+
+.chart-wrap{position:relative;cursor:pointer;}
+.chart-wrap:hover .click-hint{opacity:1;}
+.click-hint{position:absolute;top:8px;right:8px;background:rgba(30,155,97,.14);border:1px solid var(--tb);border-radius:6px;padding:3px 9px;font-size:10px;font-weight:500;color:var(--teal);pointer-events:none;opacity:0;transition:opacity .2s;letter-spacing:.02em;}
+canvas.clickable{cursor:pointer;}
+
+#drill-overlay{position:fixed;inset:0;background:rgba(14,22,34,.34);z-index:500;opacity:0;pointer-events:none;transition:opacity .25s;}
+#drill-overlay.on{opacity:1;pointer-events:auto;}
+#drill{position:fixed;top:0;right:0;bottom:0;width:min(640px,100vw);background:rgba(255,255,255,.97);backdrop-filter:blur(12px);border-left:1px solid var(--brm);z-index:501;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .3s cubic-bezier(.32,.72,0,1);box-shadow:-18px 0 48px rgba(54,78,106,.12);}
+#drill.on{transform:translateX(0);}
+#drill-head{position:relative;padding:1.25rem 1.5rem;border-bottom:1px solid var(--br);flex-shrink:0;}
+#drill-title{font-family:var(--fh);font-size:17px;font-weight:700;color:var(--tp);margin-bottom:3px;}
+#drill-sub{font-size:12px;color:var(--ts);}
+#drill-meta{display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap;}
+#drill-close{position:absolute;top:1rem;right:1.25rem;width:28px;height:28px;border-radius:50%;background:var(--bg3);border:1px solid var(--brm);color:var(--ts);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;}
+#drill-close:hover{background:var(--bg4);color:var(--tp);}
+#drill-body{flex:1;overflow-y:auto;padding:0;}
+#drill-tbl-wrap{padding:0 1.5rem 1.5rem;}
+.drill-tbl{width:100%;border-collapse:collapse;font-size:12px;}
+.drill-tbl th{text-align:left;font-size:10px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--td);padding:9px 8px;border-bottom:1px solid var(--br);position:sticky;top:0;background:rgba(255,255,255,.98);z-index:1;}
+.drill-tbl td{padding:9px 8px;border-bottom:1px solid var(--br);font-family:var(--fm);font-size:11px;}
+.drill-tbl tbody tr:hover td{background:var(--bg3);}
+.drill-tbl tbody tr:last-child td{border-bottom:none;}
+.drill-empty{padding:2.5rem;text-align:center;color:var(--td);font-size:13px;}
+.drill-stat{background:var(--bg3);border:1px solid var(--br);border-radius:var(--r);padding:7px 14px;text-align:center;}
+.drill-stat strong{display:block;font-size:18px;font-weight:700;font-family:var(--fm);color:var(--tp);}
+.drill-stat span{font-size:10px;color:var(--ts);}
+.drill-sort{cursor:pointer;user-select:none;}
+.drill-sort:hover{color:var(--tp);}
+.sort-ind{margin-left:3px;opacity:.4;}
+.sort-ind.on{opacity:1;color:var(--teal);}
+
+@media (max-width: 1200px){
+  .kpi-grid{grid-template-columns:repeat(2,1fr);}
+  .grid3{grid-template-columns:1fr 1fr;}
+}
+
+@media (max-width: 1024px){
+  :root{--sb:0px;--hh:108px;}
+  #sb{display:none;}
+  #hdr{height:auto;min-height:var(--hh);padding:.9rem 1rem;flex-wrap:wrap;align-items:flex-start;}
+  .hsep{display:none;}
+  .htitle,.hright{width:100%;}
+  .hright{justify-content:space-between;flex-wrap:wrap;}
+  #main{margin-left:0;padding:1rem 1.1rem;}
+  .grid2,.grid3,.grid32,.grid23{grid-template-columns:1fr;}
+  .gap-grid{grid-template-columns:repeat(2,1fr);}
+}
+
+@media (max-width: 640px){
+  :root{--hh:128px;}
+  #main{padding:.9rem;}
+  .kpi-grid,.gap-grid{grid-template-columns:1fr;}
+  .card{padding:1rem;}
+  .funnel-row{align-items:flex-start;flex-wrap:wrap;}
+  .funnel-label{width:100%;text-align:left;}
+  .watermark-stamp{font-size:clamp(.95rem,3.1vw,1.25rem);width:min(92vw,860px);}
+  #drill-head{padding:1rem 1rem .9rem;}
+  #drill-tbl-wrap{padding:0 1rem 1rem;}
+}
+
+/* GUIDELINES MODAL */
+#gl-overlay{position:fixed;inset:0;background:rgba(4,8,16,.75);z-index:600;opacity:0;pointer-events:none;transition:opacity .25s;}
+#gl-overlay.on{opacity:1;pointer-events:all;}
+#gl-modal{position:fixed;top:50%;left:50%;transform:translate(-50%,-48%) scale(.97);width:min(920px,96vw);max-height:88vh;background:var(--bg1);border:1px solid var(--brm);border-radius:var(--rx);z-index:601;display:flex;flex-direction:column;transition:transform .3s cubic-bezier(.32,.72,0,1),opacity .25s;opacity:0;pointer-events:none;}
+#gl-overlay.on #gl-modal{transform:translate(-50%,-50%) scale(1);opacity:1;pointer-events:all;}
+#gl-modal-head{padding:1.25rem 1.5rem;border-bottom:1px solid var(--br);flex-shrink:0;display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;}
+#gl-modal-body{flex:1;overflow-y:auto;padding:0 1.5rem 1.5rem;}
+.gl-close{width:28px;height:28px;border-radius:50%;background:var(--bg3);border:1px solid var(--brm);color:var(--ts);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;}
+.gl-close:hover{background:var(--bg4);color:var(--tp);}
+.gl-tabs{display:flex;gap:2px;margin-bottom:1.25rem;border-bottom:1px solid var(--br);padding-top:1rem;}
+.gl-tab{padding:8px 16px;font-size:12px;font-weight:500;cursor:pointer;border-bottom:2px solid transparent;color:var(--ts);background:none;border-top:none;border-left:none;border-right:none;font-family:var(--ff);transition:all .15s;white-space:nowrap;}
+.gl-tab:hover{color:var(--tp);}
+.gl-tab.on{color:var(--teal);border-bottom-color:var(--teal);}
+.gl-section{display:none;}.gl-section.on{display:block;}
+.gl-risk-block{border:1px solid var(--br);border-radius:var(--rl);margin-bottom:1rem;overflow:hidden;}
+.gl-risk-head{padding:.9rem 1.25rem;display:flex;align-items:center;gap:12px;cursor:pointer;user-select:none;}
+.gl-risk-head:hover{background:var(--bg3);}
+.gl-risk-title{font-size:13px;font-weight:600;flex:1;}
+.gl-risk-body{padding:0 1.25rem 1.25rem;display:none;}
+.gl-risk-body.open{display:block;}
+.gl-chevron{font-size:10px;color:var(--ts);transition:transform .2s;}
+.gl-chevron.open{transform:rotate(180deg);}
+.gl-row{display:flex;gap:1rem;margin-bottom:.9rem;flex-wrap:wrap;}
+.gl-col{flex:1;min-width:200px;}
+.gl-col-label{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--td);margin-bottom:.5rem;}
+.gl-item{font-size:12px;color:var(--ts);padding:5px 0;border-bottom:1px solid var(--br);display:flex;gap:8px;align-items:flex-start;line-height:1.5;}
+.gl-item:last-child{border-bottom:none;}
+.gl-bullet{width:5px;height:5px;border-radius:50%;margin-top:6px;flex-shrink:0;}
+.gl-note{font-size:11px;color:var(--td);background:var(--bg3);border-radius:var(--r);padding:8px 12px;margin-top:.75rem;line-height:1.6;border-left:2px solid var(--tb);}
+.gl-compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1rem;}
+.gl-compare-card{background:var(--bg2);border:1px solid var(--br);border-radius:var(--rl);padding:1rem 1.25rem;}
+.gl-compare-head{display:flex;align-items:center;gap:8px;margin-bottom:.75rem;padding-bottom:.6rem;border-bottom:1px solid var(--br);}
+.gl-compare-title{font-size:12px;font-weight:600;color:var(--tp);}
+.gl-flag{font-size:10px;padding:2px 7px;border-radius:6px;font-weight:600;}
+.gl-ref-row{display:flex;align-items:baseline;justify-content:space-between;gap:.5rem;padding:5px 0;border-bottom:1px solid var(--br);font-size:12px;}
+.gl-ref-row:last-child{border-bottom:none;}
+.gl-ref-k{color:var(--ts);flex:1;}
+.gl-ref-v{font-weight:500;color:var(--tp);text-align:right;font-family:var(--fm);font-size:11px;}
+.gl-verdict{font-size:11px;padding:7px 12px;border-radius:var(--r);margin-top:8px;line-height:1.55;}
+.gl-verdict.match{background:var(--tm);color:var(--teal);border:1px solid var(--tb);}
+.gl-verdict.diff{background:var(--am);color:var(--amber);border:1px solid var(--ab);}
+.gl-divider{height:1px;background:var(--br);margin:1rem 0;}
+.hbtn-gl{padding:6px 14px;border-radius:var(--r);background:var(--pm);border:1px solid var(--pb);color:var(--purple);font-size:12px;font-weight:500;cursor:pointer;font-family:var(--ff);transition:background .15s;}
+.hbtn-gl:hover{background:rgba(155,127,234,.2);}
+
+</style>
+</head>
+<body>
+<div class="watermark-layer" aria-hidden="true">
+  <span class="watermark-stamp">THB Sample Prostate Ca Screens prepared for NVS Team</span>
+</div>
+
+<!-- HEADER -->
+<header id="hdr">
+  <div class="hbrand" style="gap: 16px;">
+    <a href="https://www.thb.group" target="_blank" style="display: flex; align-items: center;">
+      <img src="https://www.thb.group/images/logo.svg" alt="THB Logo" style="height: 30px;">
+    </a>
+    <div style="display: flex; align-items: center; gap: 8px;">
+      ProstaCare <span style="color:var(--teal);font-size:11px;font-weight:400;">India · Analytics</span>
+    </div>
+  </div>
+  <div class="hsep"></div>
+  <span class="htitle">Population Dashboard · AIIMS New Delhi · Urology &amp; Radiation Oncology</span>
+  <div class="hright">
+    <div style="display:flex;gap:5px;">
+      <span class="hchip on" onclick="setRange(this,'6m')">6M</span>
+      <span class="hchip" onclick="setRange(this,'1y')">1Y</span>
+      <span class="hchip" onclick="setRange(this,'all')">All</span>
+    </div>
+    <div class="hstat"><strong>Apr 2026</strong><span>Last updated</span></div>
+    <button class="hbtn-gl" onclick="glOpen()">📋 Guidelines</button>
+    <a class="hlink" href="./index.html">Patient View</a>
+    <button class="hbtn" onclick="window.print()">Export</button>
+  </div>
+</header>
+
+<!-- SIDEBAR -->
+<aside id="sb">
+  <div style="margin-bottom:1rem;">
+    <div class="sbl">Navigation</div>
+    <div class="sbi on" onclick="show('overview',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Overview
+    </div>
+    <div class="sbi" onclick="show('clinical',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Clinical Profile
+    </div>
+    <div class="sbi" onclick="show('treatment',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/></svg>Treatment
+    </div>
+    <div class="sbi" onclick="show('caregaps',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Care Gaps
+    </div>
+    <div class="sbi" onclick="show('geography',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="10" r="3"/><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>Geography
+    </div>
+    <div class="sbi" onclick="show('cohort',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Patient Cohort
+    </div>
+    <div class="sbi" onclick="show('insights',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>Insights &amp; Alerts
+      <span style="margin-left:auto;background:var(--rm);color:var(--red);border:1px solid var(--rb);border-radius:10px;padding:1px 6px;font-size:10px;font-weight:700;">7</span>
+    </div>
+  </div>
+
+  <div class="sbdiv"></div>
+  <div class="sbl">Live Snapshot</div>
+  <div class="sbmini">
+    <div class="sbmrow"><span class="sbmk">Total Patients</span><span class="sbmv">347</span></div>
+    <div class="sbmrow"><span class="sbmk">Active Treatment</span><span class="sbmv teal">198</span></div>
+    <div class="sbmrow"><span class="sbmk">High / Very High Risk</span><span class="sbmv red">142</span></div>
+    <div class="sbmrow"><span class="sbmk">New This Month</span><span class="sbmv amber">18</span></div>
+    <div class="sbmrow"><span class="sbmk">Pending Nudges</span><span class="sbmv red">63</span></div>
+    <div class="sbmrow"><span class="sbmk">CGHS / PMJAY</span><span class="sbmv">71%</span></div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main id="main">
+
+<!-- OVERVIEW -->
+<div id="sec-overview" class="section on">
+  <div class="ph">
+    <div><h1>Population Overview</h1><p>347 registered patients · April 2026 · Data refreshed 2 hrs ago</p></div>
+    <div class="ph-actions">
+      <button class="btn-outline">Download CSV</button>
+      <button class="btn-teal" onclick="show('insights')">View Alerts</button>
+    </div>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="kpi k-blue" style="cursor:pointer;" ondblclick="drillOpen('Total Patients', 'Registered in ProstaCare', ALL_PT, mkStats(ALL_PT))">
+      <div class="kpi-label">Total Patients</div>
+      <div class="kpi-val">347</div>
+      <div class="kpi-sub">Registered in ProstaCare</div>
+      <div class="kpi-delta up">↑ 18 this month</div>
+    </div>
+    <div class="kpi k-red" style="cursor:pointer;" ondblclick="drillOpen('High Risk / Very High', 'Patients flagged as high priority', ALL_PT.filter(p=>p.risk==='High'||p.risk==='Very High'), mkStats(ALL_PT.filter(p=>p.risk==='High'||p.risk==='Very High')))">
+      <div class="kpi-label">High Risk / Very High</div>
+      <div class="kpi-val">142</div>
+      <div class="kpi-sub">41% of total cohort</div>
+      <div class="kpi-delta dn">↑ 6 from last month</div>
+    </div>
+    <div class="kpi k-amber" style="cursor:pointer;" ondblclick="drillOpen('Active ADT', 'Patients actively on hormone therapy', ALL_PT.filter(p=>p.adt==='Yes'), mkStats(ALL_PT.filter(p=>p.adt==='Yes')))">
+      <div class="kpi-label">Active ADT</div>
+      <div class="kpi-val">198</div>
+      <div class="kpi-sub">57% of cohort on ADT</div>
+      <div class="kpi-delta neu">→ Stable</div>
+    </div>
+    <div class="kpi k-teal" style="cursor:pointer;" ondblclick="drillOpen('Cohort PSA', 'All registered patients', ALL_PT, mkStats(ALL_PT))">
+      <div class="kpi-label">Median PSA (Latest)</div>
+      <div class="kpi-val">18.4</div>
+      <div class="kpi-sub">ng/mL · cohort median</div>
+      <div class="kpi-delta up">↓ from 22.1 (prev)</div>
+    </div>
+  </div>
+
+  <div class="kpi-grid" style="margin-bottom:1.25rem;">
+    <div class="kpi k-purple" style="cursor:pointer;" ondblclick="drillOpen('Awaiting Treatment', 'Patients staged and waiting to start', ALL_PT.slice(0, 34), mkStats(ALL_PT.slice(0, 34)))">
+      <div class="kpi-label">Awaiting Treatment Start</div>
+      <div class="kpi-val">34</div>
+      <div class="kpi-sub">Staged, plan agreed</div>
+      <div class="kpi-delta dn">12 CGHS approval pending</div>
+    </div>
+    <div class="kpi k-red" style="cursor:pointer;" ondblclick="drillOpen('Care Gap Flagged', 'Patients with missing interventions', ALL_PT.filter(p=>p.gap), mkStats(ALL_PT.filter(p=>p.gap)))">
+      <div class="kpi-label">Care Gap Flagged</div>
+      <div class="kpi-val">63</div>
+      <div class="kpi-sub">Missing bone scan/bone Rx/DEXA</div>
+      <div class="kpi-delta dn">↑ needs review</div>
+    </div>
+    <div class="kpi k-teal" style="cursor:pointer;" ondblclick="drillOpen('Completed / Surveillance', 'Patients on follow-up', ALL_PT.filter(p=>p.trt==='Active Surv.'||p.trt==='Watchful Wait'), mkStats(ALL_PT.filter(p=>p.trt==='Active Surv.'||p.trt==='Watchful Wait')))">
+      <div class="kpi-label">Completed / Surveillance</div>
+      <div class="kpi-val">115</div>
+      <div class="kpi-sub">Post-treatment follow-up</div>
+      <div class="kpi-delta up">↑ 8 this month</div>
+    </div>
+    <div class="kpi k-amber" style="cursor:pointer;" ondblclick="drillOpen('Median Age', 'All registered patients', ALL_PT, mkStats(ALL_PT))">
+      <div class="kpi-label">Median Age</div>
+      <div class="kpi-val">66</div>
+      <div class="kpi-sub">Range: 44–89 yrs</div>
+      <div class="kpi-delta neu">Peak: 65–74 band</div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <div class="card-hd"><div class="card-title"><div class="cdot"></div>New Registrations — Monthly Trend</div><span class="card-sub">Jan 2025 – Apr 2026</span></div>
+      <div class="chart-h"><canvas id="regChart" height="180"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-hd"><div class="card-title"><div class="cdot" style="background:var(--amber);"></div>Risk Category Distribution</div></div>
+      <div style="display:flex;gap:1.25rem;align-items:center;flex-wrap:wrap;">
+        <div style="width:170px;height:170px;flex-shrink:0;"><canvas id="riskDonut"></canvas></div>
+        <div class="dl">
+          <div class="dl-item"><div class="dl-dot" style="background:#E84560;border-radius:50%;"></div><span class="dl-label">High Risk</span><span class="dl-pct">30%</span></div>
+          <div class="dl-item"><div class="dl-dot" style="background:#F5A42A;border-radius:50%;"></div><span class="dl-label">Very High / LA</span><span class="dl-pct">11%</span></div>
+          <div class="dl-item"><div class="dl-dot" style="background:#9B7FEA;border-radius:50%;"></div><span class="dl-label">M1 Metastatic</span><span class="dl-pct">9%</span></div>
+          <div class="dl-item"><div class="dl-dot" style="background:#3BA4F4;border-radius:50%;"></div><span class="dl-label">Intermediate</span><span class="dl-pct">32%</span></div>
+          <div class="dl-item"><div class="dl-dot" style="background:#0EBC80;border-radius:50%;"></div><span class="dl-label">Low Risk</span><span class="dl-pct">18%</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 12px;">
+    <div class="card">
+      <div class="card-hd"><div class="card-title"><div class="cdot" style="background:var(--blue);"></div>Age Distribution</div></div>
+      <div style="position: relative; height: 160px;"><canvas id="ageChart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-hd"><div class="card-title"><div class="cdot" style="background:var(--purple);"></div>Healthcare Coverage</div></div>
+      <div style="display:flex;gap:1rem;align-items:center;flex-wrap:wrap;">
+        <div style="width:130px;height:130px;flex-shrink:0;"><canvas id="covDonut"></canvas></div>
+        <div class="dl" style="gap:6px;">
+          <div class="dl-item"><div class="dl-dot" style="background:#3BA4F4;border-radius:50%;"></div><span class="dl-label" style="font-size:11px;">CGHS</span><span class="dl-pct" style="font-size:11px;">38%</span></div>
+          <div class="dl-item"><div class="dl-dot" style="background:#0EBC80;border-radius:50%;"></div><span class="dl-label" style="font-size:11px;">PMJAY / Ayushman</span><span class="dl-pct" style="font-size:11px;">33%</span></div>
+          <div class="dl-item"><div class="dl-dot" style="background:#9B7FEA;border-radius:50%;"></div><span class="dl-label" style="font-size:11px;">ESIC</span><span class="dl-pct" style="font-size:11px;">9%</span></div>
+          <div class="dl-item"><div class="dl-dot" style="background:#F5A42A;border-radius:50%;"></div><span class="dl-label" style="font-size:11px;">Private Insurance</span><span class="dl-pct" style="font-size:11px;">12%</span></div>
+          <div class="dl-item"><div class="dl-dot" style="background:#8C9EB2;border-radius:50%;"></div><span class="dl-label" style="font-size:11px;">Self-pay</span><span class="dl-pct" style="font-size:11px;">8%</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-hd"><div class="card-title"><div class="cdot" style="background:var(--red);"></div>Stage at Presentation</div></div>
+      <div style="position: relative; height: 160px;"><canvas id="stageChart"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<!-- CLINICAL PROFILE -->
+<div id="sec-clinical" class="section">
+  <div class="ph"><div><h1>Clinical Profile</h1><p>PSA trends, Gleason distribution, staging &amp; comorbidity analysis across 347 patients</p></div></div>
+
+  <div class="grid2">
+    <div class="card">
+      <div class="card-hd"><div class="card-title"><div class="cdot"></div>Population PSA Trend — Cohort Median</div><span class="card-sub">Monthly median ng/mL</span></div>
+      <canvas id="psaPopChart" height="200"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-hd"><div class="card-title"><div class="cdot" style="background:var(--red);"></div>PSA at Diagnosis — Distribution</div></div>
+      <canvas id="psaDxChart" height="200"></canvas>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <div class="card-hd"><div class="card-title"><div class="cdot" style="background:var(--purple);"></div>Gleason / ISUP Grade Group</div></div>
+      <canvas id="gleasonChart" height="180"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-hd"><div class="card-title"><div class="cdot" style="background:var(--amber);"></div>ECOG Performance Status</div></div>
+      <div style="display:flex;gap:1rem;align-items:center;margin-top:.5rem;flex-wrap:wrap;">
+        <div style="width:150px;height:150px;flex-shrink:0;"><canvas id="ecogDonut"></canvas></div>
+        <div style="flex:1;min-width:220px;">
+          <div class="pbar-wrap"><div class="pbar-label"><span class="pbar-k">ECOG 0 — Fully active</span><span class="pbar-v">22%</span></div><div class="pbar-track"><div class="pbar-fill" style="width:22%;background:var(--teal);"></div></div></div>
+          <div class="pbar-wrap"><div class="pbar-label"><span class="pbar-k">ECOG 1 — Ambulatory</span><span class="pbar-v">51%</span></div><div class="pbar-track"><div class="pbar-fill" style="width:51%;background:var(--blue);"></div></div></div>
+          <div class="pbar-wrap"><div class="pbar-label"><span class="pbar-k">ECOG 2 — Self-care only</span><span class="pbar-v">19%</span></div><div class="pbar-track"><div class="pbar-fill" style="width:19%;background:var(--amber);"></div></div></div>
+          <div class="pbar-wrap"><div class="pbar-label"><span class="pbar-k">ECOG 3 — Limited self-care</span><span class="pbar-v">8%</span></div><div class="pbar-track"><div class="pbar-fill" style="width:8%;background:var(--red);"></div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid32">
+    <div class="card">
+      <div class="card-hd"><div class="card-title"><div class="cdot" style="background:var(--blue);"></div>Top Comorbidities in Cohort</div></div>
+      <canvas id="comorbChart" height="180"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-hd"><div class="card-title"><div class="cdot" style="background:var(--amber);"></div>PSA Heatmap by Stage &amp; Grade</div></div>
+      <div style="font-size:10px;color:var(--ts);margin-bottom:8px;">Median PSA ng/mL per cell · hover for detail</div>
+      <div id="psaHeatmap" style="display:grid;grid-template-columns:repeat(5,1fr);gap:4px;"></div>
+      <div style="display:flex;justify-content:space-between;margin-top:6px;">
+        <span style="font-size:9px;color:var(--td);">Grade 1</span>
+        <span style="font-size:9px;color:var(--td);">Grade 2</span>
+        <span style="font-size:9px;color:var(--td);">Grade 3</span>
+        <span style="font-size:9px;color:var(--td);">Grade 4</span>
+        <span style="font-size:9px;color:var(--td);">Grade 5</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TREATMENT -->
+<div id="sec-treatment" class="section">
+  <div class="ph"><div><h1>Treatment Landscape</h1><p>ADT, radiation, chemotherapy &amp; intensification patterns across the cohort</p></div></div>
+
+  <div class="kpi-grid">
+    <div class="kpi k-teal"><div class="kpi-label">On ADT</div><div class="kpi-val">198</div><div class="kpi-sub">57% of cohort</div><div class="kpi-delta up">↑ from 182 (3M)</div></div>
+    <div class="kpi k-blue"><div class="kpi-label">Received / On RT</div><div class="kpi-val">124</div><div class="kpi-sub">36% of cohort</div><div class="kpi-delta up">→ 22 mid-treatment</div></div>
+    <div class="kpi k-amber"><div class="kpi-label">ARSI Intensified</div><div class="kpi-val">58</div><div class="kpi-sub">29% of ADT patients</div><div class="kpi-delta dn">↑ from 41 (prev yr)</div></div>
+    <div class="kpi k-purple"><div class="kpi-label">Active Surveillance</div><div class="kpi-val">42</div><div class="kpi-sub">12% of cohort</div><div class="kpi-delta neu">→ Stable</div></div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <div class="card-hd"><div class="card-title"><div class="cdot"></div>Treatment Pathway Funnel</div></div>
+      <div class="funnel" style="margin-top:.5rem;">
+        <div class="funnel-row"><span class="funnel-label">Registered</span><div class="funnel-bar" style="width:100%;background:var(--blue);opacity:.7;">347</div></div>
+        <div class="funnel-row"><span class="funnel-label">Diagnosed &amp; Staged</span><div class="funnel-bar" style="width:92%;background:var(--blue);">319</div></div>
+        <div class="funnel-row"><span class="funnel-label">MDT Reviewed</span><div class="funnel-bar" style="width:77%;background:var(--purple);">267</div></div>
+        <div class="funnel-row"><span class="funnel-label">Treatment Started</span><div class="funnel-bar" style="width:64%;background:var(--teal);">222</div></div>
+        <div class="funnel-row"><span class="funnel-label">ADT Active</span><div class="funnel-bar" style="width:57%;background:var(--teal);">198</div></div>
+        <div class="funnel-row"><span class="funnel-label">RT Completed</span><div class="funnel-bar" style="width:29%;background:var(--amber);">102</div></div>
+        <div class="funnel-row"><span class="funnel-label">ARSI Intensified</span><div class="funnel-bar" style="width:17%;background:var(--amber);">58</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-hd"><div class="card-title"><div class="cdot" style="background:var(--purple);"></div>ADT Agent Distribution</div></div>
+      <canvas id="adtChart" height="200"></canvas>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <div class="card-hd"><div class="card-title"><div class="cdot" style="background:var(--amber);"></div>RT Fractionation Schemes Used</div></div>
+      <canvas id="rtChart" height="180"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-hd"><div class="card-title"><div class="cdot" style="background:var(--blue);"></div>ARSI Intensification by Agent</div></div>
+      <canvas id="arsiChart" height="180"></canvas>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd"><div class="card-title"><div class="cdot" style="background:var(--teal);"></div>CGHS / PMJAY Pre-auth Status — Pending Approvals</div><span class="card-sub">34 patients awaiting treatment</span></div>
+    <div class="scroll-x">
+      <table class="ptable">
+        <thead><tr><th>#</th><th>UHID</th><th>Patient</th><th>Age</th><th>Risk</th><th>Intervention Pending</th><th>Days Waiting</th><th>Coverage</th><th>Status</th></tr></thead>
+        <tbody id="authTbl"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- CARE GAPS -->
+<div id="sec-caregaps" class="section">
+  <div class="ph"><div><h1>Care Gap Analysis</h1><p>Patients with missing investigations, bone protection, genetic testing, and follow-up — sorted by clinical priority</p></div></div>
+
+  <div class="grid3" style="margin-bottom:1rem;">
+    <div class="card" style="padding:1rem;">
+      <div class="card-title" style="margin-bottom:.75rem;"><div class="cdot" style="background:var(--red);"></div>Critical Gaps</div>
+      <div class="gap-grid">
+        <div class="gap-card bad"><div class="gap-pct">67%</div><div class="gap-label">No bone protection on ADT &gt;3m</div></div>
+        <div class="gap-card bad"><div class="gap-pct">54%</div><div class="gap-label">PSMA PET-CT not done (High Risk)</div></div>
+        <div class="gap-card bad"><div class="gap-pct">48%</div><div class="gap-label">Bone scan missing (PSA &gt;20)</div></div>
+        <div class="gap-card mid"><div class="gap-pct">43%</div><div class="gap-label">DEXA not ordered on ADT</div></div>
+        <div class="gap-card mid"><div class="gap-pct">38%</div><div class="gap-label">Germline test not ordered</div></div>
+        <div class="gap-card ok"><div class="gap-pct">18%</div><div class="gap-label">PHQ-9 not documented</div></div>
+      </div>
+    </div>
+    <div class="card" style="padding:1rem;">
+      <div class="card-title" style="margin-bottom:.75rem;"><div class="cdot" style="background:var(--amber);"></div>ADT Monitoring Gaps</div>
+      <div style="margin-top:4px;">
+        <div class="pbar-wrap"><div class="pbar-label"><span class="pbar-k">Testosterone not checked</span><span class="pbar-v" style="color:var(--red);">44%</span></div><div class="pbar-track"><div class="pbar-fill" style="width:44%;background:var(--red);"></div></div></div>
+        <div class="pbar-wrap"><div class="pbar-label"><span class="pbar-k">No bone protection</span><span class="pbar-v" style="color:var(--red);">67%</span></div><div class="pbar-track"><div class="pbar-fill" style="width:67%;background:var(--red);"></div></div></div>
+        <div class="pbar-wrap"><div class="pbar-label"><span class="pbar-k">No DEXA scan</span><span class="pbar-v" style="color:var(--amber);">43%</span></div><div class="pbar-track"><div class="pbar-fill" style="width:43%;background:var(--amber);"></div></div></div>
+        <div class="pbar-wrap"><div class="pbar-label"><span class="pbar-k">No Calcium / Vit D</span><span class="pbar-v" style="color:var(--amber);">39%</span></div><div class="pbar-track"><div class="pbar-fill" style="width:39%;background:var(--amber);"></div></div></div>
+        <div class="pbar-wrap"><div class="pbar-label"><span class="pbar-k">ARSI not intensified (High Risk)</span><span class="pbar-v" style="color:var(--amber);">71%</span></div><div class="pbar-track"><div class="pbar-fill" style="width:71%;background:var(--amber);"></div></div></div>
+        <div class="pbar-wrap"><div class="pbar-label"><span class="pbar-k">PSA overdue (&gt;3m)</span><span class="pbar-v" style="color:var(--blue);">22%</span></div><div class="pbar-track"><div class="pbar-fill" style="width:22%;background:var(--blue);"></div></div></div>
+      </div>
+    </div>
+    <div class="card" style="padding:1rem;">
+      <div class="card-title" style="margin-bottom:.75rem;"><div class="cdot" style="background:var(--blue);"></div>Staging Completeness</div>
+      <canvas id="gapRadar" height="200"></canvas>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd"><div class="card-title"><div class="cdot" style="background:var(--red);"></div>High-Priority Care Gap Patients — Action Required</div><span class="card-sub">Sorted by gap severity score</span></div>
+    <div class="filter-row" id="gapFilter">
+      <span class="fchip on" onclick="filterGap(this,'all')">All (63)</span>
+      <span class="fchip" onclick="filterGap(this,'bone')">No Bone Protection (42)</span>
+      <span class="fchip" onclick="filterGap(this,'psma')">PSMA Missing (31)</span>
+      <span class="fchip" onclick="filterGap(this,'dexa')">No DEXA (28)</span>
+      <span class="fchip" onclick="filterGap(this,'genetics')">No Genetics (24)</span>
+    </div>
+    <div class="scroll-x">
+      <table class="ptable">
+        <thead><tr><th>Priority</th><th>UHID</th><th>Patient</th><th>Age</th><th>Risk</th><th>ADT (months)</th><th>Bone Rx</th><th>DEXA</th><th>PSMA</th><th>Genetics</th><th>Gap Score</th></tr></thead>
+        <tbody id="gapTbl"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- GEOGRAPHY -->
+<div id="sec-geography" class="section">
+  <div class="ph"><div><h1>Geographic Distribution</h1><p>State-wise patient origin, referral patterns &amp; travel burden analysis</p></div></div>
+
+  <div class="grid32">
+    <div class="card">
+      <div class="card-hd"><div class="card-title"><div class="cdot"></div>Patients by State of Origin</div><span class="card-sub">Top 12 states</span></div>
+      <div id="stateList"></div>
+    </div>
+    <div class="card">
+      <div class="card-hd"><div class="card-title"><div class="cdot" style="background:var(--amber);"></div>Referral Source Type</div></div>
+      <canvas id="refChart" height="200"></canvas>
+      <div style="margin-top:1rem;">
+        <div class="card-title" style="margin-bottom:.75rem;border-bottom:1px solid var(--br);padding-bottom:8px;"><div class="cdot" style="background:var(--blue);"></div>Referral Trend — Monthly</div>
+        <canvas id="refTrendChart" height="100"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid3">
+    <div class="card">
+      <div class="card-hd"><div class="card-title"><div class="cdot" style="background:var(--blue);"></div>Travel Distance Distribution</div></div>
+      <canvas id="travelChart" height="160"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-hd"><div class="card-title"><div class="cdot" style="background:var(--purple);"></div>Language Preference</div></div>
+      <canvas id="langChart" height="160"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-hd"><div class="card-title"><div class="cdot" style="background:var(--amber);"></div>Coverage by Region</div></div>
+      <canvas id="covRegChart" height="160"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- COHORT TABLE -->
+<div id="sec-cohort" class="section">
+  <div class="ph"><div><h1>Patient Cohort</h1><p>All 347 registered patients — sortable, searchable registry</p></div>
+    <div class="ph-actions"><input type="text" id="ptSearch" placeholder="Search by name / UHID…" style="background:var(--bg2);border:1px solid var(--brm);border-radius:var(--r);color:var(--tp);font-family:var(--ff);font-size:12px;padding:7px 12px;outline:none;width:200px;" oninput="filterCohort(this.value)"><button class="btn-outline">Export</button></div>
+  </div>
+  <div class="filter-row" id="cohortFilter">
+    <span class="fchip on" onclick="filterByRisk(this,'all')">All (347)</span>
+    <span class="fchip" onclick="filterByRisk(this,'high')">High / VH (142)</span>
+    <span class="fchip" onclick="filterByRisk(this,'meta')">Metastatic (31)</span>
+    <span class="fchip" onclick="filterByRisk(this,'adt')">On ADT (198)</span>
+    <span class="fchip" onclick="filterByRisk(this,'as')">Active Surv. (42)</span>
+  </div>
+  <div class="card" style="padding:0;">
+    <div class="scroll-x scroll-y" style="max-height:500px;">
+      <table class="ptable">
+        <thead style="position:sticky;top:0;background:var(--bg2);z-index:2;">
+          <tr>
+            <th>UHID</th><th>Name</th><th>Age</th><th>State</th><th>Stage</th>
+            <th>Risk</th><th>PSA (latest)</th><th>Gleason</th><th>Treatment</th>
+            <th>ADT</th><th>Coverage</th><th>Care Gap</th>
+          </tr>
+        </thead>
+        <tbody id="cohortTbl"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- INSIGHTS -->
+<div id="sec-insights" class="section">
+  <div class="ph"><div><h1>Population Insights &amp; Alerts</h1><p>Auto-generated clinical insights — based on protocol deviations, care gaps &amp; outcome signals</p></div></div>
+
+  <div class="grid23">
+    <div>
+      <div class="insight crit">
+        <div class="idot"></div>
+        <div style="flex:1;">
+          <div class="ititle"><span class="itag">Critical · 42 patients</span>Majority of patients on long-term ADT have no bone protection</div>
+          <div class="ibody">67% (42/63) of patients on ADT &gt;3 months have not been prescribed zoledronic acid, denosumab, or even calcium + Vitamin D3. Fracture risk is substantially elevated. Recommend urgent protocol-level review — flag all ADT patients for DEXA + bone protection initiation at next visit. Bone health nurse specialist referral pathway may be needed.</div>
+        </div>
+      </div>
+      <div class="insight crit">
+        <div class="idot"></div>
+        <div style="flex:1;">
+          <div class="ititle"><span class="itag">Critical · 31 patients</span>High-risk patients staged without PSMA PET-CT — RT fields may be suboptimal</div>
+          <div class="ibody">31 high-risk (cT3+/PSA &gt;20/Gleason ≥8) patients received definitive RT without prior PSMA PET-CT. PSMA PET-CT changes nodal field and RT plan in ~40% of cases. This represents a significant quality-of-care concern — recommend retrospective review, and enforce PSMA PET-CT requirement in the staging protocol for all future high-risk patients at AIIMS, RGCI, and ACTREC. CGHS pre-auth for PSMA PET can be expedited.</div>
+        </div>
+      </div>
+      <div class="insight warn">
+        <div class="idot"></div>
+        <div style="flex:1;">
+          <div class="ititle"><span class="itag">Warning · 58 patients</span>ARSI intensification rate well below international benchmarks</div>
+          <div class="ibody">Only 29% of hormone-sensitive high-risk patients have been intensified with an ARSI (abiraterone, enzalutamide, apalutamide). International benchmark is &gt;60%. Key barriers: cost, formulary delays, and physician awareness. Generic abiraterone availability makes this gap more actionable at the protocol level.</div>
+        </div>
+      </div>
+      <div class="insight warn">
+        <div class="idot"></div>
+        <div style="flex:1;">
+          <div class="ititle"><span class="itag">Warning · 24 patients</span>Germline testing not ordered despite family history or high-risk features</div>
+          <div class="ibody">24 patients have documented breast/ovarian/pancreatic cancer family history or Gleason ≥9, and have not undergone BRCA1/2 germline testing. PARP inhibitor eligibility hinges on this result. Recommend an automated flag for family history + Gleason ≥8 patients.</div>
+        </div>
+      </div>
+      <div class="insight info">
+        <div class="idot"></div>
+        <div style="flex:1;">
+          <div class="ititle"><span class="itag">Insight · 12 patients</span>CGHS approval delays causing mean 47-day treatment lag for RT</div>
+          <div class="ibody">Analysis shows average 47-day delay from MDT decision to RT start due to CGHS pre-authorisation. Patients with stage cT3b+ experience the longest delays. Recommend pre-emptive documentation submission at MDT stage and a designated payer liaison workflow.</div>
+        </div>
+      </div>
+      <div class="insight info">
+        <div class="idot"></div>
+        <div style="flex:1;">
+          <div class="ititle"><span class="itag">Insight · Cohort trend</span>PSA nadir timing signals — proportion achieving PSA &lt;0.2 at 12 months</div>
+          <div class="ibody">Among patients with 12+ months follow-up post-RT + ADT, 62% achieved PSA &lt;0.2 ng/mL at 12 months. Patients treated with whole-pelvic RT versus prostate-only RT showed stronger PSA control, supporting more aggressive nodal irradiation in cN1 patients.</div>
+        </div>
+      </div>
+      <div class="insight ok">
+        <div class="idot"></div>
+        <div style="flex:1;">
+          <div class="ititle"><span class="itag">Positive · Improving</span>MDT review rate improved from 61% to 77% over past 12 months</div>
+          <div class="ibody">Proportion of new diagnoses reviewed at MDT before treatment initiation rose from 61% to 77%. The additional weekly MDT slot appears to be the likely driver. Continue tracking against the 90%+ target.</div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:12px;">
+        <div class="card-hd"><div class="card-title"><div class="cdot" style="background:var(--amber);"></div>Protocol Adherence Score</div></div>
+        <canvas id="protocolChart" height="200"></canvas>
+      </div>
+      <div class="card">
+        <div class="card-hd"><div class="card-title"><div class="cdot" style="background:var(--red);"></div>Alert Summary</div></div>
+        <div style="font-size:12px;">
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--br);"><span style="color:var(--ts);">Critical actions</span><span style="color:var(--red);font-weight:700;font-family:var(--fm);">2 types · 73 pts</span></div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--br);"><span style="color:var(--ts);">Recommendations</span><span style="color:var(--amber);font-weight:700;font-family:var(--fm);">3 types · 82 pts</span></div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--br);"><span style="color:var(--ts);">Informational insights</span><span style="color:var(--blue);font-weight:700;font-family:var(--fm);">2 types · cohort</span></div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;"><span style="color:var(--ts);">Positive signals</span><span style="color:var(--teal);font-weight:700;font-family:var(--fm);">1 · MDT coverage</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<div id="drill-overlay" onclick="drillClose()"></div>
+<aside id="drill" aria-label="Patient drill down panel">
+  <div id="drill-head">
+    <button id="drill-close" type="button" onclick="drillClose()">✕</button>
+    <div id="drill-title">Patient List</div>
+    <div id="drill-sub">Loading…</div>
+    <div id="drill-meta"></div>
+  </div>
+  <div id="drill-body">
+    <div id="drill-tbl-wrap">
+      <table class="drill-tbl">
+        <thead id="drill-thead"></thead>
+        <tbody id="drill-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</aside>
+
+<script>
+const MONTHS=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const CHF={color:"rgba(33,56,84,.14)",grid:{color:"rgba(33,56,84,.08)"},ticks:{color:"#617386",font:{size:10,family:"'IBM Plex Mono'"}}};
+Chart.defaults.font.family="'IBM Plex Sans'";
+Chart.defaults.color="#617386";
+
+function cc(id,type,data,opts={}){
+  const el=document.getElementById(id);
+  if(!el)return;
+  return new Chart(el,{type,data,options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},...(opts.plugins||{})},scales:opts.scales||undefined,...opts}});
+}
+
+const MONTHS_LIST=["Jan 25","Feb 25","Mar 25","Apr 25","May 25","Jun 25","Jul 25","Aug 25","Sep 25","Oct 25","Nov 25","Dec 25","Jan 26","Feb 26","Mar 26","Apr 26"];
+const AGE_BANDS=["40–44","45–49","50–54","55–59","60–64","65–69","70–74","75–79","80+"];
+const PSA_BANDS=["0–4","4–10","10–20","20–50","50–100",">100"];
+const GL_LABELS=["3+3=6","3+4=7","4+3=7","4+4=8","4+5=9","5+4=9","5+5=10"];
+const COV_LABELS=["CGHS","PMJAY","ESIC","Private","Self-pay"];
+const STAGE_LABELS=["cT1c","cT2a","cT2b","cT2c","cT3a","cT3b","cT4","M1"];
+const ADT_LABELS=["Leuprolide 45mg (6M)","Leuprolide 22.5mg (3M)","Goserelin 10.8mg (3M)","Goserelin 3.6mg (1M)","Degarelix (antagonist)","Orchidectomy"];
+const REF_LABELS=["Government Hospital / OPD","Private Urologist","CGHS Panel Hospital","District Cancer Centre","Self-referral (PSA screening)","Other"];
+const TRAVEL_LABELS=["<50 km","50–200 km","200–500 km","500–1000 km",">1000 km"];
+const LANG_LABELS=["Hindi","English","Punjabi","Bengali","Urdu","Bhojpuri","Other"];
+const STATE_LABELS=["Delhi / NCR","Uttar Pradesh","Haryana","Rajasthan","Punjab","Bihar","Madhya Pradesh","Uttarakhand","Jharkhand","Himachal Pradesh","West Bengal","Other"];
+const RC={Low:"b-t","Int. Fav.":"b-b","Int. Unfav.":"b-b",High:"b-r","Very High":"b-r",M1:"b-p"};
+
+let drillSortCol=null,drillSortDir=1,drillCurrentPts=[];
+
+function seedRand(seed){
+  let s=seed%2147483647;
+  if(s<=0)s+=2147483646;
+  return function(){
+    s=s*16807%2147483647;
+    return (s-1)/2147483646;
+  };
+}
+
+function weightedIndex(randFn, weights){
+  const total=weights.reduce((sum, weight)=>sum+weight,0);
+  const target=randFn()*total;
+  let cursor=0;
+  for(let i=0;i<weights.length;i+=1){
+    cursor+=weights[i];
+    if(target<=cursor)return i;
+  }
+  return weights.length-1;
+}
+
+function median(values){
+  if(!values.length)return 0;
+  const sorted=[...values].sort((a,b)=>a-b);
+  const mid=Math.floor(sorted.length/2);
+  return sorted.length%2?sorted[mid]:(sorted[mid-1]+sorted[mid])/2;
+}
+
+function mkStats(pts){
+  if(!pts.length)return[];
+  const avgAge=Math.round(pts.reduce((sum, patient)=>sum+patient.age,0)/pts.length);
+  const medPSA=median(pts.map((patient)=>parseFloat(patient.psa))).toFixed(1);
+  const onADT=pts.filter((patient)=>patient.adt==="Yes").length;
+  const highRisk=pts.filter((patient)=>patient.risk==="High"||patient.risk==="Very High"||patient.risk==="M1").length;
+  return[
+    {val:pts.length,label:"Patients",color:"var(--tp)"},
+    {val:`${avgAge} yrs`,label:"Avg Age",color:"var(--ts)"},
+    {val:medPSA,label:"Median PSA",color:parseFloat(medPSA)>20?"var(--red)":"var(--amber)"},
+    {val:onADT,label:"On ADT",color:"var(--teal)"},
+    {val:highRisk,label:"High Risk",color:"var(--red)"}
+  ];
+}
+
+function drillOpen(title, sub, patients, stats=[]){
+  drillCurrentPts=[...patients];
+  drillSortCol=null;
+  drillSortDir=1;
+  document.getElementById("drill-title").textContent=title;
+  document.getElementById("drill-sub").textContent=`${patients.length} patient${patients.length===1?"":"s"} · ${sub}`;
+  document.getElementById("drill-meta").innerHTML=stats.map((stat)=>`
+    <div class="drill-stat">
+      <strong style="color:${stat.color||"var(--tp)"};">${stat.val}</strong>
+      <span>${stat.label}</span>
+    </div>`).join("");
+  renderDrillTbl(drillCurrentPts);
+  document.getElementById("drill-overlay").classList.add("on");
+  document.getElementById("drill").classList.add("on");
+}
+
+function drillClose(){
+  document.getElementById("drill-overlay").classList.remove("on");
+  document.getElementById("drill").classList.remove("on");
+}
+
+function renderDrillTbl(pts){
+  const thead=document.getElementById("drill-thead");
+  const tbody=document.getElementById("drill-tbody");
+  const cols=[
+    {k:"uhid",l:"UHID"},
+    {k:"name",l:"Name"},
+    {k:"age",l:"Age"},
+    {k:"risk",l:"Risk"},
+    {k:"psa",l:"PSA"},
+    {k:"stage",l:"Stage"},
+    {k:"trt",l:"Treatment"},
+    {k:"adt",l:"ADT"},
+    {k:"cov",l:"Coverage"}
+  ];
+  thead.innerHTML=`<tr>${cols.map((col)=>`<th class="drill-sort" onclick="drillSort('${col.k}')">${col.l}<span class="sort-ind ${drillSortCol===col.k?"on":""}">${drillSortCol===col.k?(drillSortDir===1?" ↑":" ↓"):" ↕"}</span></th>`).join("")}</tr>`;
+  if(!pts.length){
+    tbody.innerHTML=`<tr><td colspan="${cols.length}"><div class="drill-empty">No patients in this segment.</div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML=pts.map((patient)=>`
+    <tr>
+      <td style="color:var(--ts);">${patient.uhid}</td>
+      <td style="color:var(--tp);font-weight:500;">${patient.name}</td>
+      <td>${patient.age}</td>
+      <td><span class="badge ${RC[patient.risk]||"b-b"}">${patient.risk}</span></td>
+      <td style="color:${parseFloat(patient.psa)>20?"var(--red)":parseFloat(patient.psa)>10?"var(--amber)":"var(--teal)"};">${patient.psa}</td>
+      <td>${patient.stage}</td>
+      <td style="color:var(--ts);">${patient.trt}</td>
+      <td style="color:${patient.adt==="Yes"?"var(--teal)":"var(--td)"};">${patient.adt}</td>
+      <td><span class="badge b-b">${patient.cov}</span></td>
+    </tr>`).join("");
+}
+
+function drillSort(col){
+  if(drillSortCol===col)drillSortDir*=-1;
+  else{
+    drillSortCol=col;
+    drillSortDir=1;
+  }
+  drillCurrentPts.sort((left,right)=>{
+    const a=left[col];
+    const b=right[col];
+    if(typeof a==="number"&&typeof b==="number")return (a-b)*drillSortDir;
+    return String(a).localeCompare(String(b))*drillSortDir;
+  });
+  renderDrillTbl(drillCurrentPts);
+}
+
+function wrapChart(id){
+  const canvas=document.getElementById(id);
+  if(!canvas||canvas.parentElement.classList.contains("chart-wrap"))return;
+  const wrapper=document.createElement("div");
+  wrapper.className="chart-wrap";
+  canvas.parentNode.insertBefore(wrapper, canvas);
+  wrapper.appendChild(canvas);
+  const hint=document.createElement("div");
+  hint.className="click-hint";
+  hint.textContent="Click segment to drill down";
+  wrapper.appendChild(hint);
+  canvas.classList.add("clickable");
+}
+
+function wireChartDrill(chartObj, filterFn, titleFn, subFn){
+  if(!chartObj||!chartObj.canvas)return;
+  wrapChart(chartObj.canvas.id);
+  chartObj.canvas.addEventListener("click",(event)=>{
+    const pts=chartObj.getElementsAtEventForMode(event,"nearest",{intersect:true},true);
+    if(!pts.length)return;
+    const index=pts[0].index;
+    const datasetIndex=pts[0].datasetIndex;
+    const patients=filterFn(index,datasetIndex);
+    if(!patients||!patients.length)return;
+    drillOpen(titleFn(index,datasetIndex), subFn(index,datasetIndex), patients, mkStats(patients));
+  });
+}
+
+document.querySelector(".hlink")?.addEventListener("click",(event)=>{
+  if(window.parent&&window.parent!==window){
+    event.preventDefault();
+    window.parent.postMessage({type:"demo-nav",target:"files"},"*");
+  }
+});
+
+window.addEventListener("keydown",(event)=>{
+  if(event.key==="Escape")drillClose();
+});
+
+/* OVERVIEW CHARTS */
+const regChart=cc("regChart","bar",{
+  labels:["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec","Jan","Feb","Mar","Apr"],
+  datasets:[{
+    label:"New registrations",
+    data:[14,11,17,13,16,12,19,14,22,18,15,20,16,21,19,18],
+    backgroundColor:"rgba(59,164,244,.35)",
+    borderColor:"#3BA4F4",borderWidth:1.5,borderRadius:3
+  }]
+},{
+  scales:{x:{...CHF,grid:{display:false}},y:{...CHF,grid:CHF.grid,beginAtZero:true}},
+  plugins:{legend:{display:false}}
+});
+wireChartDrill(regChart,
+  (index)=>ALL_PT.filter((patient)=>patient.regMonthIdx===index),
+  (index)=>`Registrations — ${MONTHS_LIST[index]}`,
+  (index)=>`Patients registered in ${MONTHS_LIST[index]}`
+);
+
+const riskDonut=new Chart(document.getElementById("riskDonut"),{
+  type:"doughnut",
+  data:{
+    labels:["High Risk","Very High/LA","M1 Metastatic","Intermediate","Low Risk"],
+    datasets:[{data:[30,11,9,32,18],backgroundColor:["#E84560","#F5A42A","#9B7FEA","#3BA4F4","#0EBC80"],borderWidth:0,hoverOffset:4}]
+  },
+  options:{responsive:true,maintainAspectRatio:false,cutout:"68%",plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.label}: ${c.raw}%`}}}}
+});
+wireChartDrill(riskDonut,
+  (index)=>ALL_PT.filter((patient)=>{
+    if(index===0)return patient.risk==="High";
+    if(index===1)return patient.risk==="Very High";
+    if(index===2)return patient.risk==="M1";
+    if(index===3)return patient.risk==="Int. Fav."||patient.risk==="Int. Unfav.";
+    return patient.risk==="Low";
+  }),
+  (index)=>`Risk Category: ${["High Risk","Very High / LA","M1 Metastatic","Intermediate","Low Risk"][index]}`,
+  (index)=>`Patients in the ${["high risk","very high risk","metastatic","intermediate","low risk"][index]} segment`
+);
+
+const ageChart=cc("ageChart","bar",{
+  labels:["40–44","45–49","50–54","55–59","60–64","65–69","70–74","75–79","80+"],
+  datasets:[{data:[3,8,14,22,36,54,62,48,21],backgroundColor:"rgba(155,127,234,.4)",borderColor:"#9B7FEA",borderWidth:1.5,borderRadius:3}]
+},{scales:{x:{...CHF,grid:{display:false}},y:{...CHF,grid:CHF.grid,beginAtZero:true}},plugins:{legend:{display:false}}});
+wireChartDrill(ageChart,
+  (index)=>ALL_PT.filter((patient)=>patient.ageBandIdx===index),
+  (index)=>`Age Band: ${AGE_BANDS[index]}`,
+  (index)=>`Patients aged ${AGE_BANDS[index]}`
+);
+
+const covDonut=new Chart(document.getElementById("covDonut"),{
+  type:"doughnut",
+  data:{labels:["CGHS","PMJAY","ESIC","Private","Self-pay"],datasets:[{data:[38,33,9,12,8],backgroundColor:["#3BA4F4","#0EBC80","#9B7FEA","#F5A42A","#8C9EB2"],borderWidth:0}]},
+  options:{responsive:true,maintainAspectRatio:false,cutout:"65%",plugins:{legend:{display:false}}}
+});
+wireChartDrill(covDonut,
+  (index)=>ALL_PT.filter((patient)=>patient.covIdx===index),
+  (index)=>`Coverage: ${COV_LABELS[index]}`,
+  (index)=>`Patients covered under ${COV_LABELS[index]}`
+);
+
+const stageChart=cc("stageChart","bar",{
+  labels:["cT1c","cT2a","cT2b","cT2c","cT3a","cT3b","cT4","M1"],
+  datasets:[{data:[18,24,31,28,48,64,42,31],backgroundColor:["#0EBC80","#0EBC80","#3BA4F4","#3BA4F4","#F5A42A","#E84560","#E84560","#9B7FEA"],borderWidth:0,borderRadius:3}]
+},{scales:{x:{...CHF,grid:{display:false}},y:{...CHF,grid:CHF.grid,beginAtZero:true}},plugins:{legend:{display:false}}});
+wireChartDrill(stageChart,
+  (index)=>ALL_PT.filter((patient)=>patient.stageBucket===index),
+  (index)=>`Stage at Presentation: ${STAGE_LABELS[index]}`,
+  (index)=>`Patients presenting with ${STAGE_LABELS[index]} disease`
+);
+
+/* CLINICAL CHARTS */
+cc("psaPopChart","line",{
+  labels:["Apr 25","May 25","Jun 25","Jul 25","Aug 25","Sep 25","Oct 25","Nov 25","Dec 25","Jan 26","Feb 26","Mar 26","Apr 26"],
+  datasets:[
+    {label:"Cohort Median PSA",data:[22.1,21.4,20.8,19.7,19.1,18.8,18.2,17.6,17.1,16.8,17.2,18.0,18.4],borderColor:"#0EBC80",backgroundColor:"rgba(14,188,128,.08)",fill:true,tension:.4,pointRadius:3,borderWidth:2},
+    {label:"P75",data:[48,46,44,42,40,39,38,37,36,35,36,38,40],borderColor:"rgba(245,164,42,.4)",borderDash:[4,3],tension:.4,pointRadius:0,borderWidth:1.5}
+  ]
+},{scales:{x:{...CHF,grid:{display:false}},y:{...CHF,grid:CHF.grid,beginAtZero:true,title:{display:true,text:"ng/mL",color:"#8C9EB2",font:{size:10}}}},plugins:{legend:{display:true,labels:{color:"#617386",font:{size:10},boxWidth:12}}}});
+
+const psaDxChart=cc("psaDxChart","bar",{
+  labels:["0–4","4–10","10–20","20–50","50–100",">100"],
+  datasets:[{data:[8,31,62,78,52,24],backgroundColor:"rgba(232,69,96,.35)",borderColor:"#E84560",borderWidth:1.5,borderRadius:3}]
+},{scales:{x:{...CHF,grid:{display:false}},y:{...CHF,grid:CHF.grid,beginAtZero:true,title:{display:true,text:"Patients",color:"#8C9EB2",font:{size:10}}}},plugins:{legend:{display:false}}});
+wireChartDrill(psaDxChart,
+  (index)=>ALL_PT.filter((patient)=>patient.psaBandIdx===index),
+  (index)=>`PSA at Diagnosis: ${PSA_BANDS[index]} ng/mL`,
+  (index)=>`Patients with PSA in the ${PSA_BANDS[index]} band`
+);
+
+const gleasonChart=cc("gleasonChart","bar",{
+  labels:["3+3=6","3+4=7","4+3=7","4+4=8","4+5=9","5+4=9","5+5=10"],
+  datasets:[{data:[22,48,61,74,56,38,14],backgroundColor:["#0EBC80","#3BA4F4","#3BA4F4","#F5A42A","#E84560","#E84560","#9B7FEA"],borderWidth:0,borderRadius:3}]
+},{scales:{x:{...CHF,grid:{display:false}},y:{...CHF,grid:CHF.grid,beginAtZero:true}},plugins:{legend:{display:false}}});
+wireChartDrill(gleasonChart,
+  (index)=>ALL_PT.filter((patient)=>patient.glIdx===index),
+  (index)=>`Gleason Score: ${GL_LABELS[index]}`,
+  (index)=>`Patients with Gleason score ${GL_LABELS[index]}`
+);
+
+new Chart(document.getElementById("ecogDonut"),{type:"doughnut",data:{labels:["ECOG 0","ECOG 1","ECOG 2","ECOG 3"],datasets:[{data:[22,51,19,8],backgroundColor:["#0EBC80","#3BA4F4","#F5A42A","#E84560"],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:"62%",plugins:{legend:{display:false}}}});
+
+cc("comorbChart","bar",{
+  labels:["Hypertension","T2 Diabetes","CAD/IHD","CKD","COPD","Stroke","Anaemia","Osteoporosis"],
+  datasets:[{data:[58,44,28,19,14,11,22,16],backgroundColor:"rgba(59,164,244,.35)",borderColor:"#3BA4F4",borderWidth:1.5,borderRadius:3}]
+},{scales:{x:{...CHF,grid:{display:false}},y:{...CHF,grid:CHF.grid,beginAtZero:true,ticks:{...CHF.ticks,callback:v=>v+"%"}}},plugins:{legend:{display:false}}});
+
+/* PSA Heatmap */
+(function(){
+  const vals=[[3,7,11,19,28],[6,12,16,24,42],[14,22,30,48,71],[24,38,58,72,94],[38,61,88,110,142]];
+  const rows=["cT1","cT2","cT3a","cT3b","cT4"];
+  const el=document.getElementById("psaHeatmap");
+  if(!el)return;
+  el.style.gridTemplateColumns="60px repeat(5,1fr)";
+  vals.forEach((row,ri)=>{
+    const rl=document.createElement("div");
+    rl.style.cssText="display:flex;align-items:center;font-size:9px;color:var(--td);justify-content:flex-end;padding-right:6px;";
+    rl.textContent=rows[ri];
+    el.appendChild(rl);
+    row.forEach((v,ci)=>{
+      const cell=document.createElement("div");
+      const intensity=Math.min(v/142,1);
+      const r=Math.round(14+intensity*(232-14));
+      const g=Math.round(188-intensity*(188-69));
+      const b=Math.round(128-intensity*(128-96));
+      cell.className="hcell";
+      cell.style.background=`rgba(${r},${g},${b},${0.2+intensity*.6})`;
+      cell.style.color=intensity>.5?"#fff":"var(--ts)";
+      cell.textContent=v;
+      cell.title=`${rows[ri]} / Grade ${ci+1}: median PSA ${v} ng/mL`;
+      el.appendChild(cell);
+    });
+  });
+})();
+
+/* TREATMENT CHARTS */
+const adtChart=cc("adtChart","bar",{
+  labels:["Leuprolide 45mg (6M)","Leuprolide 22.5mg (3M)","Goserelin 10.8mg (3M)","Goserelin 3.6mg (1M)","Degarelix (antagonist)","Orchidectomy"],
+  datasets:[{data:[72,48,31,18,14,15],backgroundColor:"rgba(14,188,128,.35)",borderColor:"#0EBC80",borderWidth:1.5,borderRadius:3}]
+},{indexAxis:"y",scales:{x:{...CHF,grid:CHF.grid,beginAtZero:true},y:{...CHF,grid:{display:false}}},plugins:{legend:{display:false}}});
+wireChartDrill(adtChart,
+  (index)=>ALL_PT.filter((patient)=>patient.adtAgentIdx===index),
+  (index)=>`ADT Agent: ${ADT_LABELS[index]}`,
+  (index)=>`Patients on ${ADT_LABELS[index]}`
+);
+
+cc("rtChart","doughnut",{
+  labels:["78 Gy/39 fx (Conv.)","60 Gy/20 fx (Mod. hypo)","36.25 Gy/5 fx (SBRT)","Palliative RT","HDR Brachy boost"],
+  datasets:[{data:[48,27,12,22,15],backgroundColor:["#3BA4F4","#0EBC80","#9B7FEA","#F5A42A","#E06FA8"],borderWidth:0}]
+},{responsive:true,maintainAspectRatio:false,cutout:"55%",plugins:{legend:{display:true,position:"right",labels:{color:"#617386",font:{size:10},boxWidth:10}}}});
+
+cc("arsiChart","bar",{
+  labels:["Abiraterone + Pred (generic)","Abiraterone + Pred (Zytiga)","Enzalutamide","Apalutamide","Darolutamide"],
+  datasets:[{data:[22,11,14,7,4],backgroundColor:"rgba(155,127,234,.35)",borderColor:"#9B7FEA",borderWidth:1.5,borderRadius:3}]
+},{scales:{x:{...CHF,grid:{display:false}},y:{...CHF,grid:CHF.grid,beginAtZero:true}},plugins:{legend:{display:false}}});
+
+const authData=[
+  {uhid:"DL-2026-0341",name:"M.K. Sharma",age:72,risk:"High",intervention:"Definitive IMRT (78 Gy/39 fx)",days:34,cov:"CGHS",status:"Under review"},
+  {uhid:"UP-2026-0118",name:"R.P. Singh",age:65,risk:"Very High",intervention:"PSMA PET-CT + RT Planning",days:51,cov:"PMJAY",status:"Docs resubmitted"},
+  {uhid:"RJ-2025-0972",name:"B.L. Meena",age:70,risk:"High",intervention:"Zoledronic Acid (bone Rx)",days:18,cov:"CGHS",status:"Approved — collect"},
+  {uhid:"HR-2026-0054",name:"S.K. Yadav",age:58,risk:"Very High",intervention:"Abiraterone (generic)",days:29,cov:"PMJAY",status:"Under review"},
+  {uhid:"MH-2025-1104",name:"P.D. Patil",age:63,risk:"High",intervention:"Whole Pelvis IMRT",days:47,cov:"ESIC",status:"Query raised"},
+  {uhid:"DL-2026-0287",name:"A.K. Gupta",age:67,risk:"M1",intervention:"Docetaxel chemotherapy",days:12,cov:"CGHS",status:"Approved"}
+];
+(function(){
+  const tb=document.getElementById("authTbl");
+  if(!tb)return;
+  authData.forEach((r,i)=>{
+    const riskC=r.risk==="High"||r.risk==="Very High"?"b-r":r.risk==="M1"?"b-p":"b-a";
+    const sCol=r.status==="Approved"||r.status==="Approved — collect"?"var(--teal)":r.days>40?"var(--red)":"var(--amber)";
+    tb.innerHTML+=`<tr><td style="color:var(--ts);">${i+1}</td><td style="color:var(--ts);">${r.uhid}</td><td style="color:var(--tp);">${r.name}</td><td>${r.age}</td><td><span class="badge ${riskC}">${r.risk}</span></td><td style="color:var(--ts);">${r.intervention}</td><td style="color:${r.days>40?"var(--red)":"var(--ts)"};">${r.days}d</td><td><span class="badge b-b">${r.cov}</span></td><td style="color:${sCol};">${r.status}</td></tr>`;
+  });
+})();
+
+/* CARE GAP CHARTS */
+cc("gapRadar","radar",{
+  labels:["Bone Scan","PSMA PET-CT","DEXA Done","Bone Rx","Genetics","PSA Current","PHQ-9","MDT Review"],
+  datasets:[
+    {label:"% Complete",data:[52,46,57,33,62,78,82,77],backgroundColor:"rgba(59,164,244,.15)",borderColor:"#3BA4F4",pointBackgroundColor:"#3BA4F4",borderWidth:1.5,pointRadius:3},
+    {label:"Target",data:[90,85,80,90,75,95,90,95],backgroundColor:"rgba(14,188,128,.05)",borderColor:"rgba(14,188,128,.3)",borderDash:[4,3],borderWidth:1,pointRadius:0}
+  ]
+},{responsive:true,maintainAspectRatio:false,scales:{r:{grid:{color:"rgba(33,56,84,.08)"},pointLabels:{color:"#617386",font:{size:9}},angleLines:{color:"rgba(33,56,84,.08)"},ticks:{color:"transparent",backdropColor:"transparent",stepSize:20},min:0,max:100}},plugins:{legend:{display:true,labels:{color:"#617386",font:{size:10},boxWidth:10}}}});
+
+const gapData=[
+  {uhid:"DL-2024-08742",name:"R.K. Sharma",age:68,risk:"High",adt:4,bone:"No",dexa:"No",psma:"No",gen:"No",score:9},
+  {uhid:"UP-2025-0441",name:"S.N. Tiwari",age:71,risk:"Very High",adt:6,bone:"No",dexa:"No",psma:"No",gen:"Pending",score:8},
+  {uhid:"HR-2025-0184",name:"M.K. Verma",age:66,risk:"High",adt:5,bone:"No",dexa:"No",psma:"Done",gen:"No",score:7},
+  {uhid:"RJ-2025-0637",name:"B.S. Rathod",age:74,risk:"High",adt:7,bone:"No",dexa:"Osteopenia",psma:"No",gen:"No",score:7},
+  {uhid:"PB-2025-0219",name:"G.S. Sidhu",age:62,risk:"Very High",adt:3,bone:"No",dexa:"No",psma:"Done",gen:"Pending",score:6},
+  {uhid:"MH-2025-0882",name:"A.P. Kulkarni",age:69,risk:"High",adt:8,bone:"Zoledronate",dexa:"No",psma:"No",gen:"No",score:5},
+  {uhid:"WB-2025-0331",name:"P.K. Ghosh",age:73,risk:"High",adt:4,bone:"No",dexa:"No",psma:"Pending",gen:"No",score:6},
+  {uhid:"KA-2025-0447",name:"N.R. Reddy",age:60,risk:"M1",adt:9,bone:"Denosumab",dexa:"Done",psma:"Done",gen:"No",score:3}
+];
+function renderGapTbl(data){
+  const tb=document.getElementById("gapTbl");if(!tb)return;
+  tb.innerHTML=data.map(r=>{
+    const rc=r.risk==="High"?"b-r":r.risk==="Very High"?"b-r":r.risk==="M1"?"b-p":"b-a";
+    const sc=r.score>=8?"var(--red)":r.score>=6?"var(--amber)":"var(--ts)";
+    const noBone=r.bone==="No";const noDexa=r.dexa==="No";const noPSMA=r.psma==="No";const noGen=r.gen==="No"||r.gen==="Pending";
+    return`<tr><td style="color:${sc};font-weight:700;">${r.score}/10</td><td style="color:var(--ts);">${r.uhid}</td><td style="color:var(--tp);">${r.name}</td><td>${r.age}</td><td><span class="badge ${rc}">${r.risk}</span></td><td>${r.adt}m</td><td style="color:${noBone?"var(--red)":"var(--teal)"};">${r.bone}</td><td style="color:${noDexa?"var(--amber)":"var(--teal)"};">${r.dexa}</td><td style="color:${noPSMA?"var(--red)":"var(--teal)"};">${r.psma}</td><td style="color:${noGen?"var(--amber)":"var(--teal)"};">${r.gen}</td><td style="color:${sc};font-weight:700;">${r.score}</td></tr>`;
+  }).join("");
+}
+renderGapTbl(gapData);
+function filterGap(el,type){
+  document.querySelectorAll("#gapFilter .fchip").forEach(c=>c.classList.remove("on"));el.classList.add("on");
+  const d=type==="all"?gapData:gapData.filter(r=>{
+    if(type==="bone")return r.bone==="No";
+    if(type==="psma")return r.psma==="No";
+    if(type==="dexa")return r.dexa==="No";
+    if(type==="genetics")return r.gen==="No"||r.gen==="Pending";
+    return true;
+  });
+  renderGapTbl(d);
+}
+
+/* GEOGRAPHY */
+const stateData=[
+  {name:"Delhi / NCR",n:87,fill:87},{name:"Uttar Pradesh",n:54,fill:54},{name:"Haryana",n:38,fill:38},{name:"Rajasthan",n:31,fill:31},{name:"Punjab",n:28,fill:28},{name:"Bihar",n:24,fill:24},{name:"Madhya Pradesh",n:22,fill:22},{name:"Uttarakhand",n:18,fill:18},{name:"Jharkhand",n:14,fill:14},{name:"Himachal Pradesh",n:11,fill:11},{name:"West Bengal",n:9,fill:9},{name:"Other",n:11,fill:11}
+];
+(function(){
+  const el=document.getElementById("stateList");if(!el)return;
+  const max=stateData[0].n;
+  stateData.forEach((s,index)=>{
+    const row=document.createElement("div");
+    row.className="state-row";
+    row.style.cursor="pointer";
+    row.innerHTML=`<span class="state-name">${s.name}</span><div class="state-bar"><div class="state-fill" style="width:${s.fill/max*100}%;"></div></div><span class="state-n">${s.n}</span>`;
+    row.addEventListener("click",()=>{
+      const patients=ALL_PT.filter((patient)=>patient.stateIdx===index);
+      drillOpen(`State: ${s.name}`, `Patients from ${s.name}`, patients, mkStats(patients));
+    });
+    el.appendChild(row);
+  });
+})();
+
+const refChart=cc("refChart","doughnut",{
+  labels:["Government Hospital / OPD","Private Urologist","CGHS Panel Hospital","District Cancer Centre","Self-referral (PSA screening)","Other"],
+  datasets:[{data:[38,24,18,11,6,3],backgroundColor:["#3BA4F4","#9B7FEA","#0EBC80","#F5A42A","#E06FA8","#8C9EB2"],borderWidth:0}]
+},{responsive:true,maintainAspectRatio:false,cutout:"55%",plugins:{legend:{display:true,position:"bottom",labels:{color:"#617386",font:{size:10},boxWidth:10,padding:6}}}});
+wireChartDrill(refChart,
+  (index)=>ALL_PT.filter((patient)=>patient.refSrcIdx===index),
+  (index)=>`Referral Source: ${REF_LABELS[index]}`,
+  (index)=>`Patients referred through ${REF_LABELS[index]}`
+);
+
+cc("refTrendChart","line",{
+  labels:["Aug","Sep","Oct","Nov","Dec","Jan","Feb","Mar","Apr"],
+  datasets:[
+    {label:"Govt",data:[6,7,8,7,9,8,10,9,11],borderColor:"#3BA4F4",tension:.4,pointRadius:2,borderWidth:1.5,fill:false},
+    {label:"Private",data:[4,5,4,5,4,5,6,5,6],borderColor:"#9B7FEA",tension:.4,pointRadius:2,borderWidth:1.5,fill:false}
+  ]
+},{scales:{x:{...CHF,grid:{display:false}},y:{...CHF,grid:CHF.grid,beginAtZero:true}},plugins:{legend:{display:true,labels:{color:"#617386",font:{size:10},boxWidth:10}}}});
+
+const travelChart=cc("travelChart","bar",{
+  labels:["<50 km","50–200 km","200–500 km","500–1000 km",">1000 km"],
+  datasets:[{data:[87,96,72,58,34],backgroundColor:"rgba(59,164,244,.35)",borderColor:"#3BA4F4",borderWidth:1.5,borderRadius:3}]
+},{scales:{x:{...CHF,grid:{display:false}},y:{...CHF,grid:CHF.grid,beginAtZero:true}},plugins:{legend:{display:false}}});
+wireChartDrill(travelChart,
+  (index)=>ALL_PT.filter((patient)=>patient.travelIdx===index),
+  (index)=>`Travel Distance: ${TRAVEL_LABELS[index]}`,
+  (index)=>`Patients travelling ${TRAVEL_LABELS[index]} for care`
+);
+
+const langChart=cc("langChart","bar",{
+  labels:["Hindi","English","Punjabi","Bengali","Urdu","Bhojpuri","Other"],
+  datasets:[{data:[52,18,9,7,5,4,5],backgroundColor:"rgba(155,127,234,.35)",borderColor:"#9B7FEA",borderWidth:1.5,borderRadius:3}]
+},{scales:{x:{...CHF,grid:{display:false}},y:{...CHF,grid:CHF.grid,beginAtZero:true,ticks:{...CHF.ticks,callback:v=>v+"%"}}},plugins:{legend:{display:false}}});
+wireChartDrill(langChart,
+  (index)=>ALL_PT.filter((patient)=>patient.langIdx===index),
+  (index)=>`Language Preference: ${LANG_LABELS[index]}`,
+  (index)=>`Patients preferring ${LANG_LABELS[index]}`
+);
+
+cc("covRegChart","bar",{
+  labels:["Delhi","UP","Haryana","Rajasthan","Punjab","Bihar"],
+  datasets:[
+    {label:"CGHS",data:[52,28,38,22,18,11],backgroundColor:"rgba(59,164,244,.5)",borderRadius:2,borderWidth:0},
+    {label:"PMJAY",data:[24,48,32,44,38,62],backgroundColor:"rgba(14,188,128,.5)",borderRadius:2,borderWidth:0},
+    {label:"Other",data:[24,24,30,34,44,27],backgroundColor:"rgba(107,155,187,.3)",borderRadius:2,borderWidth:0}
+  ]
+},{scales:{x:{...CHF,grid:{display:false},stacked:true},y:{...CHF,grid:CHF.grid,stacked:true,beginAtZero:true,ticks:{...CHF.ticks,callback:v=>v+"%"}}},plugins:{legend:{display:true,labels:{color:"#617386",font:{size:10},boxWidth:10}}}});
+
+/* COHORT TABLE */
+const NAMES=["R.K. Sharma","S.N. Tiwari","M.K. Verma","B.S. Rathod","G.S. Sidhu","A.P. Kulkarni","P.K. Ghosh","N.R. Reddy","V.P. Joshi","H.K. Bhatia","T.R. Pillai","P.S. Nair","A.K. Gupta","D.C. Mishra","S.P. Yadav","R.M. Patel","K.L. Shah","F.A. Khan","Y.S. Chauhan","B.P. Tiwari"];
+const STATES=["Delhi","UP","Haryana","Rajasthan","Punjab","Bihar","MP","Uttarakhand","Jharkhand","HP","WB","Other"];
+const RISKS=["Low","Int. Fav.","Int. Unfav.","High","Very High","M1"];
+const RISKW=[0.18,0.16,0.16,0.3,0.11,0.09];
+const TRT=["ADT","RT + ADT","Active Surv.","Chemo + ADT","Watchful Wait"];
+const COV=["CGHS","PMJAY","ESIC","Private","Self-pay"];
+let ALL_PT=[];
+for(let i=0;i<347;i+=1){
+  const randFn=seedRand(i*37+101);
+  const stateIdx=weightedIndex(randFn,[87,54,38,31,28,24,22,18,14,11,9,11]);
+  const riskIdx=weightedIndex(randFn,[18,16,16,30,11,9]);
+  const risk=RISKS[riskIdx];
+  const ageBandIdx=weightedIndex(randFn,[3,8,14,22,36,54,62,48,21]);
+  const ageRanges=[[40,44],[45,49],[50,54],[55,59],[60,64],[65,69],[70,74],[75,79],[80,89]];
+  const ageRange=ageRanges[ageBandIdx];
+  const age=ageRange[0]+Math.floor(randFn()*(ageRange[1]-ageRange[0]+1));
+
+  const psaBandWeights=[
+    [58,34,8,0,0,0],
+    [4,34,44,18,0,0],
+    [1,15,39,35,10,0],
+    [0,4,18,47,26,5],
+    [0,1,7,36,37,19],
+    [0,0,3,22,42,33]
+  ];
+  const psaBandIdx=weightedIndex(randFn,psaBandWeights[riskIdx]);
+  const psaRanges=[[2.1,3.9],[4.1,9.9],[10.1,19.8],[20.1,49.5],[50.1,98.5],[100.1,148.5]];
+  const psaRange=psaRanges[psaBandIdx];
+  const psa=(psaRange[0]+randFn()*(psaRange[1]-psaRange[0])).toFixed(1);
+
+  const glWeights=[
+    [82,16,2,0,0,0,0],
+    [5,68,22,5,0,0,0],
+    [2,18,56,20,4,0,0],
+    [0,4,16,56,18,6,0],
+    [0,0,2,18,48,22,10],
+    [0,0,0,6,42,30,22]
+  ];
+  const glIdx=weightedIndex(randFn,glWeights[riskIdx]);
+  const gl=GL_LABELS[glIdx];
+
+  const stageWeights=[
+    [55,35,10,0,0,0,0,0],
+    [5,45,25,20,5,0,0,0],
+    [2,15,35,28,20,0,0,0],
+    [0,4,8,14,32,42,0,0],
+    [0,0,2,8,22,46,22,0],
+    [0,0,0,0,0,5,15,80]
+  ];
+  const stageBucket=weightedIndex(randFn,stageWeights[riskIdx]);
+  const stage=STAGE_LABELS[stageBucket];
+
+  const covIdx=weightedIndex(randFn,[38,33,9,12,8]);
+  const trtWeights=
+    riskIdx===0?[12,8,58,0,22]:
+    riskIdx===1?[18,34,22,0,26]:
+    riskIdx===2?[16,46,8,4,26]:
+    riskIdx===3?[26,46,2,8,18]:
+    riskIdx===4?[22,46,1,12,19]:
+    [30,8,0,48,14];
+  const trtIdx=weightedIndex(randFn,trtWeights);
+  const trt=TRT[trtIdx];
+  const adt=(trtIdx===2&&riskIdx<3)?"No":"Yes";
+  const adtAgentIdx=adt==="Yes"?weightedIndex(randFn,[72,48,31,18,14,15]):-1;
+  const refSrcIdx=covIdx===0?weightedIndex(randFn,[16,12,44,14,8,6]):weightedIndex(randFn,[38,24,18,11,6,3]);
+  const travelIdx=stateIdx===0?weightedIndex(randFn,[72,22,6,0,0]):stateIdx<=2?weightedIndex(randFn,[12,52,28,8,0]):stateIdx<=5?weightedIndex(randFn,[4,20,46,22,8]):weightedIndex(randFn,[2,6,22,34,36]);
+  const langIdx=stateIdx===4?weightedIndex(randFn,[18,16,56,1,4,1,4]):stateIdx===10?weightedIndex(randFn,[12,18,2,60,2,1,5]):weightedIndex(randFn,[72,14,2,1,4,5,2]);
+  const regMonthIdx=weightedIndex(randFn,[14,11,17,13,16,12,19,14,22,18,15,20,16,21,19,18]);
+
+  let comorbMask=0;
+  [0.58,0.44,0.28,0.19,0.14,0.11,0.22,0.16].forEach((probability, bit)=>{
+    if(randFn()<probability)comorbMask|=1<<bit;
+  });
+
+  ALL_PT.push({
+    uhid:`${["DL","UP","HR","RJ","PB","BR","MP","UK","JH","HP","WB","OT"][stateIdx]}-2025-${String(1000+i).padStart(4,"0")}`,
+    name:NAMES[i%NAMES.length],
+    age,
+    ageBandIdx,
+    state:STATES[stateIdx],
+    stateIdx,
+    stage,
+    stageBucket,
+    risk,
+    riskIdx,
+    psa,
+    psaBandIdx,
+    gl,
+    glIdx,
+    trt,
+    trtIdx,
+    adt,
+    cov:COV[covIdx],
+    covIdx,
+    gap:(riskIdx>=3&&randFn()>.46)||(adt==="Yes"&&randFn()>.72),
+    ecogIdx:riskIdx>=4?weightedIndex(randFn,[1,4,3,2]):weightedIndex(randFn,[2,5,2,1]),
+    adtAgentIdx,
+    refSrcIdx,
+    travelIdx,
+    langIdx,
+    regMonthIdx,
+    comorbMask
+  });
+}
+function renderCohort(data){
+  const tb=document.getElementById("cohortTbl");if(!tb)return;
+  const rc={Low:"b-t","Int. Fav.":"b-b","Int. Unfav.":"b-b",High:"b-r","Very High":"b-r",M1:"b-p"};
+  tb.innerHTML=data.map(r=>`<tr><td style="color:var(--ts);">${r.uhid}</td><td style="color:var(--tp);">${r.name}</td><td>${r.age}</td><td style="color:var(--ts);">${r.state}</td><td>${r.stage}</td><td><span class="badge ${rc[r.risk]||"b-b"}">${r.risk}</span></td><td style="color:${parseFloat(r.psa)>20?"var(--red)":parseFloat(r.psa)>10?"var(--amber)":"var(--teal)"};">${r.psa}</td><td style="color:var(--ts);">${r.gl}</td><td style="color:var(--ts);">${r.trt}</td><td style="color:${r.adt==="Yes"?"var(--teal)":"var(--td)"};">${r.adt}</td><td><span class="badge b-b">${r.cov}</span></td><td style="color:${r.gap?"var(--red)":"var(--ts)"};">${r.gap?"Flag":"—"}</td></tr>`).join("");
+}
+renderCohort(ALL_PT);
+function filterCohort(q){renderCohort(ALL_PT.filter(p=>p.name.toLowerCase().includes(q.toLowerCase())||p.uhid.toLowerCase().includes(q.toLowerCase())));}
+function filterByRisk(el,type){
+  document.querySelectorAll("#cohortFilter .fchip").forEach(c=>c.classList.remove("on"));el.classList.add("on");
+  const d=type==="all"?ALL_PT:type==="high"?ALL_PT.filter(p=>p.risk==="High"||p.risk==="Very High"):type==="meta"?ALL_PT.filter(p=>p.risk==="M1"):type==="adt"?ALL_PT.filter(p=>p.adt==="Yes"):ALL_PT.filter(p=>p.trt==="Active Surv.");
+  renderCohort(d);
+}
+
+/* INSIGHTS */
+cc("protocolChart","radar",{
+  labels:["MDT Review","Staging Complete","Bone Scan","RT Dose/Target","ADT Duration","Bone Rx","Genetics","PSA Monitoring","ARSI Intensity","Psych Screen"],
+  datasets:[
+    {label:"Our Cohort",data:[77,71,52,88,82,33,62,78,29,44],backgroundColor:"rgba(14,188,128,.12)",borderColor:"#0EBC80",pointBackgroundColor:"#0EBC80",borderWidth:1.5,pointRadius:3},
+    {label:"EAU Benchmark",data:[95,90,85,92,90,85,75,95,65,80],backgroundColor:"rgba(59,164,244,.05)",borderColor:"rgba(59,164,244,.3)",borderDash:[4,3],borderWidth:1,pointRadius:0}
+  ]
+},{responsive:true,maintainAspectRatio:false,scales:{r:{grid:{color:"rgba(33,56,84,.08)"},pointLabels:{color:"#617386",font:{size:9}},angleLines:{color:"rgba(33,56,84,.08)"},ticks:{color:"transparent",backdropColor:"transparent",stepSize:20},min:0,max:100}},plugins:{legend:{display:true,labels:{color:"#617386",font:{size:10},boxWidth:10}}}});
+
+/* NAVIGATION */
+const SECS=["overview","clinical","treatment","caregaps","geography","cohort","insights"];
+function show(id,el){
+  SECS.forEach(s=>{const sc=document.getElementById("sec-"+s);if(sc)sc.classList.toggle("on",s===id);});
+  document.querySelectorAll(".sbi").forEach(i=>i.classList.remove("on"));
+  if(el)el.classList.add("on");
+  else{
+    const idx=SECS.indexOf(id);
+    const items=document.querySelectorAll(".sbi");
+    if(items[idx])items[idx].classList.add("on");
+  }
+}
+function setRange(el,v){
+  document.querySelectorAll(".hchip").forEach(c=>c.classList.remove("on"));
+  el.classList.add("on");
+  
+  const data = {
+    '6m': { total: '124', high: '62', adt: '86', psa: '21.2', await: '14', gap: '28' },
+    '1y': { total: '210', high: '98', adt: '142', psa: '19.8', await: '22', gap: '45' },
+    'all': { total: '347', high: '142', adt: '198', psa: '18.4', await: '34', gap: '63' }
+  };
+  const d = data[v] || data['all'];
+  
+  const kpiVals = document.querySelectorAll('.kpi-val');
+  if (kpiVals.length >= 6) {
+    kpiVals[0].textContent = d.total;
+    kpiVals[1].textContent = d.high;
+    kpiVals[2].textContent = d.adt;
+    kpiVals[3].textContent = d.psa;
+    kpiVals[4].textContent = d.await;
+    kpiVals[5].textContent = d.gap;
+  }
+  
+  const sbmvs = document.querySelectorAll('.sbmv');
+  if (sbmvs.length >= 5) {
+    sbmvs[0].textContent = d.total;
+    sbmvs[1].textContent = d.adt;
+    sbmvs[2].textContent = d.high;
+    sbmvs[4].textContent = d.gap;
+  }
+}
+
+/* ─── GUIDELINES MODAL ─── */
+function glOpen(){document.getElementById('gl-overlay').classList.add('on');}
+function glClose(){document.getElementById('gl-overlay').classList.remove('on');}
+function glOverlayClick(e){if(e.target===document.getElementById('gl-overlay'))glClose();}
+function glTab(el,id){
+  document.querySelectorAll('.gl-tab').forEach(t=>t.classList.remove('on'));el.classList.add('on');
+  document.querySelectorAll('.gl-section').forEach(s=>s.classList.remove('on'));
+  const sec=document.getElementById('gl-'+id);if(sec)sec.classList.add('on');
+}
+function glToggle(head){
+  const body=head.nextElementSibling;
+  const chevron=head.querySelector('.gl-chevron');
+  const open=body.classList.toggle('open');
+  if(chevron)chevron.classList.toggle('open',open);
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){glClose();if(typeof drillClose==='function')drillClose();}});
+
+</script>
+</body>
+</html>
