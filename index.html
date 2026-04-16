@@ -3640,6 +3640,199 @@
       transform: translateY(-1px);
     }
 
+    .team-preview-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(26, 19, 64, 0.42);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      z-index: 220;
+    }
+
+    .team-preview-overlay.on {
+      display: flex;
+    }
+
+    .team-preview-modal {
+      width: min(100%, 760px);
+      max-height: min(88vh, 880px);
+      overflow: auto;
+      background: #fff;
+      border: 1px solid #E8E4F3;
+      border-radius: 24px;
+      box-shadow: 0 32px 64px rgba(26, 19, 64, 0.14);
+    }
+
+    .team-preview-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 1.35rem 1.4rem 1rem;
+      border-bottom: 1px solid #F0ECF8;
+    }
+
+    .team-preview-title {
+      font-size: 20px;
+      color: #1A1340;
+      font-weight: 800;
+      line-height: 1.15;
+    }
+
+    .team-preview-sub {
+      margin-top: 4px;
+      font-size: 12px;
+      color: #7A72A0;
+      line-height: 1.55;
+    }
+
+    .team-preview-close {
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      border: 1px solid #E2DDF5;
+      background: #fff;
+      color: #7B61D6;
+      font-size: 18px;
+      line-height: 1;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .team-preview-body {
+      padding: 1.25rem 1.4rem 1.45rem;
+    }
+
+    .team-email-card {
+      border: 1px solid #ECE7F7;
+      border-radius: 18px;
+      overflow: hidden;
+      background: #FCFBFF;
+    }
+
+    .team-email-top {
+      padding: 1rem 1.1rem;
+      background: linear-gradient(180deg, #F7F3FF, #FCFBFF);
+      border-bottom: 1px solid #ECE7F7;
+    }
+
+    .team-email-subject {
+      font-size: 17px;
+      line-height: 1.35;
+      color: #1A1340;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+
+    .team-email-meta {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 8px 12px;
+      font-size: 12px;
+      color: #7A72A0;
+    }
+
+    .team-email-meta strong {
+      color: #5C47C5;
+      font-weight: 700;
+    }
+
+    .team-email-content {
+      padding: 1.1rem;
+      display: grid;
+      gap: 14px;
+    }
+
+    .team-email-copy {
+      font-size: 13px;
+      color: #5A5280;
+      line-height: 1.7;
+    }
+
+    .team-email-summary {
+      background: #FFFFFF;
+      border: 1px solid #ECE7F7;
+      border-radius: 16px;
+      padding: 1rem;
+    }
+
+    .team-email-summary-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #1A1340;
+      margin-bottom: 10px;
+    }
+
+    .team-email-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .team-email-kv {
+      background: #FAF8FF;
+      border: 1px solid #F0ECF8;
+      border-radius: 12px;
+      padding: 0.8rem 0.9rem;
+    }
+
+    .team-email-kv-k {
+      font-size: 10px;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: #ABA6C8;
+      margin-bottom: 4px;
+      font-weight: 700;
+    }
+
+    .team-email-kv-v {
+      font-size: 12px;
+      color: #1A1340;
+      font-weight: 600;
+      line-height: 1.5;
+    }
+
+    .team-email-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+
+    .team-email-pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: #F1EDFF;
+      border: 1px solid #DED4FA;
+      color: #6B4ED4;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .team-email-open {
+      padding: 9px 14px;
+      border-radius: 10px;
+      background: #F4F0FF;
+      border: 1px solid #DED4FA;
+      color: #6B4ED4;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .team-email-disclaimer {
+      font-size: 11px;
+      color: #8D87AE;
+      line-height: 1.6;
+    }
+
     .list-add-btn {
       background: #1A1340;
       color: white;
@@ -4255,18 +4448,206 @@
     function closeAddPatientModal() {
       document.getElementById('modal-patient-overlay').classList.remove('active');
     }
+    const TEAM_DIRECTORY = [
+      { name: 'Dr. Meera Khanna', email: 'meera.khanna@aiims.edu', role: 'Radiation Oncology' },
+      { name: 'Dr. Rajiv Mehta', email: 'rajiv.mehta@aiims.edu', role: 'Medical Oncology' },
+      { name: 'Dr. Neha Suri', email: 'neha.suri@aiims.edu', role: 'Onco-radiology' },
+      { name: 'Dr. Vivek Nanda', email: 'vivek.nanda@aiims.edu', role: 'Nuclear Medicine' },
+      { name: 'Dr. Asha Menon', email: 'asha.menon@aiims.edu', role: 'Uro-oncology Nurse Specialist' }
+    ];
+    const NEW_PATIENT_EMAIL_LOG_KEY = 'prostacare.team.newPatientEmails';
+    let currentNewPatientEmailPayload = null;
+
+    function loadNewPatientEmailLog() {
+      try {
+        const parsed = JSON.parse(window.localStorage.getItem(NEW_PATIENT_EMAIL_LOG_KEY) || '[]');
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (error) {
+        console.warn('Unable to read new patient email log', error);
+        return [];
+      }
+    }
+
+    function saveNewPatientEmailLog(entries) {
+      try {
+        window.localStorage.setItem(NEW_PATIENT_EMAIL_LOG_KEY, JSON.stringify(entries));
+      } catch (error) {
+        console.warn('Unable to save new patient email log', error);
+      }
+    }
+
+    function buildNewPatientRecord(form) {
+      const formData = new FormData(form);
+      const fullName = String(formData.get('full_name') || '').trim();
+      const age = Number(formData.get('age') || 0);
+      const genderValue = String(formData.get('gender') || 'male');
+      const genderLabel = genderValue === 'female' ? 'Female' : genderValue === 'other' ? 'Other' : 'Male';
+      const uhid = String(formData.get('uhid') || '').trim().toUpperCase();
+      const statusTone = String(formData.get('status') || 'soon');
+      const slot = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+      const statusMap = {
+        soon: 'New registration · awaiting review',
+        arrived: 'Registered · in clinic',
+        urgent: 'Registered · urgent triage requested'
+      };
+      const reasonMap = {
+        soon: 'New patient onboarding and baseline workup pending',
+        arrived: 'New patient registration ready for clinic intake',
+        urgent: 'New patient added with urgent attention requested'
+      };
+      const shortName = typeof makePatientShortName === 'function' ? makePatientShortName(fullName) : fullName;
+      const initials = typeof makePatientInitials === 'function'
+        ? makePatientInitials(fullName)
+        : fullName.split(/\s+/).map((part) => part[0]).join('').slice(0, 3).toUpperCase();
+
+      return {
+        id: `np-${Date.now()}`,
+        fullName,
+        shortName,
+        initials,
+        uhid,
+        abha: 'Pending ABHA',
+        age,
+        gender: genderLabel,
+        phone: '',
+        slot,
+        status: statusMap[statusTone] || statusMap.soon,
+        statusTone,
+        reason: reasonMap[statusTone] || reasonMap.soon,
+        department: doctorProfile.department,
+        assignedDoctor: doctorProfile.name,
+        clinic: 'New patient intake · AIIMS New Delhi',
+        flags: statusTone === 'urgent' ? ['New patient', 'Urgent review'] : ['New patient'],
+        flagTones: statusTone === 'urgent' ? ['blue', 'red'] : ['blue']
+      };
+    }
+
+    function upsertVisitingPatient(patient) {
+      const existingIndex = visitingPatients.findIndex((item) => item.uhid === patient.uhid);
+      if (existingIndex >= 0) {
+        visitingPatients[existingIndex] = { ...visitingPatients[existingIndex], ...patient };
+        return visitingPatients[existingIndex];
+      }
+      visitingPatients.unshift(patient);
+      return patient;
+    }
+
+    function buildNewPatientEmailPayload(patient) {
+      const sentAt = new Date().toISOString();
+      return {
+        id: `new-pt-mail-${Date.now()}`,
+        sentAt,
+        sender: doctorProfile.name,
+        senderRole: `${doctorProfile.title} · ${doctorProfile.department}`,
+        recipientLabel: `All MDT members (${TEAM_DIRECTORY.length})`,
+        recipients: TEAM_DIRECTORY.map((member) => ({ ...member })),
+        subject: `New patient registered — ${patient.fullName} (${patient.uhid})`,
+        note: `A new patient has been added to ProstaCare and should be visible to the department team for triage and follow-up.`,
+        patient
+      };
+    }
+
+    function openNewPatientEmailPreview(payload) {
+      currentNewPatientEmailPayload = payload;
+      const body = document.getElementById('new-patient-email-preview-body');
+      if (!body) return;
+      const sentAt = new Date(payload.sentAt).toLocaleString('en-IN', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit'
+      });
+      body.innerHTML = `
+        <div class="team-email-card">
+          <div class="team-email-top">
+            <div class="team-email-subject">${escapeHtml(payload.subject)}</div>
+            <div class="team-email-meta">
+              <strong>From</strong><span>${escapeHtml(payload.sender)} via ProstaCare India &lt;notifications@prostacare.demo&gt;</span>
+              <strong>To</strong><span>${escapeHtml(payload.recipients.map((member) => member.email).join(', '))}</span>
+              <strong>Sent</strong><span>${escapeHtml(sentAt)}</span>
+              <strong>Scope</strong><span>${escapeHtml(payload.recipientLabel)}</span>
+            </div>
+          </div>
+          <div class="team-email-content">
+            <div class="team-email-copy">
+              Dear team,<br><br>
+              A new patient has been registered in ProstaCare and is now available for department review.<br><br>
+              ${escapeHtml(payload.note)}
+            </div>
+            <div class="team-email-summary">
+              <div class="team-email-summary-title">Patient summary</div>
+              <div class="team-email-grid">
+                <div class="team-email-kv">
+                  <div class="team-email-kv-k">Patient</div>
+                  <div class="team-email-kv-v">${escapeHtml(payload.patient.fullName)}</div>
+                </div>
+                <div class="team-email-kv">
+                  <div class="team-email-kv-k">UHID</div>
+                  <div class="team-email-kv-v">${escapeHtml(payload.patient.uhid)}</div>
+                </div>
+                <div class="team-email-kv">
+                  <div class="team-email-kv-k">Age / Gender</div>
+                  <div class="team-email-kv-v">${escapeHtml(String(payload.patient.age))} yrs · ${escapeHtml(payload.patient.gender || 'Male')}</div>
+                </div>
+                <div class="team-email-kv">
+                  <div class="team-email-kv-k">Current status</div>
+                  <div class="team-email-kv-v">${escapeHtml(payload.patient.status)}</div>
+                </div>
+                <div class="team-email-kv">
+                  <div class="team-email-kv-k">Reason</div>
+                  <div class="team-email-kv-v">${escapeHtml(payload.patient.reason)}</div>
+                </div>
+                <div class="team-email-kv">
+                  <div class="team-email-kv-k">Department</div>
+                  <div class="team-email-kv-v">${escapeHtml(payload.patient.department)}</div>
+                </div>
+              </div>
+              <div class="team-email-actions">
+                <span class="team-email-pill">Sent to all configured MDT members</span>
+                <button type="button" class="team-email-open" onclick="openPatientFile('${payload.patient.id}', 'files')">Open patient file</button>
+              </div>
+            </div>
+            <div class="team-email-disclaimer">
+              Demo mail preview. The platform has recorded this as an all-members notification event for the new patient onboarding flow.
+            </div>
+          </div>
+        </div>
+      `;
+      document.getElementById('new-patient-email-preview-overlay')?.classList.add('on');
+    }
+
+    function closeNewPatientEmailPreview() {
+      document.getElementById('new-patient-email-preview-overlay')?.classList.remove('on');
+    }
+
+    function handleNewPatientEmailOverlay(event) {
+      if (event.target === document.getElementById('new-patient-email-preview-overlay')) {
+        closeNewPatientEmailPreview();
+      }
+    }
+
     function handleNewPatientSubmit(e) {
       e.preventDefault();
-      const btn = e.target.querySelector('.modal-submit');
+      const form = e.target;
+      const btn = form.querySelector('.modal-submit');
       const originalText = btn.innerText;
       btn.innerText = 'Registering...';
       btn.disabled = true;
+      const newPatient = buildNewPatientRecord(form);
       setTimeout(() => {
-        alert('Patient registered successfully! (Demo Mode)');
+        const patient = upsertVisitingPatient(newPatient);
+        const payload = buildNewPatientEmailPayload(patient);
+        const existingEmails = loadNewPatientEmailLog();
+        existingEmails.unshift(payload);
+        saveNewPatientEmailLog(existingEmails);
+        applyDoctorContext();
+        renderPatientQueue(document.getElementById('patient-search')?.value || '');
         closeAddPatientModal();
         btn.innerText = originalText;
         btn.disabled = false;
-        e.target.reset();
+        form.reset();
+        openNewPatientEmailPreview(payload);
       }, 1000);
     }
 
@@ -6197,16 +6578,16 @@
       <form id="add-patient-form" onsubmit="handleNewPatientSubmit(event)">
         <div class="form-group">
           <label class="form-label">Full Name</label>
-          <input type="text" class="form-input" placeholder="e.g. Rajesh Kumar" required>
+          <input type="text" name="full_name" class="form-input" placeholder="e.g. Rajesh Kumar" required>
         </div>
         <div class="form-row">
           <div class="form-group">
             <label class="form-label">Age</label>
-            <input type="number" class="form-input" placeholder="e.g. 52" required>
+            <input type="number" name="age" class="form-input" placeholder="e.g. 52" required>
           </div>
           <div class="form-group">
             <label class="form-label">Gender</label>
-            <select class="form-input"
+            <select name="gender" class="form-input"
               style="appearance: none; background: #fff url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M5%207L10%2012L15%207%22%20stroke%3D%22%2364748B%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E') no-repeat right 12px center;">
               <option value="male">Male</option>
               <option value="female">Female</option>
@@ -6216,11 +6597,11 @@
         </div>
         <div class="form-group">
           <label class="form-label">UHID / Medical ID</label>
-          <input type="text" class="form-input" placeholder="e.g. PX-99281" required>
+          <input type="text" name="uhid" class="form-input" placeholder="e.g. PX-99281" required>
         </div>
         <div class="form-group">
           <label class="form-label">Initial Status</label>
-          <select class="form-input"
+          <select name="status" class="form-input"
             style="appearance: none; background: #fff url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M5%207L10%2012L15%207%22%20stroke%3D%22%2364748B%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E') no-repeat right 12px center;">
             <option value="soon">Upcoming</option>
             <option value="arrived">Arrived / In Clinic</option>
@@ -6229,6 +6610,19 @@
         </div>
         <button type="submit" class="modal-submit">Register Patient</button>
       </form>
+    </div>
+  </div>
+
+  <div id="new-patient-email-preview-overlay" class="team-preview-overlay" onclick="handleNewPatientEmailOverlay(event)">
+    <div class="team-preview-modal" role="dialog" aria-modal="true" aria-labelledby="new-patient-email-preview-title">
+      <div class="team-preview-head">
+        <div>
+          <div id="new-patient-email-preview-title" class="team-preview-title">Team notification sent</div>
+          <div class="team-preview-sub">This is the email-style notification automatically triggered for all configured team members when a new patient is added.</div>
+        </div>
+        <button type="button" class="team-preview-close" onclick="closeNewPatientEmailPreview()" aria-label="Close email preview">×</button>
+      </div>
+      <div id="new-patient-email-preview-body" class="team-preview-body"></div>
     </div>
   </div>
 
