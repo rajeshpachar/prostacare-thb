@@ -1458,6 +1458,124 @@
       margin-bottom: 1.85rem;
     }
 
+    .home-pulse-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin: 0 0 1.8rem;
+    }
+
+    .home-pulse-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      min-width: 108px;
+      background: transparent;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .home-pulse-item:focus-visible {
+      outline: none;
+    }
+
+    .home-pulse-item:focus-visible .home-pulse-ring,
+    .home-pulse-item:hover .home-pulse-ring {
+      transform: translateY(-2px);
+      box-shadow: 0 16px 28px rgba(62, 40, 146, 0.12);
+    }
+
+    .home-pulse-ring {
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      transition: transform .18s ease, box-shadow .18s ease;
+      background: rgba(255, 255, 255, .9);
+      border: 1px solid rgba(255, 255, 255, .46);
+      box-shadow: 0 12px 24px rgba(40, 24, 112, .08);
+      backdrop-filter: blur(10px);
+    }
+
+    .home-pulse-ring strong {
+      font-size: 1.6rem;
+      line-height: 1;
+      font-family: 'DM Mono', monospace;
+      font-weight: 700;
+    }
+
+    .home-pulse-ring span {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+
+    .home-pulse-ring.red {
+      background: linear-gradient(180deg, rgba(255, 246, 247, .96), rgba(255, 239, 241, .92));
+      border-color: #F3C1C7;
+    }
+
+    .home-pulse-ring.red strong,
+    .home-pulse-ring.red span {
+      color: #C93030;
+    }
+
+    .home-pulse-ring.purple {
+      background: linear-gradient(180deg, rgba(245, 240, 255, .96), rgba(236, 229, 255, .92));
+      border-color: #D7CAF8;
+    }
+
+    .home-pulse-ring.purple strong,
+    .home-pulse-ring.purple span {
+      color: #6B4ED4;
+    }
+
+    .home-pulse-ring.blue {
+      background: linear-gradient(180deg, rgba(241, 247, 255, .96), rgba(232, 240, 255, .92));
+      border-color: #C6D8F7;
+    }
+
+    .home-pulse-ring.blue strong,
+    .home-pulse-ring.blue span {
+      color: #3E6ED8;
+    }
+
+    .home-pulse-ring.amber {
+      background: linear-gradient(180deg, rgba(255, 249, 239, .96), rgba(255, 244, 224, .92));
+      border-color: #F1D2A0;
+    }
+
+    .home-pulse-ring.amber strong,
+    .home-pulse-ring.amber span {
+      color: #C77711;
+    }
+
+    .home-pulse-ring.green {
+      background: linear-gradient(180deg, rgba(241, 255, 247, .96), rgba(233, 250, 241, .92));
+      border-color: #BFE6CF;
+    }
+
+    .home-pulse-ring.green strong,
+    .home-pulse-ring.green span {
+      color: #1B8A55;
+    }
+
+    .home-pulse-label {
+      font-size: 11px;
+      line-height: 1.45;
+      font-weight: 700;
+      color: #5A5280;
+      max-width: 114px;
+    }
+
     .tag {
       padding: 5px 12px;
       border-radius: 20px;
@@ -1694,6 +1812,10 @@
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
 
+      .home-pulse-row {
+        gap: 14px;
+      }
+
       .g4,
       .benchmark-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1758,6 +1880,19 @@
       .g4,
       .benchmark-grid {
         grid-template-columns: 1fr;
+      }
+
+      .home-pulse-row {
+        justify-content: center;
+      }
+
+      .home-pulse-item {
+        min-width: 96px;
+      }
+
+      .home-pulse-ring {
+        width: 88px;
+        height: 88px;
       }
 
       #home-drill-overlay {
@@ -3651,6 +3786,7 @@
               <a href="#" onclick="openPopulationDashboard('quality', 'quality-top'); return false;" class="tag red clickable">63
                 active care gap flags</a>
             </div>
+            <div class="home-pulse-row" id="home-pulse-row"></div>
             <div class="action-cards">
               <a class="action-card" href="#" onclick="openPatientList(); return false;">
                 <div class="action-card-title">Open Patient File</div>
@@ -5447,6 +5583,86 @@
       openHomeDrill(buildGuidelineDrillConfig(tabId));
     }
 
+    function extractLeadingNumber(value) {
+      const match = String(value || '').match(/\d+/);
+      return match ? Number(match[0]) : 0;
+    }
+
+    function buildHomePulseItems() {
+      const gapStat = homeDrillRegistry.gaps?.stats?.find((stat) => stat.label === 'Open gaps');
+      const criticalStat = homeDrillRegistry['gap-bone']?.stats?.find((stat) => stat.label === 'Gap count');
+      const criticalPatientsStat = homeDrillRegistry.gaps?.stats?.find((stat) => stat.label === 'Critical patients');
+      const fullyEnteredStat = homeDrillRegistry.completeness?.stats?.find((stat) => stat.label === 'Fully entered');
+      let incompleteCount = 0;
+      if (fullyEnteredStat?.value) {
+        const counts = String(fullyEnteredStat.value).match(/\d+/g) || [];
+        if (counts.length >= 2) {
+          incompleteCount = Number(counts[1]) - Number(counts[0]);
+        }
+      }
+
+      const mdtUpcomingCount = homeDrillRegistry.mdt?.rows?.length || 0;
+
+      return [
+        {
+          label: 'Pending nudges',
+          value: extractLeadingNumber(gapStat?.value),
+          sublabel: 'active',
+          tone: 'purple',
+          onClick: () => openPopulationDashboard('quality', 'quality-top')
+        },
+        {
+          label: 'Critical gaps',
+          value: extractLeadingNumber(criticalStat?.value),
+          sublabel: 'open',
+          tone: 'red',
+          onClick: () => openHomeDrill('gaps')
+        },
+        {
+          label: 'Upcoming MDT Review',
+          value: mdtUpcomingCount,
+          sublabel: 'queued',
+          tone: 'blue',
+          onClick: () => openHomeDrill('mdt')
+        },
+        {
+          label: 'Incomplete data Entry',
+          value: incompleteCount,
+          sublabel: 'records',
+          tone: 'amber',
+          onClick: () => openHomeDrill('completeness')
+        },
+        {
+          label: 'Critical Patients',
+          value: extractLeadingNumber(criticalPatientsStat?.value),
+          sublabel: 'flagged',
+          tone: 'green',
+          onClick: () => openHomeDrill('gaps')
+        }
+      ];
+    }
+
+    function renderHomePulseRow() {
+      const container = document.getElementById('home-pulse-row');
+      if (!container) return;
+      const items = buildHomePulseItems();
+      container.innerHTML = '';
+      items.forEach((item) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'home-pulse-item';
+        button.innerHTML = `
+          <span class="home-pulse-ring ${item.tone}">
+            <strong>${escapeHtml(String(item.value))}</strong>
+            <span>${escapeHtml(item.sublabel)}</span>
+          </span>
+          <span class="home-pulse-label">${escapeHtml(item.label)}</span>
+        `;
+        button.addEventListener('click', item.onClick);
+        container.appendChild(button);
+      });
+    }
+
     function closeHomeDrill(clearState = true) {
       document.getElementById('home-drill-overlay')?.classList.remove('on');
       if (clearState) activeHomeDrill = null;
@@ -5841,6 +6057,7 @@
 
     function renderHomeScripts() {
       homeDrillRegistry = buildHomeDrillRegistry();
+      renderHomePulseRow();
 
       /* ─── SPARKLINES ─── */
       function spark(id, vals, cls) {
