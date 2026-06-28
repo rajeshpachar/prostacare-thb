@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ProstaCare India — Visual Workflows Preview</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<style>
+  :root { --ink:#1A1340; --teal:#1e9b61; --muted:#5b6478; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: -apple-system, "DM Sans", Segoe UI, Roboto, sans-serif;
+         color: var(--ink); background:
+         radial-gradient(1200px 600px at 10% -5%, #eef4ff 0%, transparent 60%),
+         radial-gradient(1000px 600px at 95% 0%, #eafaf2 0%, transparent 55%), #f7f9fc; }
+  header { position:sticky; top:0; z-index:10; backdrop-filter: blur(10px);
+           background: rgba(255,255,255,.78); border-bottom:1px solid #e6eaf2;
+           padding:14px 28px; display:flex; align-items:center; gap:14px; }
+  header h1 { font-size:17px; margin:0; }
+  header .tag { font-size:12px; color:var(--muted); }
+  nav { padding:8px 28px; display:flex; flex-wrap:wrap; gap:6px 10px;
+        background:rgba(255,255,255,.55); border-bottom:1px solid #eef0f6; position:sticky; top:49px; z-index:9; backdrop-filter: blur(8px);}
+  nav a { font-size:12px; text-decoration:none; color:#3a4a8a; padding:3px 9px;
+          border:1px solid #dfe4f1; border-radius:999px; background:#fff; }
+  nav a:hover { border-color:#9fb0e6; }
+  main { max-width:1100px; margin:0 auto; padding:24px 28px 80px; }
+  section { background:#fff; border:1px solid #e9edf5; border-radius:16px;
+            padding:18px 22px 24px; margin:22px 0; box-shadow:0 10px 30px rgba(20,25,60,.05); }
+  section h2 { font-size:16px; margin:2px 0 4px; }
+  section p.s { margin:0 0 14px; color:var(--muted); font-size:13px; }
+  .mermaid { overflow-x:auto; text-align:center; }
+  footer { text-align:center; color:var(--muted); font-size:12px; padding:30px; }
+  .pill { display:inline-block; font-size:11px; color:#fff; background:var(--teal);
+          border-radius:999px; padding:2px 9px; }
+</style>
+</head>
+<body>
+<header>
+  <span class="pill">ProstaCare India</span>
+  <h1>Visual Workflows &amp; User Stories</h1>
+  <span class="tag">rendered from VISUAL-WORKFLOWS.md · intended product</span>
+</header>
+<nav>
+  <a href="#m0">0 · Capability map</a>
+  <a href="#m1">1 · Persona journey</a>
+  <a href="#m2">2 · Value loop</a>
+  <a href="#m3">3 · Story map</a>
+  <a href="#m41">4.1 Login</a>
+  <a href="#m42">4.2 Home drill</a>
+  <a href="#m43">4.3 Record</a>
+  <a href="#m44">4.4 Nudges</a>
+  <a href="#m45">4.5 MDT notify</a>
+  <a href="#m46">4.6 Documents</a>
+  <a href="#m47">4.7 Onboarding</a>
+  <a href="#m48">4.8 Analytics</a>
+  <a href="#m49">4.9 Privacy</a>
+  <a href="#m6">6 · Nudge lifecycle</a>
+  <a href="#m7">7 · System context</a>
+</nav>
+<main>
+
+<section id="m0">
+  <h2>0 · Product at a Glance — Capability Map</h2>
+  <p class="s">The whole product on one page.</p>
+  <pre class="mermaid">
+mindmap
+  root((ProstaCare India))
+    Home Command Center
+      Cohort KPIs
+      Pulse indicators
+      Benchmark gap cards
+      Attention queue
+      Nudge trends
+    Patient File
+      Demographics + IDs
+      Clinical assessment + PSA
+      Treatment plan
+      Patient journey
+      Documents / Rx
+    Decision Support
+      Nudges engine
+      Guideline reference
+      Acknowledge + log
+    MDT Collaboration
+      Notify member / all
+      Preview + send
+      Discussion log
+    Population Analytics
+      6 analytic domains
+      35+ visualizations
+      Universal drill-down
+      Export / report
+    Platform
+      Roles + access
+      Privacy masking
+      Audit
+      India localization
+  </pre>
+</section>
+
+<section id="m1">
+  <h2>1 · End-to-End Persona Journey (HOD)</h2>
+  <p class="s">Login → scan → drill → patient → nudge → notify.</p>
+  <pre class="mermaid">
+flowchart LR
+    L[Login] --&gt; H[Home command center]
+    H --&gt;|scan KPIs| B{Where is the<br/>biggest gap?}
+    B --&gt;|benchmark card| D[Drill to affected patients]
+    B --&gt;|pulse: pending nudges| Q[Quality &amp; gaps view]
+    B --&gt;|attention queue| P[Open flagged patient]
+    D --&gt; P
+    Q --&gt; D
+    P --&gt; N[Review nudges]
+    N --&gt; A[Acknowledge &amp; log]
+    A --&gt; M[Notify MDT]
+    M --&gt; R[(Gap documented<br/>+ routed)]
+    R --&gt; H
+  </pre>
+</section>
+
+<section id="m2">
+  <h2>2 · Core Value Loop — Gap → Nudge → Action → Closure</h2>
+  <p class="s">The platform's signature clinical loop, closing back to the cohort metric.</p>
+  <pre class="mermaid">
+flowchart TD
+    subgraph Population
+      G1[Top care gaps<br/>e.g. 42 no bone protection]
+    end
+    subgraph Patient
+      G2[Nudge: bone protection<br/>not started — URGENT]
+      G3[Acknowledge &amp; log]
+    end
+    subgraph MDT
+      G4[Notify member / all]
+      G5[Discussion log entry]
+    end
+    subgraph Closure
+      G6[Record updated]
+      G7[Nudge resolves]
+      G8[Cohort metric improves]
+    end
+    G1 --&gt;|drill to patient| G2 --&gt; G3 --&gt; G4 --&gt; G5 --&gt; G6 --&gt; G7 --&gt; G8
+    G8 -.recompute.-&gt; G1
+  </pre>
+</section>
+
+<section id="m3">
+  <h2>3 · User Story Map</h2>
+  <p class="s">Five epics with their stories, release-oriented.</p>
+  <pre class="mermaid">
+flowchart LR
+    subgraph EPIC1[Epic: Manage Patient Record]
+      U11[See patient at a glance]
+      U12[Enter / edit demographics + IDs]
+      U13[Record PSA + staging + pathology]
+      U14[Plan treatment + bone health]
+      U15[Track journey timeline]
+    end
+    subgraph EPIC2[Epic: Decision Support]
+      U21[See prioritized care gaps]
+      U22[Understand the guideline rationale]
+      U23[Acknowledge &amp; log a nudge]
+    end
+    subgraph EPIC3[Epic: MDT Collaboration]
+      U31[Notify a member or all MDT]
+      U32[Preview before sending]
+      U33[See discussion history]
+    end
+    subgraph EPIC4[Epic: Population Insight]
+      U41[See cohort vs benchmark]
+      U42[Drill any metric to patients]
+      U43[Filter by time / segment]
+      U44[Export a report]
+    end
+    subgraph EPIC5[Epic: Platform]
+      U51[Log in by role]
+      U52[Mask / reveal patient identity]
+      U53[Upload &amp; view documents]
+      U54[Onboard a new patient + notify]
+    end
+  </pre>
+</section>
+
+<section id="m41">
+  <h2>4.1 · Login &amp; Role-Scoped Entry</h2>
+  <p class="s">Land on a workspace scoped to my role.</p>
+  <pre class="mermaid">
+flowchart LR
+    A[Open app] --&gt; B[Authenticate<br/>SSO / credentials]
+    B --&gt;|valid| C{Role?}
+    B --&gt;|invalid| B
+    C --&gt;|HOD| D[Department cohort home]
+    C --&gt;|Treating clinician| E[My panel home]
+    C --&gt;|MDT member| F[Shared patients + inbox]
+    C --&gt;|Data staff| G[Incomplete-records queue]
+  </pre>
+</section>
+
+<section id="m42">
+  <h2>4.2 · Home → Navigate / Drill</h2>
+  <p class="s">Scan cohort health and jump to what needs attention.</p>
+  <pre class="mermaid">
+flowchart TD
+    H[Home] --&gt; K[Live KPIs + pulse indicators]
+    K --&gt; C1[Benchmark gap card] --&gt;|drill| PL[Patient list for that gap]
+    K --&gt; C2[Attention queue] --&gt; PF[Patient file]
+    K --&gt; C3[Pending-nudges pulse] --&gt; QV[Quality &amp; gaps]
+    K --&gt; C4[Go to dashboard] --&gt; DASH[Population analytics]
+    PL --&gt; PF
+    QV --&gt; PL
+  </pre>
+</section>
+
+<section id="m43">
+  <h2>4.3 · Patient File — Record &amp; Edit</h2>
+  <p class="s">View and complete the record across all sections.</p>
+  <pre class="mermaid">
+flowchart LR
+    PF[Patient file] --&gt; S1[Nudges &amp; alerts]
+    PF --&gt; S2[Demographics + IDs]
+    PF --&gt; S3[Clinical: PSA, biopsy, staging, imaging]
+    PF --&gt; S4[Treatment: ADT, RT, bone health]
+    PF --&gt; S5[Journey timeline]
+    S2 --&gt; SV[Save -&gt; validate + version + audit]
+    S3 --&gt; SV
+    S4 --&gt; SV
+    SV --&gt; RC[Recompute nudges]
+    RC --&gt; S1
+  </pre>
+</section>
+
+<section id="m44">
+  <h2>4.4 · Nudges (Decision Support)</h2>
+  <p class="s">Guideline-based care gaps, ranked by urgency, with rationale.</p>
+  <pre class="mermaid">
+flowchart TD
+    REC[Patient record] --&gt; RE[Rules engine<br/>vs guideline version]
+    RE --&gt; N1[Urgent nudges]
+    RE --&gt; N2[Recommendations]
+    RE --&gt; N3[Reminders]
+    N1 --&gt; CARD[Nudge card:<br/>title · rationale · guideline cite]
+    N2 --&gt; CARD
+    N3 --&gt; CARD
+    CARD --&gt; ACK[Acknowledge &amp; log]
+    CARD --&gt; RT[Route to MDT]
+    ACK --&gt; HIST[Care-decision history]
+    RT --&gt; NOTIFY[MDT notify flow 4.5]
+  </pre>
+</section>
+
+<section id="m45">
+  <h2>4.5 · MDT Notify &amp; Discussion</h2>
+  <p class="s">Notify a colleague or the whole MDT; preview, send, keep a trail.</p>
+  <pre class="mermaid">
+flowchart LR
+    T[Compose notification] --&gt; M{Recipient?}
+    M --&gt;|specific| M1[Typeahead MDT directory]
+    M --&gt;|all MDT| M2[Whole team]
+    M1 --&gt; F[Reason · subject · note<br/>+ secure summary link]
+    M2 --&gt; F
+    F --&gt; PV[Preview rendered message]
+    PV --&gt; SEND[Send via email / in-app]
+    SEND --&gt; DEL[(Delivery tracked)]
+    SEND --&gt; LOG[Discussion log entry]
+    LOG --&gt; RV[Re-view sent item]
+  </pre>
+</section>
+
+<section id="m46">
+  <h2>4.6 · Documents (Rx &amp; Reports)</h2>
+  <p class="s">Attach and view prescriptions / reports.</p>
+  <pre class="mermaid">
+flowchart LR
+    U[Upload PDF/image] --&gt; ST[Secure object storage]
+    ST --&gt; LIST[Document list w/ metadata]
+    LIST --&gt; OPEN[View]
+    LIST --&gt; RM[Remove]
+    OPEN --&gt; AUD[(Audited)]
+    RM --&gt; AUD
+  </pre>
+</section>
+
+<section id="m47">
+  <h2>4.7 · New Patient Onboarding + Team Notify</h2>
+  <p class="s">Register a patient; the MDT is automatically notified.</p>
+  <pre class="mermaid">
+flowchart TD
+    A[Add patient form] --&gt; V{Valid + not duplicate?}
+    V --&gt;|no| A
+    V --&gt;|yes| REG[Create record]
+    REG --&gt; Q[Appears in roster]
+    REG --&gt; NOTE[Notify MDT: new-patient summary + open link]
+    NOTE --&gt; DEL[(Delivery tracked)]
+    Q --&gt; PF[Open patient file]
+  </pre>
+</section>
+
+<section id="m48">
+  <h2>4.8 · Population Analytics + Drill-Down</h2>
+  <p class="s">Explore cohort metrics, compare to benchmark, drill to patients.</p>
+  <pre class="mermaid">
+flowchart LR
+    DASH[Dashboard] --&gt; SEC{Section}
+    SEC --&gt; O[Overview]
+    SEC --&gt; CL[Clinical]
+    SEC --&gt; TR[Treatment]
+    SEC --&gt; OU[Outcomes]
+    SEC --&gt; QA[Quality &amp; gaps]
+    SEC --&gt; DE[Demographics]
+    O --&gt; CH[Chart / KPI]
+    CL --&gt; CH
+    TR --&gt; CH
+    OU --&gt; CH
+    QA --&gt; CH
+    DE --&gt; CH
+    CH --&gt;|click element| DP[Drill panel: filtered patients + stats]
+    DP --&gt;|select patient| PF[Patient file<br/>back to dashboard]
+    DASH --&gt; EXP[Export / report]
+  </pre>
+</section>
+
+<section id="m49">
+  <h2>4.9 · Privacy Masking (cross-cutting)</h2>
+  <p class="s">Identities masked by default; reveal is deliberate and audited.</p>
+  <pre class="mermaid">
+flowchart LR
+    V[View any screen] --&gt; MASK[Names/contact masked by default]
+    MASK --&gt; TOG{Reveal?}
+    TOG --&gt;|toggle on| SHOW[Visible + reveal audited]
+    SHOW --&gt; SYNC[State persists across all views]
+    MASK --&gt; SYNC
+  </pre>
+</section>
+
+<section id="m6">
+  <h2>6 · Care-Gap (Nudge) State Lifecycle</h2>
+  <p class="s">Open → Logged → In-progress → Resolved / Dismissed, with re-trigger.</p>
+  <pre class="mermaid">
+stateDiagram-v2
+    [*] --&gt; Open: rules engine emits nudge
+    Open --&gt; Logged: acknowledge &amp; route to MDT
+    Logged --&gt; InProgress: MDT action / order placed
+    InProgress --&gt; Resolved: record updated + criteria met
+    Open --&gt; Dismissed: clinically not applicable (reason)
+    Resolved --&gt; [*]
+    Dismissed --&gt; [*]
+    Resolved --&gt; Open: re-triggers if criteria recur
+  </pre>
+</section>
+
+<section id="m7">
+  <h2>7 · System Context (production target)</h2>
+  <p class="s">Integrations the real build must support.</p>
+  <pre class="mermaid">
+flowchart TB
+    User[Clinician / Staff] --&gt; APP[ProstaCare India app]
+    APP --&gt; SVC[Application services + rules engine]
+    SVC --&gt; DB[(Clinical data store)]
+    SVC --&gt; OBJ[(Document storage)]
+    SVC --&gt; AUD[(Audit log)]
+    SVC &lt;--&gt; ABDM[ABHA / ABDM]
+    SVC &lt;--&gt; HIS[HIS / EMR / LIS / RIS]
+    SVC &lt;--&gt; TPA[Coverage: CGHS / PMJAY / ESIC]
+    SVC --&gt; MSG[Email / secure messaging]
+    SVC --&gt; GL[Versioned guideline content]
+  </pre>
+</section>
+
+</main>
+<footer>ProstaCare India · intended-product workflows · diagrams rendered with Mermaid</footer>
+<script>
+  mermaid.initialize({ startOnLoad: true, theme: 'base', securityLevel: 'loose',
+    themeVariables: { primaryColor:'#eef2ff', primaryBorderColor:'#7d8cf0',
+      primaryTextColor:'#1A1340', lineColor:'#7d8cf0', fontFamily:'DM Sans, sans-serif' }});
+</script>
+</body>
+</html>
