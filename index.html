@@ -4007,8 +4007,7 @@
               <a class="action-card" href="#" onclick="openPatientList(); return false;">
                 <div class="action-card-title">Open Patient File</div>
                 <div class="action-card-desc" id="queue-action-copy">Browse a searchable list of patients from your
-                  department visiting
-                  today, ordered by appointment slot and urgency, then open any patient file in one click.
+                  department by visit status and date, then open any patient file in one click.
                 </div>
                 <div class="action-card-footer">
                   <span class="action-card-label" id="home-queue-label">Department roster</span>
@@ -4025,7 +4024,7 @@
                 </div>
               </a>
               <a class="action-card soft-red" href="#" onclick="openHomeSection('home-attention'); return false;">
-                <div class="action-card-title">Review Urgent Attention Patients</div>
+                <div class="action-card-title">Review Missed and High-Priority Patients</div>
                 <div class="action-card-desc">Jump straight to the surfaced critical and recommendation-level patients
                   requiring follow-up, documentation, or treatment acceleration.</div>
                 <div class="action-card-footer">
@@ -4069,12 +4068,12 @@
               <div class="glance-cell">
                 <div class="glance-cell-label">Upcoming</div>
                 <div class="glance-cell-val purple">2</div>
-                <div class="glance-cell-sub">Scheduled visits</div>
+                <div class="glance-cell-sub">Planned visits</div>
               </div>
               <div class="glance-cell">
-                <div class="glance-cell-label">Overdue</div>
+                <div class="glance-cell-label">Missed / Overdue</div>
                 <div class="glance-cell-val red">1</div>
-                <div class="glance-cell-sub">Requires immediate attn</div>
+                <div class="glance-cell-sub">Needs follow-up</div>
               </div>
               <div class="glance-cell">
                 <div class="glance-cell-label">Population Alerts</div>
@@ -4362,7 +4361,7 @@
                 </svg>
               </button>
             </div>
-            <p id="queue-copy">Today’s visiting patients are sequenced by slot and status. Use search to jump directly
+            <p id="queue-copy">Patients are organized by visit status and date. Use search to jump directly
               to a patient by name or UHID.</p>
           </div>
           <div class="queue-chips">
@@ -4376,7 +4375,7 @@
                 style="margin-left:6px;font-family:var(--fm);font-size:11px;">3</strong></span>
             <span id="filter-chip-urgent" class="queue-chip"
               style="background:var(--red-m);color:var(--red);border:1px solid var(--red-b);cursor:pointer;transition:opacity 0.2s;"
-              onclick="filterQueueByStatus('urgent')">Overdue <strong id="queue-urgent-count"
+              onclick="filterQueueByStatus('urgent')">Missed / Overdue <strong id="queue-urgent-count"
                 style="margin-left:6px;font-family:var(--fm);font-size:11px;">2</strong></span>
           </div>
         </div>
@@ -4390,7 +4389,7 @@
           </button>
           <input id="patient-search" class="search-input" type="text" placeholder="Search patient by name or UHID"
             oninput="renderPatientQueue(this.value)">
-          <span class="search-meta" id="queue-result-copy">8 patients scheduled today</span>
+          <span class="search-meta" id="queue-result-copy">8 patient records</span>
         </div>
         <div id="queue-list"></div>
       </div>
@@ -4484,16 +4483,16 @@
       const genderLabel = genderValue === 'female' ? 'Female' : genderValue === 'other' ? 'Other' : 'Male';
       const uhid = String(formData.get('uhid') || '').trim().toUpperCase();
       const statusTone = String(formData.get('status') || 'soon');
-      const slot = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+      const slot = new Date().toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
       const statusMap = {
         soon: 'New registration · awaiting review',
-        arrived: 'Registered · in clinic',
-        urgent: 'Registered · urgent triage requested'
+        arrived: 'Registered · visit completed',
+        urgent: 'Registered · missed / needs review'
       };
       const reasonMap = {
         soon: 'New patient onboarding and baseline workup pending',
-        arrived: 'New patient registration ready for clinic intake',
-        urgent: 'New patient added with urgent attention requested'
+        arrived: 'New patient registration ready for clinical intake',
+        urgent: 'New patient added for priority review'
       };
       const shortName = typeof makePatientShortName === 'function' ? makePatientShortName(fullName) : fullName;
       const initials = typeof makePatientInitials === 'function'
@@ -4517,7 +4516,7 @@
         department: doctorProfile.department,
         assignedDoctor: doctorProfile.name,
         clinic: 'New patient intake · AIIMS New Delhi',
-        flags: statusTone === 'urgent' ? ['New patient', 'Urgent review'] : ['New patient'],
+        flags: statusTone === 'urgent' ? ['New patient', 'Priority review'] : ['New patient'],
         flagTones: statusTone === 'urgent' ? ['blue', 'red'] : ['blue']
       };
     }
@@ -4703,7 +4702,7 @@
         dobLabel: '12 Mar 1956',
         dobIso: '1956-03-12',
         phone: '+91 98765 43210',
-        slot: '09:00 AM',
+        slot: '08 Apr 2026',
         status: 'Last visit done on 08 Apr 2026',
         statusTone: 'arrived',
         reason: 'ADT follow-up and RT planning review',
@@ -4724,7 +4723,7 @@
         dobLabel: '07 Jul 1953',
         dobIso: '1953-07-07',
         phone: '+91 98111 27344',
-        slot: '09:20 AM',
+        slot: '09 Apr 2026',
         status: 'Last visit done on 09 Apr 2026',
         statusTone: 'arrived',
         reason: 'PSMA PET review and MDT recommendation',
@@ -4745,8 +4744,8 @@
         dobLabel: '22 Nov 1958',
         dobIso: '1958-11-22',
         phone: '+91 98994 11062',
-        slot: '10:00 AM',
-        status: 'Next visit scheduled on 12 Apr 2026',
+        slot: '12 Apr 2026',
+        status: 'Next visit planned on 12 Apr 2026',
         statusTone: 'soon',
         reason: 'ADT toxicity and bone health review',
         department: 'Urology & Radiation Oncology',
@@ -4766,7 +4765,7 @@
         dobLabel: '03 Feb 1951',
         dobIso: '1951-02-03',
         phone: '+91 97841 88233',
-        slot: '10:30 AM',
+        slot: '01 Apr 2026',
         status: 'Overdue since 01 Apr 2026',
         statusTone: 'urgent',
         reason: 'Pain escalation and RT start delay',
@@ -4787,8 +4786,8 @@
         dobLabel: '18 Aug 1962',
         dobIso: '1962-08-18',
         phone: '+91 98880 40552',
-        slot: '11:15 AM',
-        status: 'Next visit scheduled on 15 Apr 2026',
+        slot: '15 Apr 2026',
+        status: 'Next visit planned on 15 Apr 2026',
         statusTone: 'soon',
         reason: 'ARSI intensification counselling',
         department: 'Urology & Radiation Oncology',
@@ -4808,7 +4807,7 @@
         dobLabel: '14 Dec 1951',
         dobIso: '1951-12-14',
         phone: '+91 98300 61425',
-        slot: '12:00 PM',
+        slot: '10 Apr 2026',
         status: 'Last visit done on 10 Apr 2026',
         statusTone: 'waiting',
         reason: 'Latest PSA response review',
@@ -4829,8 +4828,8 @@
         dobLabel: '28 Jan 1956',
         dobIso: '1956-01-28',
         phone: '+91 98206 78145',
-        slot: '01:10 PM',
-        status: 'Next visit scheduled on 20 Apr 2026',
+        slot: '20 Apr 2026',
+        status: 'Next visit planned on 20 Apr 2026',
         statusTone: 'waiting',
         reason: 'Zoledronic acid follow-up visit',
         department: 'Urology & Radiation Oncology',
@@ -4850,8 +4849,8 @@
         dobLabel: '09 Sep 1964',
         dobIso: '1964-09-09',
         phone: '+91 99863 55218',
-        slot: '02:00 PM',
-        status: 'Next visit scheduled on 22 Apr 2026',
+        slot: '22 Apr 2026',
+        status: 'Next visit planned on 22 Apr 2026',
         statusTone: 'waiting',
         reason: 'Metastatic HSPC interval review',
         department: 'Urology & Radiation Oncology',
@@ -4871,7 +4870,7 @@
         dobLabel: '24 Jun 1961',
         dobIso: '1961-06-24',
         phone: '+91 98731 60482',
-        slot: '09:40 AM',
+        slot: '07 Apr 2026',
         status: 'Last visit done on 07 Apr 2026',
         statusTone: 'arrived',
         reason: 'Chemotherapy toxicity review',
@@ -4892,14 +4891,14 @@
         dobLabel: '31 Jan 1967',
         dobIso: '1967-01-31',
         phone: '+91 98105 22714',
-        slot: '11:45 AM',
-        status: 'Next visit scheduled on 14 Apr 2026',
+        slot: '14 Apr 2026',
+        status: 'Next visit planned on 14 Apr 2026',
         statusTone: 'soon',
         reason: 'PET tracer scheduling review',
         department: 'Nuclear Medicine',
         assignedDoctor: 'Dr. Imran Qureshi',
         clinic: 'Nuclear Medicine',
-        flags: ['Tracer slot pending'],
+        flags: ['Tracer review pending'],
         flagTones: ['amber']
       }
     ];
@@ -5161,14 +5160,14 @@
         'hero-department-chip': doctorProfile.department,
         'hero-hospital-chip': doctorProfile.hospital,
         'queue-action-copy': isHod
-          ? 'Browse a searchable list of patients from your department visiting today, ordered by appointment slot and urgency, then open any patient file in one click.'
-          : 'Browse a searchable list of patients visiting today, ordered by appointment slot and urgency, then open the patient file in one click.',
+          ? 'Browse a searchable list of patients from your department by visit status and date, then open any patient file in one click.'
+          : 'Browse a searchable list of patients by visit status and date, then open the patient file in one click.',
         'home-queue-label': isHod ? 'Department roster' : 'Today’s list',
         'glance-heading': isHod ? 'Department At A Glance' : 'Today At A Glance',
         'queue-heading': isHod ? 'Department Patient Files' : 'Patient Files',
         'queue-copy': isHod
-          ? `${doctorProfile.department} patients are sequenced by slot and status. Use search to jump directly to any department patient by name or UHID.`
-          : 'Today’s visiting patients are sequenced by slot and status. Use search to jump directly to a patient by name or UHID.',
+          ? `${doctorProfile.department} patients are organized by visit status and date. Use search to jump directly to any department patient by name or UHID.`
+          : 'Patients are organized by visit status and date. Use search to jump directly to a patient by name or UHID.',
         'home-queue-count': `${visiblePatients.length} patients`,
         'stat-arrived': String(queueMetrics.arrived),
         'stat-next': String(queueMetrics.soon),
@@ -5359,7 +5358,7 @@
         dobIso,
         dobLabel,
         phone: source.phone || formatDemoPhone(uhid),
-        slot: source.slot || 'Scheduled',
+        slot: source.slot || 'Planned',
         status: source.status || 'Opened from analytics',
         statusTone: source.statusTone || 'soon',
         reason: source.reason || source.missing_desc || `${source.risk || 'Clinical'} review`,
@@ -5460,7 +5459,7 @@
         initials: 'DCM',
         uhid: 'UP-2025-0811',
         age: 70,
-        status: 'Next visit scheduled on 18 Apr 2026',
+        status: 'Next visit planned on 18 Apr 2026',
         statusTone: 'soon',
         reason: 'PSMA staging completion',
         department: doctorProfile.department,
@@ -5560,7 +5559,7 @@
       ];
 
       const psmaRows = [
-        { patient: p1, stage: 'cT3bN1M0', psa: '42.6', imaging: 'Not booked', nextStep: 'Escalate imaging slot after CGHS approval' },
+        { patient: p1, stage: 'cT3bN1M0', psa: '42.6', imaging: 'Not booked', nextStep: 'Escalate imaging access after CGHS approval' },
         { patient: p2, stage: 'cT3bN0', psa: '68.1', imaging: 'Not done', nextStep: 'PSMA PET-CT before definitive field design' },
         { patient: p4, stage: 'cT3bN0', psa: '38.4', imaging: 'Delayed', nextStep: 'Close pre-auth and replan RT start' },
         { patient: hkb, stage: 'cT3aN0', psa: '29.7', imaging: 'CT only', nextStep: 'Upgrade staging to PSMA PET-CT' },
@@ -5570,7 +5569,7 @@
 
       const mdtRows = [
         { patient: p2, risk: 'Very High', treatment: 'ADT started', mdtStatus: 'No documented review', nextStep: 'Retro-MDT sign-off or waiver' },
-        { patient: hkb, risk: 'High', treatment: 'RT planning', mdtStatus: 'Forum date missing', nextStep: 'Book next tumour board slot' },
+        { patient: hkb, risk: 'High', treatment: 'RT planning', mdtStatus: 'Forum date missing', nextStep: 'Book next tumour board date' },
         { patient: akg, risk: 'High', treatment: 'Salvage RT', mdtStatus: 'External start before MDT', nextStep: 'Upload retrospective sign-off' },
         { patient: trp, risk: 'Very High', treatment: 'Systemic therapy pending', mdtStatus: 'No documented decision', nextStep: 'Complete board review this week' },
         { patient: p5, risk: 'Very High', treatment: 'ADT alone', mdtStatus: 'Booked but not completed', nextStep: 'Present on 18 Apr board' }
@@ -5613,7 +5612,7 @@
 
       const gapRows = [
         { patient: p1, gapType: 'Bone protection not started', severity: 'Critical', daysOpen: '42 days', nextStep: 'DEXA + zoledronic acid order' },
-        { patient: p2, gapType: 'PSMA PET-CT not done', severity: 'Critical', daysOpen: '31 days', nextStep: 'Imaging slot before RT planning' },
+        { patient: p2, gapType: 'PSMA PET-CT not done', severity: 'Critical', daysOpen: '31 days', nextStep: 'Imaging completion before RT planning' },
         { patient: p3, gapType: 'DEXA not ordered', severity: 'Recommendation', daysOpen: '23 days', nextStep: 'Add baseline bone health order' },
         { patient: p4, gapType: 'Germline BRCA1/2 not ordered', severity: 'Recommendation', daysOpen: '27 days', nextStep: 'Send genetics panel request' },
         { patient: p5, gapType: 'ARSI intensification gap', severity: 'Recommendation', daysOpen: '18 days', nextStep: 'Discuss abiraterone at MDT' },
@@ -6258,7 +6257,7 @@
 
       configureViewer(
         patient.fullName,
-        `${patient.slot && patient.slot !== 'Scheduled' ? `${patient.slot} · ` : ''}${patient.reason}`,
+        patient.reason,
         'Patient file',
         backLabel,
         backHandler,
@@ -6604,8 +6603,8 @@
           <select name="status" class="form-input"
             style="appearance: none; background: #fff url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22none%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cpath%20d%3D%22M5%207L10%2012L15%207%22%20stroke%3D%22%2364748B%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E') no-repeat right 12px center;">
             <option value="soon">Upcoming</option>
-            <option value="arrived">Arrived / In Clinic</option>
-            <option value="urgent">Urgent Attention</option>
+            <option value="arrived">Visit Completed</option>
+            <option value="urgent">Missed / Needs Review</option>
           </select>
         </div>
         <button type="submit" class="modal-submit">Register Patient</button>
