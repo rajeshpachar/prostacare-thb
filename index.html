@@ -18,29 +18,29 @@
     :root {
       --bg: #ffffff;
       --bg-card: #ffffff;
-      --bg-raised: #f6f8fc;
-      --bg-high: #eef4ff;
+      --bg-raised: #F4FBFA;
+      --bg-high: #E8F7F6;
       --border: rgba(33, 56, 84, 0.08);
       --border-m: rgba(33, 56, 84, 0.14);
       --border-s: rgba(33, 56, 84, 0.22);
-      --teal: #1e9b61;
-      --teal-d: #177b4c;
-      --teal-m: rgba(30, 155, 97, 0.1);
-      --teal-b: rgba(30, 155, 97, 0.24);
+      --teal: #008C8C;
+      --teal-d: #006B73;
+      --teal-m: rgba(0, 140, 140, 0.10);
+      --teal-b: rgba(0, 140, 140, 0.24);
       --amber: #d58a1c;
       --amber-m: rgba(213, 138, 28, 0.11);
       --amber-b: rgba(213, 138, 28, 0.25);
       --red: #d34b52;
       --red-m: rgba(211, 75, 82, 0.1);
       --red-b: rgba(211, 75, 82, 0.22);
-      --blue: #6e7eeb;
-      --blue-m: rgba(110, 126, 235, 0.1);
-      --blue-b: rgba(110, 126, 235, 0.22);
-      --purple: #8a78e6;
-      --purple-m: rgba(138, 120, 230, 0.1);
-      --purple-b: rgba(138, 120, 230, 0.2);
-      --orchid: #b68cff;
-      --orchid-m: rgba(182, 140, 255, 0.18);
+      --blue: #0f9fb3;
+      --blue-m: rgba(15, 159, 179, 0.1);
+      --blue-b: rgba(15, 159, 179, 0.22);
+      --purple: #0b9fa8;
+      --purple-m: rgba(11, 159, 168, 0.1);
+      --purple-b: rgba(11, 159, 168, 0.2);
+      --orchid: #4bc7c1;
+      --orchid-m: rgba(75, 199, 193, 0.18);
       --tp: #233547;
       --ts: #617386;
       --tm: #8c9eb2;
@@ -69,9 +69,9 @@
       font-family: var(--ff);
       color: var(--tp);
       background:
-        radial-gradient(circle at top left, rgba(242, 161, 74, 0.1), transparent 28%),
-        radial-gradient(circle at top right, rgba(125, 140, 240, 0.1), transparent 24%),
-        linear-gradient(180deg, #fffdf8 0%, var(--bg) 28%, #f9fbff 100%);
+        radial-gradient(circle at top left, rgba(0, 166, 166, 0.08), transparent 28%),
+        radial-gradient(circle at top right, rgba(15, 159, 179, 0.08), transparent 24%),
+        linear-gradient(180deg, #f7fffe 0%, var(--bg) 28%, #f3fbfb 100%);
       overflow-x: hidden;
     }
 
@@ -134,7 +134,7 @@
       position: fixed;
       inset: 0;
       z-index: 9999;
-      background: radial-gradient(circle at 18% 18%, #F2F1F8, #FAF8FF 50%, #F0ECFF 100%);
+      background: radial-gradient(circle at 18% 18%, #E8F7F6, #F7FFFE 50%, #E7F6F5 100%);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -177,13 +177,13 @@
     .login-title {
       font-family: 'DM Serif Display', serif;
       font-size: 1.8rem;
-      color: #1A1340;
+      color: #123B45;
       margin-bottom: 0.5rem;
     }
 
     .login-subtitle {
       font-size: 13px;
-      color: #7A72A0;
+      color: #5A7D83;
     }
 
     .login-form {
@@ -203,30 +203,30 @@
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.05em;
-      color: #6B5FA6;
+      color: #0A7D83;
     }
 
     .login-input {
-      background: #F8F7FF;
-      border: 1.5px solid #E8E4F3;
+      background: #F4FBFA;
+      border: 1.5px solid #D5ECEA;
       border-radius: 12px;
       padding: 12px 16px;
       font-size: 14px;
-      color: #1A1340;
+      color: #123B45;
       font-family: 'DM Sans', sans-serif;
       transition: all 0.2s;
     }
 
     .login-input:focus {
       outline: none;
-      border-color: #7B61D6;
+      border-color: #00A6A6;
       background: #ffffff;
-      box-shadow: 0 0 0 4px rgba(123, 97, 214, 0.1);
+      box-shadow: 0 0 0 4px rgba(0, 166, 166, 0.1);
     }
 
     .login-btn {
       margin-top: 1rem;
-      background: #1A1340;
+      background: #123B45;
       color: #ffffff;
       border: none;
       border-radius: 12px;
@@ -238,7 +238,7 @@
     }
 
     .login-btn:hover {
-      background: #5C47C5;
+      background: #008C8C;
       transform: translateY(-1px);
     }
 
@@ -429,7 +429,7 @@
         radial-gradient(circle at 16% 18%, rgba(255, 255, 255, 0.24), transparent 18%),
         radial-gradient(circle at 83% 20%, rgba(196, 181, 255, 0.36), transparent 24%),
         radial-gradient(circle at 70% 78%, rgba(255, 255, 255, 0.14), transparent 20%),
-        linear-gradient(145deg, #472394 0%, #6638ca 34%, #8660eb 68%, #efe9ff 100%);
+        linear-gradient(145deg, #00636A 0%, #008C8C 34%, #29B8B2 68%, #E9F8F6 100%);
       box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, 0.16),
         0 32px 80px rgba(78, 44, 148, 0.18);
@@ -529,7 +529,7 @@
 
     #screen-home_disabled .hero-card::before,
     #screen-home_disabled .stats-card::before {
-      background: linear-gradient(90deg, rgba(255, 255, 255, 0.72), rgba(182, 140, 255, 0.88), rgba(110, 126, 235, 0.88));
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0.72), rgba(75, 199, 193, 0.88), rgba(15, 159, 179, 0.88));
     }
 
     #screen-home_disabled .hero-card h1 {
@@ -571,7 +571,7 @@
       inset: 0 auto auto 0;
       width: 100%;
       height: 4px;
-      background: linear-gradient(90deg, #f2a14a, #4db57a, #7d8cf0);
+      background: linear-gradient(90deg, #18a999, #4db57a, #0f9fb3);
     }
 
     .hero-card h1 {
@@ -1190,7 +1190,7 @@
     /* ─── HEADER (faithful reconstruction) ─── */
     #hdr {
       background: #fff;
-      border-bottom: 1px solid #E8E4F3;
+      border-bottom: 1px solid #D5ECEA;
       height: 60px;
       display: flex;
       align-items: center;
@@ -1222,12 +1222,12 @@
     .brand-name {
       font-size: 15px;
       font-weight: 700;
-      color: #1A1340;
+      color: #123B45;
       letter-spacing: -.2px;
     }
 
     .brand-name span {
-      color: #7B61D6;
+      color: #00A6A6;
       font-weight: 500;
       font-size: 13px;
       margin-left: 3px;
@@ -1236,7 +1236,7 @@
     .hdr-sep {
       width: 1px;
       height: 28px;
-      background: #E8E4F3;
+      background: #D5ECEA;
       flex-shrink: 0;
     }
 
@@ -1248,12 +1248,12 @@
     .hdr-doc-name {
       font-size: 13px;
       font-weight: 600;
-      color: #1A1340;
+      color: #123B45;
     }
 
     .hdr-doc-sub {
       font-size: 11px;
-      color: #8A82B0;
+      color: #63868B;
     }
 
     .hdr-nav {
@@ -1270,29 +1270,29 @@
       font-weight: 700;
       cursor: pointer;
       border: none;
-      background: #1A1340;
+      background: #123B45;
       color: #ffffff;
       font-family: 'DM Sans', sans-serif;
       transition: all .15s;
     }
 
     .nav-btn:hover {
-      background: #31266B;
+      background: #0E5F66;
       transform: translateY(-1px);
     }
 
     .nav-btn.active {
-      background: #5C47C5;
+      background: #008C8C;
       color: #ffffff;
       font-weight: 700;
-      box-shadow: 0 4px 12px rgba(92, 71, 197, 0.24);
+      box-shadow: 0 4px 12px rgba(0, 140, 140, 0.24);
     }
 
     /* ─── HERO (faithful reconstruction) ─── */
     #hero {
       background:
-        linear-gradient(180deg, #f5f7ff 0%, #e9efff 46%, #f8fbff 100%),
-        radial-gradient(circle at 16% 20%, rgba(123, 97, 214, .22), transparent 0 22%),
+        linear-gradient(180deg, #f4fbfa 0%, #e8f7f6 46%, #f7fffe 100%),
+        radial-gradient(circle at 16% 20%, rgba(0, 166, 166, .22), transparent 0 22%),
         radial-gradient(circle at 84% 18%, rgba(40, 177, 166, .17), transparent 0 18%),
         radial-gradient(circle at 72% 80%, rgba(236, 168, 78, .14), transparent 0 15%);
       padding: 4.5rem clamp(2.25rem, 4vw, 4.5rem) 4.9rem;
@@ -1307,7 +1307,7 @@
       inset: 0;
       background:
         radial-gradient(circle at 12% 14%, rgba(124, 99, 218, .16), transparent 0 22%),
-        radial-gradient(circle at 83% 22%, rgba(57, 191, 179, .15), transparent 0 18%),
+        radial-gradient(circle at 83% 22%, rgba(42, 184, 176, .15), transparent 0 18%),
         radial-gradient(circle at 56% 78%, rgba(237, 173, 95, .11), transparent 0 16%);
       opacity: .96;
       z-index: 0;
@@ -1321,7 +1321,7 @@
       width: 460px;
       height: 460px;
       border-radius: 50%;
-      background: radial-gradient(circle, rgba(123, 97, 214, .11) 0%, rgba(123, 97, 214, 0) 68%);
+      background: radial-gradient(circle, rgba(0, 166, 166, .11) 0%, rgba(0, 166, 166, 0) 68%);
       top: -190px;
       right: -80px;
       filter: blur(4px);
@@ -1348,7 +1348,7 @@
       border-radius: 58% 42% 56% 44% / 62% 38% 62% 38%;
       transform: rotate(-11deg);
       background:
-        radial-gradient(circle at 22% 44%, rgba(123, 97, 214, .31), transparent 0 34%),
+        radial-gradient(circle at 22% 44%, rgba(0, 166, 166, .31), transparent 0 34%),
         radial-gradient(circle at 56% 46%, rgba(53, 181, 169, .26), transparent 0 28%),
         radial-gradient(circle at 82% 50%, rgba(232, 171, 82, .22), transparent 0 23%);
     }
@@ -1363,7 +1363,7 @@
       background:
         radial-gradient(circle at 24% 48%, rgba(84, 124, 229, .22), transparent 0 26%),
         radial-gradient(circle at 62% 48%, rgba(66, 193, 172, .24), transparent 0 22%),
-        radial-gradient(circle at 82% 46%, rgba(123, 97, 214, .19), transparent 0 20%);
+        radial-gradient(circle at 82% 46%, rgba(0, 166, 166, .19), transparent 0 20%);
     }
 
     .hero-swirl.c {
@@ -1376,7 +1376,7 @@
       background:
         radial-gradient(circle at 24% 56%, rgba(255, 255, 255, .34), transparent 0 18%),
         radial-gradient(circle at 52% 48%, rgba(95, 170, 225, .17), transparent 0 24%),
-        radial-gradient(circle at 78% 52%, rgba(123, 97, 214, .17), transparent 0 24%);
+        radial-gradient(circle at 78% 52%, rgba(0, 166, 166, .17), transparent 0 24%);
     }
 
     .hero-inner {
@@ -1398,7 +1398,7 @@
       width: 240px;
       height: 240px;
       border-radius: 50%;
-      border: 1px solid rgba(123, 97, 214, .12);
+      border: 1px solid rgba(0, 166, 166, .12);
       opacity: .85;
       pointer-events: none;
       user-select: none;
@@ -1429,7 +1429,7 @@
       font-size: clamp(2.35rem, 4.2vw, 3.45rem);
       line-height: 1.08;
       letter-spacing: -.03em;
-      color: #1A1340;
+      color: #123B45;
       margin-bottom: .9rem;
       max-width: none;
       white-space: nowrap;
@@ -1438,7 +1438,7 @@
     .welcome-question {
       font-size: 1.15rem;
       font-weight: 600;
-      color: #5C47C5;
+      color: #008C8C;
       margin-bottom: .9rem;
       letter-spacing: -.01em;
     }
@@ -1553,22 +1553,22 @@
 
     .home-pulse-ring.purple {
       background: linear-gradient(180deg, rgba(245, 240, 255, .96), rgba(236, 229, 255, .92));
-      border-color: #D7CAF8;
+      border-color: #B8E4E0;
     }
 
     .home-pulse-ring.purple strong,
     .home-pulse-ring.purple span {
-      color: #6B4ED4;
+      color: #007F86;
     }
 
     .home-pulse-ring.blue {
       background: linear-gradient(180deg, rgba(241, 247, 255, .96), rgba(232, 240, 255, .92));
-      border-color: #C6D8F7;
+      border-color: #BDE6E8;
     }
 
     .home-pulse-ring.blue strong,
     .home-pulse-ring.blue span {
-      color: #3E6ED8;
+      color: #0F9FB3;
     }
 
     .home-pulse-ring.amber {
@@ -1595,7 +1595,7 @@
       font-size: 11px;
       line-height: 1.45;
       font-weight: 700;
-      color: #5A5280;
+      color: #5A7D83;
       max-width: 114px;
     }
 
@@ -1616,20 +1616,20 @@
 
     .tag.clickable:hover {
       transform: translateY(-1px);
-      box-shadow: 0 4px 8px rgba(92, 71, 197, 0.12);
+      box-shadow: 0 4px 8px rgba(0, 140, 140, 0.12);
       opacity: 0.9;
     }
 
     .tag.purple {
-      background: #F0ECFF;
-      color: #6B4ED4;
-      border-color: #C5B8F0;
+      background: #E7F6F5;
+      color: #007F86;
+      border-color: #A8DBD6;
     }
 
     .tag.outline {
       background: transparent;
-      color: #5A5280;
-      border-color: #C8C4DC;
+      color: #5A7D83;
+      border-color: #B8D6D4;
     }
 
     .tag.red {
@@ -1676,13 +1676,13 @@
     .action-card-title {
       font-size: 15px;
       font-weight: 700;
-      color: #1A1340;
+      color: #123B45;
       margin-bottom: .5rem;
     }
 
     .action-card-desc {
       font-size: 11.5px;
-      color: #7A72A0;
+      color: #5A7D83;
       line-height: 1.6;
     }
 
@@ -1692,33 +1692,33 @@
       align-items: center;
       margin-top: .9rem;
       padding-top: .75rem;
-      border-top: 1px solid #E2DDF5;
+      border-top: 1px solid #C9E7E4;
     }
 
     .action-card-label {
       font-size: 10px;
-      color: #ABA6C8;
+      color: #8BA6AA;
       letter-spacing: .03em;
     }
 
     .action-card-count {
       font-size: 11px;
       font-weight: 700;
-      color: #6B4ED4;
+      color: #007F86;
       font-family: 'DM Mono', monospace;
     }
 
     .action-card.highlight {
-      background: linear-gradient(135deg, #F5F0FF, #EBE4FF);
-      border-color: #C0B0F0;
+      background: linear-gradient(135deg, #EFFBFA, #E2F4F2);
+      border-color: #9FD8D4;
     }
 
     .action-card.highlight .action-card-title {
-      color: #4A35B5;
+      color: #006B73;
     }
 
     .action-card.highlight .action-card-footer {
-      border-color: #D5CAF5;
+      border-color: #B9E5E1;
     }
 
     .action-card.soft-green {
@@ -1737,10 +1737,76 @@
       color: #C93030;
     }
 
+    .action-card.ai-buddy {
+      position: relative;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at top right, rgba(83, 200, 194, 0.36), transparent 38%),
+        linear-gradient(135deg, #123B45 0%, #0F6F78 48%, #00A6A6 100%);
+      border-color: rgba(185, 229, 225, 0.42);
+      box-shadow: 0 20px 44px rgba(7, 72, 84, 0.24);
+    }
+
+    .action-card.ai-buddy::after {
+      content: '';
+      position: absolute;
+      inset: auto -18% -42% auto;
+      width: 132px;
+      height: 132px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.12);
+      filter: blur(2px);
+    }
+
+    .action-card.ai-buddy .action-card-title,
+    .action-card.ai-buddy .action-card-desc,
+    .action-card.ai-buddy .action-card-label,
+    .action-card.ai-buddy .action-card-count {
+      position: relative;
+      z-index: 1;
+      color: #F8FFFE;
+    }
+
+    .action-card.ai-buddy .action-card-desc {
+      color: rgba(248, 255, 254, 0.86);
+    }
+
+    .action-card.ai-buddy .action-card-footer {
+      border-color: rgba(255, 255, 255, 0.18);
+    }
+
+    .ai-buddy-card-topline {
+      position: relative;
+      z-index: 1;
+      display: inline-flex;
+      align-items: center;
+      align-self: flex-start;
+      gap: 6px;
+      margin-bottom: 10px;
+      padding: 4px 9px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: #D7FFFB;
+    }
+
+    .ai-buddy-card-topline::before {
+      content: '';
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #8BFFF2;
+      box-shadow: 0 0 0 4px rgba(139, 255, 242, 0.14);
+    }
+
     /* Right glance card */
     .glance-card {
       background: rgba(255, 255, 255, .78);
-      border: 1px solid rgba(123, 97, 214, .16);
+      border: 1px solid rgba(0, 166, 166, .16);
       border-radius: 22px;
       padding: 1.4rem 1.45rem 1.25rem;
       backdrop-filter: blur(16px);
@@ -1755,7 +1821,7 @@
       font-weight: 700;
       letter-spacing: .1em;
       text-transform: uppercase;
-      color: #7B73A5;
+      color: #5F8589;
       margin-bottom: 1rem;
     }
 
@@ -1776,7 +1842,7 @@
       font-weight: 700;
       letter-spacing: .07em;
       text-transform: uppercase;
-      color: #8A82B0;
+      color: #63868B;
       margin-bottom: 6px;
     }
 
@@ -1800,7 +1866,7 @@
     }
 
     .glance-cell-val.purple {
-      color: #6B4ED4;
+      color: #007F86;
     }
 
     .glance-cell-sub {
@@ -1868,8 +1934,8 @@
 
       #hero::before {
         background:
-          radial-gradient(circle at 20% 18%, rgba(123, 97, 214, .12), transparent 0 24%),
-          radial-gradient(circle at 82% 16%, rgba(57, 191, 179, .11), transparent 0 20%);
+          radial-gradient(circle at 20% 18%, rgba(0, 166, 166, .12), transparent 0 24%),
+          radial-gradient(circle at 82% 16%, rgba(42, 184, 176, .11), transparent 0 20%);
       }
 
       #hero::after,
@@ -1960,13 +2026,13 @@
     .section-hd h2 {
       font-size: 14px;
       font-weight: 700;
-      color: #1A1340;
+      color: #123B45;
       letter-spacing: -.1px;
     }
 
     .section-hd a {
       font-size: 11px;
-      color: #7B61D6;
+      color: #00A6A6;
       cursor: pointer;
       text-decoration: none;
     }
@@ -2014,7 +2080,7 @@
     /* base card */
     .card {
       background: #fff;
-      border: 1px solid #E8E4F3;
+      border: 1px solid #D5ECEA;
       border-radius: 16px;
       padding: 1.35rem 1.6rem;
     }
@@ -2024,7 +2090,7 @@
       font-weight: 700;
       letter-spacing: .07em;
       text-transform: uppercase;
-      color: #ABA6C8;
+      color: #8BA6AA;
       margin-bottom: 1rem;
       display: flex;
       align-items: center;
@@ -2048,12 +2114,12 @@
       font-weight: 700;
       font-family: 'DM Sans', sans-serif;
       line-height: 1;
-      color: #1A1340;
+      color: #123B45;
     }
 
     .score-denom {
       font-size: 18px;
-      color: #ABA6C8;
+      color: #8BA6AA;
       font-weight: 400;
       margin-bottom: 4px;
     }
@@ -2080,7 +2146,7 @@
 
     .score-bar {
       height: 9px;
-      background: #F0ECF8;
+      background: #E8F7F6;
       border-radius: 5px;
       margin-bottom: .75rem;
       overflow: hidden;
@@ -2089,24 +2155,24 @@
     .score-bar-fill {
       height: 100%;
       border-radius: 5px;
-      background: linear-gradient(90deg, #7B61D6, #A68BE8);
+      background: linear-gradient(90deg, #00A6A6, #53C8C2);
       transition: width .6s ease;
     }
 
     .score-reason {
       font-size: 11px;
-      color: #7A72A0;
+      color: #5A7D83;
       line-height: 1.55;
     }
 
     .score-reason strong {
-      color: #5C47C5;
+      color: #008C8C;
     }
 
     /* ─── KPI SPARKLINE CARDS ─── */
     .kpi-card {
       background: #fff;
-      border: 1px solid #E8E4F3;
+      border: 1px solid #D5ECEA;
       border-radius: 14px;
       padding: 1.1rem 1.3rem 1.05rem;
     }
@@ -2116,21 +2182,21 @@
       font-weight: 700;
       letter-spacing: .06em;
       text-transform: uppercase;
-      color: #ABA6C8;
+      color: #8BA6AA;
       margin-bottom: 4px;
     }
 
     .kpi-card-val {
       font-size: 22px;
       font-weight: 700;
-      color: #1A1340;
+      color: #123B45;
       line-height: 1;
       margin-bottom: 2px;
     }
 
     .kpi-card-sub {
       font-size: 10px;
-      color: #ABA6C8;
+      color: #8BA6AA;
       margin-bottom: .75rem;
     }
 
@@ -2156,13 +2222,13 @@
     .spark-b {
       flex: 1;
       border-radius: 2px 2px 0 0;
-      background: #E2DDF5;
+      background: #C9E7E4;
       min-height: 3px;
       transition: background .2s;
     }
 
     .spark-b.hi {
-      background: #7B61D6;
+      background: #00A6A6;
     }
 
     .spark-b.red {
@@ -2202,13 +2268,13 @@
     }
 
     .kd.neu {
-      background: #F5F2FF;
-      color: #7B61D6;
+      background: #F2FBFA;
+      color: #00A6A6;
     }
 
     .kd-label {
       font-size: 10px;
-      color: #ABA6C8;
+      color: #8BA6AA;
     }
 
     /* ─── GAP TREND ─── */
@@ -2247,7 +2313,7 @@
 
     .gap-circle-t {
       font-size: 9px;
-      color: #ABA6C8;
+      color: #8BA6AA;
       margin-top: 1px;
     }
 
@@ -2260,7 +2326,7 @@
       align-items: center;
       gap: 8px;
       padding: 5px 0;
-      border-bottom: 1px solid #F0ECF8;
+      border-bottom: 1px solid #E8F7F6;
     }
 
     .gap-row:last-child {
@@ -2269,14 +2335,14 @@
 
     .gap-name {
       font-size: 11px;
-      color: #5A5280;
+      color: #5A7D83;
       flex: 1;
     }
 
     .gap-bar-wrap {
       width: 90px;
       height: 6px;
-      background: #F0ECF8;
+      background: #E8F7F6;
       border-radius: 3px;
       overflow: hidden;
     }
@@ -2289,7 +2355,7 @@
     .gap-n {
       font-size: 11px;
       font-weight: 700;
-      color: #1A1340;
+      color: #123B45;
       min-width: 28px;
       text-align: right;
       font-family: monospace;
@@ -2308,14 +2374,14 @@
     }
 
     .gap-change.same {
-      background: #F5F2FF;
-      color: #9B8FD4;
+      background: #F2FBFA;
+      color: #6B9FA5;
     }
 
     /* ─── SURFACED PATIENT CARDS (data-driven) ─── */
     .patient-flag {
       background: #fff;
-      border: 1px solid #E8E4F3;
+      border: 1px solid #D5ECEA;
       border-radius: 14px;
       padding: 1.1rem 1.3rem;
       display: flex;
@@ -2324,8 +2390,8 @@
     }
 
     .patient-flag:hover {
-      border-color: #C5B8F0;
-      background: #FAF8FF;
+      border-color: #A8DBD6;
+      background: #F7FFFE;
     }
 
     .pf-top {
@@ -2338,12 +2404,12 @@
     .pf-name {
       font-size: 13px;
       font-weight: 700;
-      color: #1A1340;
+      color: #123B45;
     }
 
     .pf-uhid {
       font-size: 10px;
-      color: #ABA6C8;
+      color: #8BA6AA;
       margin-top: 1px;
       font-family: monospace;
     }
@@ -2370,19 +2436,19 @@
     }
 
     .pf-badge.info {
-      background: #F0ECFF;
-      color: #6B4ED4;
-      border: 1px solid #C5B8F0;
+      background: #E7F6F5;
+      color: #007F86;
+      border: 1px solid #A8DBD6;
     }
 
     .pf-issue {
       font-size: 11px;
-      color: #7A72A0;
+      color: #5A7D83;
       line-height: 1.5;
     }
 
     .pf-issue strong {
-      color: #5C47C5;
+      color: #008C8C;
     }
 
     .pf-stats {
@@ -2392,22 +2458,22 @@
     }
 
     .pf-stat {
-      background: #F8F7FF;
+      background: #F4FBFA;
       border-radius: 6px;
       padding: 3px 9px;
       font-size: 10px;
-      color: #7A72A0;
+      color: #5A7D83;
     }
 
     .pf-stat strong {
-      color: #1A1340;
+      color: #123B45;
       font-weight: 600;
     }
 
     .pf-action {
       font-size: 11px;
       font-weight: 600;
-      color: #7B61D6;
+      color: #00A6A6;
       cursor: pointer;
       background: none;
       border: none;
@@ -2422,8 +2488,8 @@
 
     /* ─── INSIGHT OF THE DAY ─── */
     .insight-card {
-      background: linear-gradient(135deg, #F8F5FF, #F0ECFF);
-      border: 1.5px solid #D5CAF5;
+      background: linear-gradient(135deg, #F4FBFA, #E7F6F5);
+      border: 1.5px solid #B9E5E1;
       border-radius: 16px;
       padding: 1.25rem 1.5rem;
     }
@@ -2433,7 +2499,7 @@
       font-weight: 700;
       letter-spacing: .1em;
       text-transform: uppercase;
-      color: #9B8FD4;
+      color: #6B9FA5;
       margin-bottom: .5rem;
       display: flex;
       align-items: center;
@@ -2445,14 +2511,14 @@
       width: 6px;
       height: 6px;
       border-radius: 50%;
-      background: #7B61D6;
+      background: #00A6A6;
       flex-shrink: 0;
     }
 
     .insight-text {
       font-size: 14px;
       font-weight: 600;
-      color: #1A1340;
+      color: #123B45;
       line-height: 1.55;
       margin-bottom: .75rem;
     }
@@ -2465,11 +2531,11 @@
 
     .insight-source {
       font-size: 11px;
-      color: #9B8FD4;
+      color: #6B9FA5;
     }
 
     .insight-link {
-      color: #7B61D6;
+      color: #00A6A6;
       cursor: pointer;
       font-weight: 600;
     }
@@ -2480,7 +2546,7 @@
       align-items: center;
       gap: .75rem;
       padding: 8px 0;
-      border-bottom: 1px solid #F0ECF8;
+      border-bottom: 1px solid #E8F7F6;
       cursor: pointer;
       transition: background .12s;
       border-radius: 8px;
@@ -2493,20 +2559,20 @@
     }
 
     .recent-row:hover {
-      background: #FAF8FF;
+      background: #F7FFFE;
     }
 
     .rr-av {
       width: 32px;
       height: 32px;
       border-radius: 50%;
-      background: #EDE8FF;
+      background: #DFF3F1;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 11px;
       font-weight: 700;
-      color: #6B4ED4;
+      color: #007F86;
       flex-shrink: 0;
     }
 
@@ -2518,7 +2584,7 @@
     .rr-name {
       font-size: 12px;
       font-weight: 600;
-      color: #1A1340;
+      color: #123B45;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -2526,7 +2592,7 @@
 
     .rr-sub {
       font-size: 10px;
-      color: #ABA6C8;
+      color: #8BA6AA;
       margin-top: 1px;
     }
 
@@ -2554,13 +2620,13 @@
     }
 
     .rr-badge.b {
-      background: #EEF5FF;
-      color: #2A6FCC;
+      background: #EAF8F7;
+      color: #0F9FB3;
     }
 
     .rr-time {
       font-size: 10px;
-      color: #C5BEE8;
+      color: #8DAEAF;
       flex-shrink: 0;
     }
 
@@ -2570,7 +2636,7 @@
       align-items: center;
       gap: .75rem;
       padding: 9px 0;
-      border-bottom: 1px solid #F0ECF8;
+      border-bottom: 1px solid #E8F7F6;
     }
 
     .incomplete-row:last-child {
@@ -2598,12 +2664,12 @@
     .ir-name {
       font-size: 12px;
       font-weight: 600;
-      color: #1A1340;
+      color: #123B45;
     }
 
     .ir-missing {
       font-size: 10px;
-      color: #ABA6C8;
+      color: #8BA6AA;
       margin-top: 2px;
     }
 
@@ -2620,7 +2686,7 @@
 
     .ir-bar {
       height: 4px;
-      background: #F0ECF8;
+      background: #E8F7F6;
       border-radius: 2px;
       overflow: hidden;
       margin-top: 3px;
@@ -2642,14 +2708,14 @@
 
     .bm-card {
       background: #fff;
-      border: 1px solid #E8E4F3;
+      border: 1px solid #D5ECEA;
       border-radius: 12px;
       padding: 1.05rem 1.1rem;
     }
 
     .bm-label {
       font-size: 10px;
-      color: #ABA6C8;
+      color: #8BA6AA;
       font-weight: 600;
       letter-spacing: .04em;
       text-transform: uppercase;
@@ -2682,18 +2748,18 @@
 
     .bm-vs {
       font-size: 10px;
-      color: #ABA6C8;
+      color: #8BA6AA;
     }
 
     .bm-bench {
       font-size: 13px;
       font-weight: 600;
-      color: #6B4ED4;
+      color: #007F86;
     }
 
     .bm-bar {
       height: 5px;
-      background: #F0ECF8;
+      background: #E8F7F6;
       border-radius: 3px;
       overflow: hidden;
       margin-bottom: 4px;
@@ -2706,7 +2772,7 @@
 
     .bm-note {
       font-size: 10px;
-      color: #ABA6C8;
+      color: #8BA6AA;
       line-height: 1.4;
     }
 
@@ -2718,13 +2784,13 @@
 
     .home-drill-trigger:hover {
       transform: translateY(-2px);
-      border-color: #C5B8F0;
+      border-color: #A8DBD6;
       box-shadow: 0 16px 32px rgba(82, 65, 130, 0.08);
-      background: #FCFBFF;
+      background: #F8FFFE;
     }
 
     .home-drill-trigger:focus-visible {
-      outline: 3px solid rgba(123, 97, 214, 0.18);
+      outline: 3px solid rgba(0, 166, 166, 0.18);
       outline-offset: 2px;
     }
 
@@ -2753,8 +2819,8 @@
       max-height: min(86vh, 880px);
       display: flex;
       flex-direction: column;
-      background: linear-gradient(180deg, #FFFFFF 0%, #FCFBFF 100%);
-      border: 1px solid #E8E4F3;
+      background: linear-gradient(180deg, #FFFFFF 0%, #F8FFFE 100%);
+      border: 1px solid #D5ECEA;
       border-radius: 22px;
       box-shadow: 0 28px 80px rgba(42, 28, 84, 0.16);
       overflow: hidden;
@@ -2766,13 +2832,687 @@
       transform: translateY(0) scale(1);
     }
 
+    #ai-buddy-overlay {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: rgba(9, 28, 34, 0.58);
+      backdrop-filter: blur(8px);
+      z-index: 80;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .18s ease;
+    }
+
+    #ai-buddy-overlay.on {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    #ai-buddy-overlay.patient-context {
+      justify-content: flex-end;
+      padding: 18px 20px 18px 72px;
+      background: linear-gradient(270deg, rgba(9, 28, 34, 0.56) 0%, rgba(9, 28, 34, 0.3) 44%, rgba(9, 28, 34, 0.12) 100%);
+    }
+
+    #ai-buddy-modal {
+      width: min(1180px, 96vw);
+      max-height: min(88vh, 940px);
+      display: grid;
+      grid-template-rows: auto auto 1fr auto;
+      background: linear-gradient(180deg, #FFFFFF 0%, #F7FFFE 100%);
+      border: 1px solid rgba(167, 223, 219, 0.8);
+      border-radius: 24px;
+      box-shadow: 0 32px 96px rgba(9, 42, 47, 0.28);
+      overflow: hidden;
+      transform: translateY(10px) scale(.985);
+      transition: transform .22s ease;
+    }
+
+    #ai-buddy-overlay.on #ai-buddy-modal {
+      transform: translateY(0) scale(1);
+    }
+
+    #ai-buddy-overlay.patient-context #ai-buddy-modal {
+      width: min(920px, 76vw);
+      max-height: calc(100vh - 36px);
+      height: min(920px, calc(100vh - 36px));
+      border-radius: 28px;
+      box-shadow: 0 38px 98px rgba(9, 42, 47, 0.34);
+    }
+
+    .ai-buddy-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 1.45rem 1.5rem 1.05rem;
+      border-bottom: 1px solid #E8F7F6;
+      background:
+        radial-gradient(circle at top right, rgba(0, 166, 166, 0.12), transparent 34%),
+        linear-gradient(180deg, rgba(244, 251, 250, 0.92) 0%, rgba(255, 255, 255, 0) 100%);
+    }
+
+    .ai-buddy-kicker {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: #6A9295;
+      margin-bottom: 6px;
+    }
+
+    #ai-buddy-title {
+      font-family: var(--fh);
+      font-size: 1.5rem;
+      line-height: 1.08;
+      color: #123B45;
+      margin-bottom: 4px;
+    }
+
+    #ai-buddy-subtitle {
+      font-size: 12px;
+      color: #5A7D83;
+      line-height: 1.55;
+      max-width: 72ch;
+    }
+
+    #ai-buddy-close {
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      border: 1px solid #C9E7E4;
+      background: #fff;
+      color: #00A6A6;
+      font-size: 18px;
+      line-height: 1;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .ai-buddy-status-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      padding: 0.95rem 1.5rem 1rem;
+      border-bottom: 1px solid #E8F7F6;
+      background: rgba(255, 255, 255, 0.9);
+    }
+
+    .ai-buddy-evidence-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: #E8F7F6;
+      border: 1px solid #C9E7E4;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .03em;
+      color: #0B6670;
+      text-transform: uppercase;
+    }
+
+    .ai-buddy-evidence-pill::before {
+      content: '';
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #00A6A6;
+    }
+
+    #ai-buddy-steps {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-left: auto;
+    }
+
+    .ai-buddy-step-pill {
+      border: 1px solid #D5ECEA;
+      background: #fff;
+      border-radius: 999px;
+      padding: 8px 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #567478;
+      cursor: pointer;
+      transition: border-color .16s ease, background .16s ease, color .16s ease;
+    }
+
+    .ai-buddy-step-pill strong {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #EAF8F7;
+      color: #007F86;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      flex-shrink: 0;
+    }
+
+    .ai-buddy-step-pill.active {
+      border-color: #8FD6D1;
+      background: linear-gradient(180deg, #F7FFFE 0%, #EDF8F7 100%);
+      color: #123B45;
+    }
+
+    .ai-buddy-step-pill.active strong {
+      background: #00A6A6;
+      color: #fff;
+    }
+
+    #ai-buddy-content {
+      min-height: 0;
+      overflow: auto;
+      padding: 1.4rem 1.5rem 1.45rem;
+    }
+
+    .ai-buddy-grid {
+      display: grid;
+      gap: 14px;
+    }
+
+    .ai-buddy-grid.cols-2 {
+      grid-template-columns: minmax(0, 1.15fr) minmax(300px, .85fr);
+    }
+
+    .ai-buddy-grid.cols-3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .ai-buddy-panel {
+      background: rgba(255, 255, 255, 0.96);
+      border: 1px solid #D5ECEA;
+      border-radius: 18px;
+      padding: 1.15rem 1.15rem 1.05rem;
+      box-shadow: 0 14px 30px rgba(11, 68, 74, 0.06);
+    }
+
+    .ai-buddy-panel-title {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: #7A999C;
+      margin-bottom: .8rem;
+    }
+
+    .ai-buddy-summary-hero {
+      padding: 1.15rem 1.2rem;
+      border-radius: 20px;
+      background:
+        radial-gradient(circle at top right, rgba(83, 200, 194, 0.18), transparent 36%),
+        linear-gradient(135deg, #F2FBFA 0%, #E6F7F5 100%);
+      border: 1px solid #C9E7E4;
+      margin-bottom: 14px;
+    }
+
+    .ai-buddy-summary-title {
+      font-family: var(--fh);
+      font-size: 1.28rem;
+      line-height: 1.08;
+      color: #123B45;
+      margin-bottom: 6px;
+    }
+
+    .ai-buddy-summary-copy {
+      font-size: 12px;
+      line-height: 1.6;
+      color: #4D6A6E;
+    }
+
+    .ai-buddy-chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .ai-buddy-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 9px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.84);
+      border: 1px solid #CFEAE7;
+      font-size: 10px;
+      font-weight: 600;
+      color: #0C6871;
+    }
+
+    .ai-buddy-chip.actionable {
+      background: #fff;
+      cursor: pointer;
+      transition: border-color .16s ease, background .16s ease, transform .16s ease;
+    }
+
+    .ai-buddy-chip.actionable:hover {
+      border-color: #8FD6D1;
+      background: #F8FFFE;
+      transform: translateY(-1px);
+    }
+
+    .ai-buddy-patient-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .ai-buddy-patient-btn {
+      width: 100%;
+      border: 1px solid #D5ECEA;
+      background: #fff;
+      border-radius: 16px;
+      padding: .9rem 1rem;
+      cursor: pointer;
+      text-align: left;
+      transition: border-color .16s ease, transform .16s ease, box-shadow .16s ease;
+    }
+
+    .ai-buddy-patient-btn:hover,
+    .ai-buddy-patient-btn.active {
+      border-color: #87D0CB;
+      transform: translateY(-1px);
+      box-shadow: 0 12px 24px rgba(11, 68, 74, 0.08);
+      background: #F8FFFE;
+    }
+
+    .ai-buddy-patient-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+
+    .ai-buddy-patient-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: #123B45;
+    }
+
+    .ai-buddy-patient-meta,
+    .ai-buddy-line-copy,
+    .ai-buddy-empty {
+      font-size: 11px;
+      line-height: 1.6;
+      color: #5A7D83;
+    }
+
+    .ai-buddy-inline-link {
+      border: none;
+      background: transparent;
+      padding: 0;
+      color: #007F86;
+      font-size: 11px;
+      font-weight: 700;
+      font-family: 'DM Sans', sans-serif;
+      cursor: pointer;
+    }
+
+    .ai-buddy-inline-link:hover {
+      text-decoration: underline;
+    }
+
+    .ai-buddy-context-grid {
+      display: grid;
+      gap: 14px;
+      grid-template-columns: minmax(0, 1.05fr) minmax(320px, .95fr);
+    }
+
+    .ai-buddy-note-box {
+      border: 1px dashed #B7DEDA;
+      border-radius: 16px;
+      background: linear-gradient(180deg, rgba(248, 255, 254, 0.92) 0%, rgba(255, 255, 255, 0.92) 100%);
+      padding: .95rem 1rem;
+    }
+
+    .ai-buddy-note-box strong {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      color: #123B45;
+      margin-bottom: 6px;
+    }
+
+    .ai-buddy-note-box span {
+      display: block;
+      font-size: 11px;
+      line-height: 1.6;
+      color: #547276;
+    }
+
+    .ai-buddy-live-stack {
+      display: grid;
+      gap: 10px;
+    }
+
+    .ai-buddy-patient-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .ai-buddy-mini-tag {
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: #EFFBFA;
+      border: 1px solid #D5ECEA;
+      font-size: 10px;
+      font-weight: 600;
+      color: #007F86;
+    }
+
+    .ai-buddy-kv-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .ai-buddy-kv {
+      display: grid;
+      grid-template-columns: minmax(110px, 140px) 1fr;
+      gap: 10px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #EEF7F6;
+    }
+
+    .ai-buddy-kv:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .ai-buddy-kv-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      color: #8AA6A9;
+    }
+
+    .ai-buddy-kv-value {
+      font-size: 12px;
+      line-height: 1.6;
+      color: #123B45;
+    }
+
+    .ai-buddy-source-list,
+    .ai-buddy-action-list,
+    .ai-buddy-ordered-list,
+    .ai-buddy-study-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .ai-buddy-source-card,
+    .ai-buddy-action-card,
+    .ai-buddy-study-card,
+    .ai-buddy-drug-card {
+      border: 1px solid #D8ECEA;
+      border-radius: 16px;
+      background: #fff;
+      padding: .95rem 1rem;
+    }
+
+    .ai-buddy-source-head,
+    .ai-buddy-action-head,
+    .ai-buddy-study-head,
+    .ai-buddy-drug-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+
+    .ai-buddy-source-title,
+    .ai-buddy-action-title,
+    .ai-buddy-study-title,
+    .ai-buddy-drug-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #123B45;
+    }
+
+    .ai-buddy-source-body,
+    .ai-buddy-action-body,
+    .ai-buddy-study-body,
+    .ai-buddy-drug-body,
+    .ai-buddy-callout-body {
+      font-size: 11px;
+      line-height: 1.65;
+      color: #547276;
+    }
+
+    .ai-buddy-badge {
+      flex-shrink: 0;
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 700;
+      border: 1px solid transparent;
+    }
+
+    .ai-buddy-badge.guideline {
+      background: #EAF8F7;
+      color: #007F86;
+      border-color: #CBE9E6;
+    }
+
+    .ai-buddy-badge.practice {
+      background: #EDF6FF;
+      color: #2366A6;
+      border-color: #C8DCF6;
+    }
+
+    .ai-buddy-badge.data {
+      background: #FFF8EC;
+      color: #B86C0A;
+      border-color: #F0D49A;
+    }
+
+    .ai-buddy-badge.access {
+      background: #F1F8F2;
+      color: #1A7D4A;
+      border-color: #CDE8D6;
+    }
+
+    .ai-buddy-action-index {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #00A6A6;
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .ai-buddy-action-row {
+      display: grid;
+      grid-template-columns: 28px 1fr;
+      gap: 12px;
+    }
+
+    .ai-buddy-callout {
+      border-radius: 18px;
+      padding: 1rem 1.05rem;
+      border: 1px solid #D5ECEA;
+      background: linear-gradient(180deg, rgba(242, 251, 250, 0.96) 0%, rgba(255, 255, 255, 0.96) 100%);
+    }
+
+    .ai-buddy-callout-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: #6D9295;
+      margin-bottom: 8px;
+    }
+
+    .ai-buddy-drug-grid {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .ai-buddy-ordered-item {
+      display: grid;
+      grid-template-columns: 22px 1fr;
+      gap: 10px;
+      align-items: flex-start;
+    }
+
+    .ai-buddy-ordered-item strong {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #E8F7F6;
+      color: #007F86;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-family: var(--fm);
+    }
+
+    .ai-buddy-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem 1.5rem 1.2rem;
+      border-top: 1px solid #E8F7F6;
+      background: rgba(255, 255, 255, 0.96);
+    }
+
+    .ai-buddy-footer-note {
+      font-size: 11px;
+      line-height: 1.55;
+      color: #5A7D83;
+      max-width: 58ch;
+    }
+
+    .ai-buddy-footer-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    #ai-buddy-open-file.record-mode {
+      background: #F7FFFE;
+      border-color: #A7DCD7;
+    }
+
+    .ai-buddy-btn {
+      border: 1px solid #CDE8E5;
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-size: 12px;
+      font-weight: 700;
+      font-family: 'DM Sans', sans-serif;
+      cursor: pointer;
+      transition: transform .16s ease, box-shadow .16s ease, background .16s ease, border-color .16s ease;
+    }
+
+    .ai-buddy-btn.secondary {
+      background: #fff;
+      color: #123B45;
+    }
+
+    .ai-buddy-btn.secondary:hover {
+      border-color: #A7DCD7;
+      background: #F7FFFE;
+    }
+
+    .ai-buddy-btn.primary {
+      background: linear-gradient(135deg, #0F6F78 0%, #00A6A6 100%);
+      border-color: transparent;
+      color: #fff;
+      box-shadow: 0 12px 24px rgba(0, 140, 140, 0.18);
+    }
+
+    .ai-buddy-btn.primary:hover,
+    .ai-buddy-btn.secondary:hover {
+      transform: translateY(-1px);
+    }
+
+    .ai-buddy-btn:disabled {
+      opacity: .45;
+      cursor: default;
+      transform: none !important;
+      box-shadow: none !important;
+    }
+
+    @media (max-width: 980px) {
+      #ai-buddy-overlay {
+        padding: 12px;
+      }
+
+      #ai-buddy-overlay.patient-context {
+        padding: 12px;
+      }
+
+      #ai-buddy-modal {
+        width: 100%;
+        max-height: 92vh;
+      }
+
+      #ai-buddy-overlay.patient-context #ai-buddy-modal {
+        width: 100%;
+        height: auto;
+        max-height: 92vh;
+      }
+
+      .ai-buddy-grid.cols-2,
+      .ai-buddy-grid.cols-3,
+      .ai-buddy-drug-grid,
+      .ai-buddy-context-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .ai-buddy-status-bar {
+        align-items: stretch;
+      }
+
+      #ai-buddy-steps {
+        margin-left: 0;
+      }
+
+      .ai-buddy-footer {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .ai-buddy-footer-actions {
+        width: 100%;
+        justify-content: flex-end;
+        flex-wrap: wrap;
+      }
+    }
+
     #home-drill-head {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
       gap: 1rem;
       padding: 1.4rem 1.5rem 1rem;
-      border-bottom: 1px solid #F0ECF8;
+      border-bottom: 1px solid #E8F7F6;
     }
 
     .home-drill-kicker {
@@ -2780,7 +3520,7 @@
       font-weight: 700;
       letter-spacing: .08em;
       text-transform: uppercase;
-      color: #ABA6C8;
+      color: #8BA6AA;
       margin-bottom: 6px;
     }
 
@@ -2788,13 +3528,13 @@
       font-family: var(--fh);
       font-size: 1.55rem;
       line-height: 1.08;
-      color: #1A1340;
+      color: #123B45;
       margin-bottom: 4px;
     }
 
     #home-drill-subtitle {
       font-size: 12px;
-      color: #7A72A0;
+      color: #5A7D83;
       line-height: 1.55;
       max-width: 72ch;
     }
@@ -2803,9 +3543,9 @@
       width: 34px;
       height: 34px;
       border-radius: 999px;
-      border: 1px solid #E2DDF5;
+      border: 1px solid #C9E7E4;
       background: #fff;
-      color: #7B61D6;
+      color: #00A6A6;
       font-size: 18px;
       line-height: 1;
       cursor: pointer;
@@ -2820,8 +3560,8 @@
     }
 
     .home-drill-stat {
-      background: #F8F7FF;
-      border: 1px solid #ECE7F7;
+      background: #F4FBFA;
+      border: 1px solid #D7ECEA;
       border-radius: 12px;
       padding: 0.8rem 0.95rem;
     }
@@ -2831,7 +3571,7 @@
       font-family: var(--fm);
       font-size: 1rem;
       line-height: 1;
-      color: #1A1340;
+      color: #123B45;
       margin-bottom: 5px;
     }
 
@@ -2848,12 +3588,12 @@
     }
 
     .home-drill-stat strong.purple {
-      color: #7B61D6;
+      color: #00A6A6;
     }
 
     .home-drill-stat span {
       font-size: 10px;
-      color: #7A72A0;
+      color: #5A7D83;
       text-transform: uppercase;
       letter-spacing: .06em;
     }
@@ -2861,8 +3601,8 @@
     .home-drill-note {
       padding: 0.95rem 1.5rem 0.9rem;
       font-size: 11px;
-      color: #7A72A0;
-      border-bottom: 1px solid #F0ECF8;
+      color: #5A7D83;
+      border-bottom: 1px solid #E8F7F6;
       background: linear-gradient(180deg, rgba(248, 245, 255, 0.86), rgba(255, 255, 255, 0));
     }
 
@@ -2886,22 +3626,22 @@
       font-weight: 700;
       letter-spacing: .06em;
       text-transform: uppercase;
-      color: #ABA6C8;
+      color: #8BA6AA;
       padding: 12px 10px;
-      background: #FCFBFF;
-      border-bottom: 1px solid #ECE7F7;
+      background: #F8FFFE;
+      border-bottom: 1px solid #D7ECEA;
     }
 
     .home-drill-table td {
       padding: 12px 10px;
-      border-bottom: 1px solid #F0ECF8;
+      border-bottom: 1px solid #E8F7F6;
       font-size: 12px;
-      color: #5A5280;
+      color: #5A7D83;
       vertical-align: top;
     }
 
     .home-drill-table tbody tr:hover td {
-      background: #FBFAFF;
+      background: #F8FFFE;
     }
 
     .home-drill-patient-btn {
@@ -2912,7 +3652,7 @@
       background: none;
       border: 0;
       padding: 0;
-      color: #1A1340;
+      color: #123B45;
       font-weight: 700;
       text-align: left;
       cursor: pointer;
@@ -2920,7 +3660,7 @@
 
     .home-drill-patient-btn span {
       font-size: 10px;
-      color: #ABA6C8;
+      color: #8BA6AA;
       font-family: var(--fm);
       font-weight: 500;
     }
@@ -2928,9 +3668,9 @@
     .home-drill-open-btn {
       padding: 8px 12px;
       border-radius: 8px;
-      background: #F4F0FF;
-      border: 1px solid #DDD4F6;
-      color: #6B4ED4;
+      background: #EDF9F8;
+      border: 1px solid #BFE4E0;
+      color: #007F86;
       font-size: 11px;
       font-weight: 700;
       cursor: pointer;
@@ -2938,13 +3678,13 @@
     }
 
     .home-drill-open-btn:hover {
-      background: #EFE8FF;
+      background: #E4F5F3;
     }
 
     .home-drill-empty {
       padding: 2rem 0;
       text-align: center;
-      color: #9B8FD4;
+      color: #6B9FA5;
       font-size: 12px;
     }
 
@@ -2960,8 +3700,8 @@
     }
 
     .home-guide-card {
-      background: #FCFBFF;
-      border: 1px solid #ECE7F7;
+      background: #F8FFFE;
+      border: 1px solid #D7ECEA;
       border-radius: 16px;
       padding: 1rem 1rem 1.05rem;
     }
@@ -2980,9 +3720,9 @@
     }
 
     .home-guide-chip.nccn {
-      background: #F1EDFF;
-      border: 1px solid #DED4FA;
-      color: #6B4ED4;
+      background: #EDF9F8;
+      border: 1px solid #BFE4E0;
+      color: #007F86;
     }
 
     .home-guide-chip.india {
@@ -3000,7 +3740,7 @@
     .home-guide-title {
       font-size: 14px;
       font-weight: 700;
-      color: #1A1340;
+      color: #123B45;
       line-height: 1.4;
       margin-bottom: 10px;
     }
@@ -3016,12 +3756,12 @@
       gap: 8px;
       align-items: flex-start;
       font-size: 12px;
-      color: #5A5280;
+      color: #5A7D83;
       line-height: 1.55;
     }
 
     .home-guide-item strong {
-      color: #1A1340;
+      color: #123B45;
     }
 
     .home-guide-bullet {
@@ -3033,7 +3773,7 @@
     }
 
     .home-guide-bullet.nccn {
-      background: #7B61D6;
+      background: #00A6A6;
     }
 
     .home-guide-bullet.india {
@@ -3052,8 +3792,8 @@
 
     /* ─── GUIDELINE BANNER ─── */
     .gl-banner {
-      background: linear-gradient(90deg, #F0ECFF, #FAF8FF);
-      border: 1px solid #D5CAF5;
+      background: linear-gradient(90deg, #E7F6F5, #F7FFFE);
+      border: 1px solid #B9E5E1;
       border-radius: 12px;
       padding: 1rem 1.35rem;
       display: flex;
@@ -3063,7 +3803,7 @@
     }
 
     .gl-pill {
-      background: #7B61D6;
+      background: #00A6A6;
       color: #fff;
       border-radius: 6px;
       font-size: 10px;
@@ -3076,19 +3816,19 @@
 
     .gl-text {
       font-size: 12px;
-      color: #5A5280;
+      color: #5A7D83;
       flex: 1;
       line-height: 1.5;
     }
 
     .gl-text strong {
-      color: #1A1340;
+      color: #123B45;
     }
 
     .gl-cta {
       font-size: 11px;
       font-weight: 700;
-      color: #7B61D6;
+      color: #00A6A6;
       white-space: nowrap;
       cursor: pointer;
       border: none;
@@ -3103,20 +3843,20 @@
 
     .gl-dismiss {
       font-size: 16px;
-      color: #C5BEE8;
+      color: #8DAEAF;
       cursor: pointer;
       line-height: 1;
       flex-shrink: 0;
     }
 
     .gl-dismiss:hover {
-      color: #9B8FD4;
+      color: #6B9FA5;
     }
 
     /* ─── DATA COMPLETENESS ─── */
     .completeness-outer {
       height: 10px;
-      background: #F0ECF8;
+      background: #E8F7F6;
       border-radius: 5px;
       overflow: hidden;
       margin-bottom: .5rem;
@@ -3125,7 +3865,7 @@
     .completeness-fill {
       height: 100%;
       border-radius: 5px;
-      background: linear-gradient(90deg, #7B61D6, #B09AF0);
+      background: linear-gradient(90deg, #00A6A6, #53C8C2);
     }
 
     .completeness-row {
@@ -3136,12 +3876,12 @@
     }
 
     .completeness-row .ck {
-      color: #7A72A0;
+      color: #5A7D83;
     }
 
     .completeness-row .cv {
       font-weight: 700;
-      color: #1A1340;
+      color: #123B45;
     }
 
     .completeness-row .cv.bad {
@@ -3163,7 +3903,7 @@
     .divider-label span {
       font-size: 11px;
       font-weight: 700;
-      color: #C5BEE8;
+      color: #8DAEAF;
       letter-spacing: .06em;
       text-transform: uppercase;
       white-space: nowrap;
@@ -3174,7 +3914,7 @@
       content: '';
       flex: 1;
       height: 1px;
-      background: #E8E4F3;
+      background: #D5ECEA;
     }
 
     /* quick action strip */
@@ -3191,20 +3931,20 @@
       gap: 7px;
       padding: 8px 16px;
       border-radius: 10px;
-      border: 1.5px solid #E2DDF5;
+      border: 1.5px solid #C9E7E4;
       background: #fff;
       font-size: 12px;
       font-weight: 600;
-      color: #5A5280;
+      color: #5A7D83;
       cursor: pointer;
       font-family: 'DM Sans', sans-serif;
       transition: all .15s;
     }
 
     .qa-btn:hover {
-      background: #F5F2FF;
-      border-color: #C5B8F0;
-      color: #5C47C5;
+      background: #F2FBFA;
+      border-color: #A8DBD6;
+      color: #008C8C;
     }
 
     .qa-btn .qai {
@@ -3219,8 +3959,8 @@
     }
 
     .qa-btn .qai.purple {
-      background: #EDE8FF;
-      color: #7B61D6;
+      background: #DFF3F1;
+      color: #00A6A6;
     }
 
     .qa-btn .qai.teal {
@@ -3241,7 +3981,7 @@
     /* section divider */
     .sdiv {
       height: 1px;
-      background: #E8E4F3;
+      background: #D5ECEA;
       margin: 2rem 0 1.75rem;
     }
 
@@ -3277,7 +4017,7 @@
     /* --- Add Patient Modal & Tile Styles --- */
     .action-card.add-new {
       background: rgba(255, 255, 255, 0.4);
-      border: 2px dashed rgba(92, 71, 197, 0.3);
+      border: 2px dashed rgba(0, 140, 140, 0.3);
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -3289,15 +4029,15 @@
     }
 
     .action-card.add-new:hover {
-      background: rgba(92, 71, 197, 0.05);
-      border-color: rgba(92, 71, 197, 0.6);
+      background: rgba(0, 140, 140, 0.05);
+      border-color: rgba(0, 140, 140, 0.6);
       transform: translateY(-4px);
     }
 
     .add-new-icon {
       width: 48px;
       height: 48px;
-      background: #7B61D6;
+      background: #00A6A6;
       color: white;
       border-radius: 50%;
       display: flex;
@@ -3305,7 +4045,7 @@
       justify-content: center;
       font-size: 24px;
       margin-bottom: 12px;
-      box-shadow: 0 4px 12px rgba(123, 97, 214, 0.3);
+      box-shadow: 0 4px 12px rgba(0, 166, 166, 0.3);
     }
 
     .modal-overlay {
@@ -3350,7 +4090,7 @@
       position: absolute;
       top: 20px;
       right: 20px;
-      background: #f5f7ff;
+      background: #f4fbfa;
       border: none;
       width: 32px;
       height: 32px;
@@ -3367,7 +4107,7 @@
       display: block;
       font-size: 12px;
       font-weight: 700;
-      color: #1A1340;
+      color: #123B45;
       margin-bottom: 8px;
       text-transform: uppercase;
       letter-spacing: 0.5px;
@@ -3384,9 +4124,9 @@
     }
 
     .form-input:focus {
-      border-color: #7B61D6;
+      border-color: #00A6A6;
       outline: none;
-      box-shadow: 0 0 0 3px rgba(123, 97, 214, 0.1);
+      box-shadow: 0 0 0 3px rgba(0, 166, 166, 0.1);
     }
 
     .form-row {
@@ -3398,7 +4138,7 @@
     .modal-submit {
       width: 100%;
       padding: 14px;
-      background: #7B61D6;
+      background: #00A6A6;
       color: white;
       border: none;
       border-radius: 12px;
@@ -3409,7 +4149,7 @@
     }
 
     .list-add-btn {
-      background: #1A1340;
+      background: #123B45;
       color: white;
       border: none;
       padding: 10px 18px;
@@ -3468,7 +4208,7 @@
     }
 
     .hdr-logo {
-      background: linear-gradient(90deg, #1A1340, #3C2A99);
+      background: linear-gradient(90deg, #123B45, #008C8C);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       font-weight: 800;
@@ -3500,7 +4240,7 @@
     /* --- Add Patient Modal & Tile Styles --- */
     .action-card.add-new {
       background: rgba(255, 255, 255, 0.4) !important;
-      border: 2px dashed rgba(92, 71, 197, 0.3) !important;
+      border: 2px dashed rgba(0, 140, 140, 0.3) !important;
       display: flex !important;
       flex-direction: column !important;
       justify-content: center !important;
@@ -3512,15 +4252,15 @@
     }
 
     .action-card.add-new:hover {
-      background: rgba(92, 71, 197, 0.05) !important;
-      border-color: rgba(92, 71, 197, 0.6) !important;
+      background: rgba(0, 140, 140, 0.05) !important;
+      border-color: rgba(0, 140, 140, 0.6) !important;
       transform: translateY(-4px) !important;
     }
 
     .add-new-icon {
       width: 48px;
       height: 48px;
-      background: #7B61D6;
+      background: #00A6A6;
       color: white;
       border-radius: 50%;
       display: flex;
@@ -3528,7 +4268,7 @@
       justify-content: center;
       font-size: 24px;
       margin-bottom: 12px;
-      box-shadow: 0 4px 12px rgba(123, 97, 214, 0.3);
+      box-shadow: 0 4px 12px rgba(0, 166, 166, 0.3);
     }
 
     .modal-overlay {
@@ -3572,7 +4312,7 @@
       position: absolute;
       top: 20px;
       right: 20px;
-      background: #f5f7ff;
+      background: #f4fbfa;
       border: none;
       width: 32px;
       height: 32px;
@@ -3592,7 +4332,7 @@
       display: block;
       font-size: 11px;
       font-weight: 700;
-      color: #1A1340;
+      color: #123B45;
       margin-bottom: 8px;
       text-transform: uppercase;
       letter-spacing: 0.5px;
@@ -3610,9 +4350,9 @@
     }
 
     .form-input:focus {
-      border-color: #7B61D6;
+      border-color: #00A6A6;
       outline: none;
-      box-shadow: 0 0 0 3px rgba(123, 97, 214, 0.1);
+      box-shadow: 0 0 0 3px rgba(0, 166, 166, 0.1);
     }
 
     .form-row {
@@ -3624,7 +4364,7 @@
     .modal-submit {
       width: 100%;
       padding: 14px;
-      background: #7B61D6;
+      background: #00A6A6;
       color: white;
       border: none;
       border-radius: 12px;
@@ -3636,7 +4376,7 @@
     }
 
     .modal-submit:hover {
-      background: #5C47C5;
+      background: #008C8C;
       transform: translateY(-1px);
     }
 
@@ -3661,7 +4401,7 @@
       max-height: min(88vh, 880px);
       overflow: auto;
       background: #fff;
-      border: 1px solid #E8E4F3;
+      border: 1px solid #D5ECEA;
       border-radius: 24px;
       box-shadow: 0 32px 64px rgba(26, 19, 64, 0.14);
     }
@@ -3672,12 +4412,12 @@
       align-items: flex-start;
       gap: 1rem;
       padding: 1.35rem 1.4rem 1rem;
-      border-bottom: 1px solid #F0ECF8;
+      border-bottom: 1px solid #E8F7F6;
     }
 
     .team-preview-title {
       font-size: 20px;
-      color: #1A1340;
+      color: #123B45;
       font-weight: 800;
       line-height: 1.15;
     }
@@ -3685,7 +4425,7 @@
     .team-preview-sub {
       margin-top: 4px;
       font-size: 12px;
-      color: #7A72A0;
+      color: #5A7D83;
       line-height: 1.55;
     }
 
@@ -3693,9 +4433,9 @@
       width: 34px;
       height: 34px;
       border-radius: 999px;
-      border: 1px solid #E2DDF5;
+      border: 1px solid #C9E7E4;
       background: #fff;
-      color: #7B61D6;
+      color: #00A6A6;
       font-size: 18px;
       line-height: 1;
       cursor: pointer;
@@ -3707,22 +4447,22 @@
     }
 
     .team-email-card {
-      border: 1px solid #ECE7F7;
+      border: 1px solid #D7ECEA;
       border-radius: 18px;
       overflow: hidden;
-      background: #FCFBFF;
+      background: #F8FFFE;
     }
 
     .team-email-top {
       padding: 1rem 1.1rem;
-      background: linear-gradient(180deg, #F7F3FF, #FCFBFF);
-      border-bottom: 1px solid #ECE7F7;
+      background: linear-gradient(180deg, #F4FBFA, #F8FFFE);
+      border-bottom: 1px solid #D7ECEA;
     }
 
     .team-email-subject {
       font-size: 17px;
       line-height: 1.35;
-      color: #1A1340;
+      color: #123B45;
       font-weight: 800;
       margin-bottom: 10px;
     }
@@ -3732,11 +4472,11 @@
       grid-template-columns: auto 1fr;
       gap: 8px 12px;
       font-size: 12px;
-      color: #7A72A0;
+      color: #5A7D83;
     }
 
     .team-email-meta strong {
-      color: #5C47C5;
+      color: #008C8C;
       font-weight: 700;
     }
 
@@ -3748,13 +4488,13 @@
 
     .team-email-copy {
       font-size: 13px;
-      color: #5A5280;
+      color: #5A7D83;
       line-height: 1.7;
     }
 
     .team-email-summary {
       background: #FFFFFF;
-      border: 1px solid #ECE7F7;
+      border: 1px solid #D7ECEA;
       border-radius: 16px;
       padding: 1rem;
     }
@@ -3762,7 +4502,7 @@
     .team-email-summary-title {
       font-size: 12px;
       font-weight: 700;
-      color: #1A1340;
+      color: #123B45;
       margin-bottom: 10px;
     }
 
@@ -3773,8 +4513,8 @@
     }
 
     .team-email-kv {
-      background: #FAF8FF;
-      border: 1px solid #F0ECF8;
+      background: #F7FFFE;
+      border: 1px solid #E8F7F6;
       border-radius: 12px;
       padding: 0.8rem 0.9rem;
     }
@@ -3783,14 +4523,14 @@
       font-size: 10px;
       letter-spacing: .06em;
       text-transform: uppercase;
-      color: #ABA6C8;
+      color: #8BA6AA;
       margin-bottom: 4px;
       font-weight: 700;
     }
 
     .team-email-kv-v {
       font-size: 12px;
-      color: #1A1340;
+      color: #123B45;
       font-weight: 600;
       line-height: 1.5;
     }
@@ -3809,9 +4549,9 @@
       align-items: center;
       padding: 6px 12px;
       border-radius: 999px;
-      background: #F1EDFF;
-      border: 1px solid #DED4FA;
-      color: #6B4ED4;
+      background: #EDF9F8;
+      border: 1px solid #BFE4E0;
+      color: #007F86;
       font-size: 11px;
       font-weight: 700;
     }
@@ -3819,9 +4559,9 @@
     .team-email-open {
       padding: 9px 14px;
       border-radius: 10px;
-      background: #F4F0FF;
-      border: 1px solid #DED4FA;
-      color: #6B4ED4;
+      background: #EDF9F8;
+      border: 1px solid #BFE4E0;
+      color: #007F86;
       font-size: 12px;
       font-weight: 700;
       cursor: pointer;
@@ -3829,12 +4569,12 @@
 
     .team-email-disclaimer {
       font-size: 11px;
-      color: #8D87AE;
+      color: #5F8589;
       line-height: 1.6;
     }
 
     .list-add-btn {
-      background: #1A1340;
+      background: #123B45;
       color: white;
       border: none;
       padding: 10px 18px;
@@ -3849,7 +4589,7 @@
     }
 
     .list-add-btn:hover {
-      background: #3C2A99;
+      background: #008C8C;
       transform: translateY(-1px);
     }
 
@@ -3877,7 +4617,7 @@
       padding: 4px 12px;
       font-size: 11px;
       font-weight: 600;
-      color: #7A72A0;
+      color: #5A7D83;
       background: transparent;
       border: none;
       border-radius: 6px;
@@ -3886,12 +4626,12 @@
     }
 
     .tbtn:hover {
-      color: #1A1340;
+      color: #123B45;
     }
 
     .tbtn.on {
       background: #fff;
-      color: #1A1340;
+      color: #123B45;
       box-shadow: 0 2px 8px rgba(26, 19, 64, 0.06);
     }
 
@@ -3908,7 +4648,7 @@
       align-items: center;
       gap: 6px;
       font-size: 11px;
-      color: #7A72A0;
+      color: #5A7D83;
       font-weight: 500;
     }
 
@@ -3938,7 +4678,7 @@
     <div class="login-modal">
       <div class="login-brand">
         <img src="./assets-thb-logo.svg" alt="THB Logo" class="login-logo">
-        <div class="login-title">ProstaCare <span style="color:#7B61D6; font-weight: 500;">India</span></div>
+        <div class="login-title">ProstaCare <span style="color:#00A6A6; font-weight: 500;">India</span></div>
         <div class="login-subtitle">Clinical Analytics & Patient Management Platform</div>
       </div>
       <div class="login-form">
@@ -3953,7 +4693,7 @@
         <div id="login-error-msg" class="login-error">Invalid User ID or Password. Please try 1234.</div>
         <button type="button" class="login-btn" onclick="handleLogin()">Sign In</button>
       </div>
-      <div style="margin-top: 2.5rem; text-align: center; font-size: 11px; color: #ABA6C8;">
+      <div style="margin-top: 2.5rem; text-align: center; font-size: 11px; color: #8BA6AA;">
         © 2026 THB / Sekhmet Technologies Private Limited
       </div>
     </div>
@@ -4004,6 +4744,15 @@
             </div>
             <div class="home-pulse-row" id="home-pulse-row"></div>
             <div class="action-cards">
+              <a class="action-card ai-buddy" href="#" onclick="openAiBuddy(); return false;">
+                <div class="ai-buddy-card-topline">Governed Evidence Brain</div>
+                <div class="action-card-title">AI Buddy</div>
+                <div class="action-card-desc">Study one patient step by step across guideline packs, site practice, retrospective outcomes, access checks, and clinical-study routes before acting.</div>
+                <div class="action-card-footer">
+                  <span class="action-card-label">Guided review</span>
+                  <span class="action-card-count">4 steps</span>
+                </div>
+              </a>
               <a class="action-card" href="#" onclick="openPatientList(); return false;">
                 <div class="action-card-title">Open Patient File</div>
                 <div class="action-card-desc" id="queue-action-copy">Browse a searchable list of patients from your
@@ -4110,7 +4859,7 @@
           <!-- Protocol adherence score -->
           <div class="card home-drill-trigger" data-home-drill="protocol" style="grid-column:span 1;">
             <div class="card-title">
-              <div class="ct-dot" style="background:#7B61D6;"></div>Protocol adherence score
+              <div class="ct-dot" style="background:#00A6A6;"></div>Protocol adherence score
             </div>
             <div class="score-row">
               <div class="score-big">73</div>
@@ -4209,7 +4958,7 @@
         <div class="card au2 home-drill-trigger" data-home-drill="gaps">
           <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-bottom:1rem;">
             <div class="card-title" style="margin-bottom:0;">
-              <div class="ct-dot" style="background:#7B61D6;"></div>Nudge trend analysis
+              <div class="ct-dot" style="background:#00A6A6;"></div>Nudge trend analysis
             </div>
             <div style="display:flex;gap:4px;">
               <button class="tbtn on" type="button" onclick="updateNudgeTrend('weekly', this)">Weekly</button>
@@ -4219,7 +4968,7 @@
           <div style="height:280px;">
             <canvas id="nudgeTrendChart"></canvas>
           </div>
-          <div style="margin-top:.75rem;font-size:11px;color:#8D87AE;line-height:1.6;">
+          <div style="margin-top:.75rem;font-size:11px;color:#5F8589;line-height:1.6;">
             Bars show opened, viewed, acted upon, and resolved nudges. The line tracks net active nudges still requiring follow-up.
           </div>
         </div>
@@ -4288,8 +5037,8 @@
                 <button class="pf-action" type="button" onclick="openPatientFile('p4', 'home')">Open record →</button>
               </div>
             </div>
-            <div style="font-size:11px;color:#ABA6C8;text-align:right;margin-top:-.25rem;">Showing 3 of 12 flagged
-              patients · <a href="#" style="color:#7B61D6;font-weight:600;"
+            <div style="font-size:11px;color:#8BA6AA;text-align:right;margin-top:-.25rem;">Showing 3 of 12 flagged
+              patients · <a href="#" style="color:#00A6A6;font-weight:600;"
                 onclick="openPopulationDashboard('quality', 'quality-top'); return false;">View all →</a></div>
           </div>
 
@@ -4320,7 +5069,7 @@
         <div class="g2 au">
           <div class="card">
             <div class="card-title" style="margin-bottom:.75rem;">
-              <div class="ct-dot" style="background:#7B61D6;"></div>Recently viewed patients
+              <div class="ct-dot" style="background:#00A6A6;"></div>Recently viewed patients
             </div>
             <div id="recent-list"></div>
           </div>
@@ -4329,8 +5078,8 @@
               <div class="ct-dot" style="background:#D97B0E;"></div>Incomplete records — data entry pending
             </div>
             <div id="incomplete-list"></div>
-            <div style="margin-top:.75rem;font-size:11px;color:#ABA6C8;text-align:right;">112 records missing key
-              fields · <a href="#" style="color:#7B61D6;font-weight:600;"
+            <div style="margin-top:.75rem;font-size:11px;color:#8BA6AA;text-align:right;">112 records missing key
+              fields · <a href="#" style="color:#00A6A6;font-weight:600;"
                 onclick="openPatientList(); return false;">Open full list →</a></div>
           </div>
         </div>
@@ -4435,6 +5184,32 @@
           <thead id="home-drill-thead"></thead>
           <tbody id="home-drill-tbody"></tbody>
         </table>
+      </div>
+    </div>
+  </div>
+
+  <div id="ai-buddy-overlay" onclick="handleAiBuddyOverlay(event)">
+    <div id="ai-buddy-modal" role="dialog" aria-modal="true" aria-labelledby="ai-buddy-title">
+      <div class="ai-buddy-head">
+        <div>
+          <div class="ai-buddy-kicker">AI Buddy</div>
+          <h3 id="ai-buddy-title">Step-by-step treatment pathway review</h3>
+          <p id="ai-buddy-subtitle">Guided review across structured patient data, guideline rules, practice patterns, retrospective cohort signals, and access logic.</p>
+        </div>
+        <button id="ai-buddy-close" type="button" onclick="closeAiBuddy()">×</button>
+      </div>
+      <div class="ai-buddy-status-bar">
+        <div class="ai-buddy-evidence-pill">No free-text generation outside the configured brain</div>
+        <div id="ai-buddy-steps"></div>
+      </div>
+      <div id="ai-buddy-content"></div>
+      <div class="ai-buddy-footer">
+        <div class="ai-buddy-footer-note" id="ai-buddy-footer-note">AI Buddy only uses structured records, configured guideline packs, practice logs, retrospective outcomes, and access pathways captured in the platform.</div>
+        <div class="ai-buddy-footer-actions">
+          <button class="ai-buddy-btn secondary" type="button" id="ai-buddy-prev" onclick="prevAiBuddyStep()">Back</button>
+          <button class="ai-buddy-btn secondary" type="button" id="ai-buddy-open-file" onclick="openAiBuddyPatientFile()">Open patient file</button>
+          <button class="ai-buddy-btn primary" type="button" id="ai-buddy-next" onclick="nextAiBuddyStep()">Continue</button>
+        </div>
       </div>
     </div>
   </div>
@@ -5370,9 +6145,717 @@
       };
     }
 
+    const AI_BUDDY_STEPS = [
+      { key: 'patient', label: 'Patient' },
+      { key: 'brain', label: 'Brain' },
+      { key: 'pathway', label: 'Pathway' },
+      { key: 'access', label: 'Access & studies' }
+    ];
+
+    const aiBuddyState = {
+      open: false,
+      step: 0,
+      patient: null,
+      snapshot: null,
+      nudges: [],
+      source: 'home',
+      launchNote: '',
+      launchPatientId: ''
+    };
+
+    function stripInlineHtml(value) {
+      return String(value || '')
+        .replace(/<[^>]*>/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+    }
+
+    function getAiBuddyCandidatePatients() {
+      const visiblePatients = getVisiblePatients().map((patient) => normalizePatientRecord(patient)).filter(Boolean);
+      if (aiBuddyState.patient && !visiblePatients.some((patient) => patient.id === aiBuddyState.patient.id)) {
+        visiblePatients.unshift(aiBuddyState.patient);
+      }
+      return visiblePatients;
+    }
+
+    function getAiBuddyRegion(patient) {
+      const prefix = String(patient?.uhid || '').split('-')[0];
+      const regionMap = {
+        DL: 'Delhi NCR',
+        UP: 'Uttar Pradesh / Lucknow corridor',
+        HR: 'Gurgaon / Haryana',
+        RJ: 'Rajasthan',
+        PB: 'Punjab / Chandigarh',
+        WB: 'West Bengal / Kolkata',
+        MH: 'Maharashtra / Mumbai',
+        KA: 'Karnataka / Bengaluru'
+      };
+      return regionMap[prefix] || doctorProfile.hospital;
+    }
+
+    function isAiBuddyPatientFileLaunch() {
+      return aiBuddyState.source === 'patient-file';
+    }
+
+    function getAiBuddySignals(patient, snapshot = null) {
+      const flagText = (patient?.flags || []).join(' ').toLowerCase();
+      const reasonText = `${patient?.reason || ''} ${patient?.status || ''} ${patient?.clinic || ''}`.toLowerCase();
+      const liveRisk = snapshot?.risk || '';
+      const riskLabel = liveRisk
+        || (flagText.includes('very high') ? 'Very high risk'
+          : flagText.includes('high risk') ? 'High risk'
+            : flagText.includes('m1') ? 'Metastatic'
+              : 'Clinical review');
+
+      return {
+        riskLabel,
+        needsPsma: snapshot ? snapshot.psma === 'Not done' : flagText.includes('psma pending') || reasonText.includes('pet tracer'),
+        needsBoneScan: snapshot ? snapshot.bone === 'Not done' : ((flagText.includes('high risk') || flagText.includes('very high')) && reasonText.includes('staging')),
+        needsGenetics: snapshot ? snapshot.genetics === 'Not done' : flagText.includes('genetics pending'),
+        needsDexa: snapshot ? snapshot.dexa === 'Not done' : flagText.includes('no dexa'),
+        needsBoneProtection: snapshot ? snapshot.boneProtection === 'Not started' : flagText.includes('bone protection due'),
+        overdue: patient?.statusTone === 'urgent' || reasonText.includes('delay') || reasonText.includes('overdue'),
+        painEscalation: flagText.includes('pain') || reasonText.includes('pain'),
+        coverageBlock: flagText.includes('coverage') || reasonText.includes('pre-auth') || reasonText.includes('approval'),
+        adtActive: flagText.includes('adt') || (snapshot?.castrationStatus || '').includes('HSPC'),
+        arsiNotStarted: snapshot ? snapshot.arsi === 'Not initiated' : flagText.includes('coverage discussion') || flagText.includes('very high risk'),
+        m1Disease: flagText.includes('m1 disease') || flagText.includes('m1') || String(snapshot?.risk || '').includes('M1'),
+        pendingFollowUp: snapshot ? !snapshot.followUpDate : reasonText.includes('review') || flagText.includes('psa trend review'),
+        launchedFromLiveForm: Boolean(snapshot)
+      };
+    }
+
+    function buildAiBuddyAnalysis(patient, snapshot = null, nudges = []) {
+      const region = getAiBuddyRegion(patient);
+      const signals = getAiBuddySignals(patient, snapshot);
+      const caseTitle =
+        signals.overdue && signals.painEscalation ? 'Urgent symptom control and pathway reset'
+          : signals.needsPsma ? 'Stage the disease completely before locking the next line'
+            : signals.needsBoneProtection || signals.needsDexa ? 'Close the supportive-care gap on active ADT'
+              : signals.arsiNotStarted && (signals.riskLabel.includes('High') || signals.riskLabel.includes('Very')) ? 'Review intensification readiness'
+                : signals.m1Disease ? 'Metastatic review with next-line readiness'
+                  : 'Structured pathway review';
+
+      const summaryCopy =
+        signals.launchedFromLiveForm
+          ? `${patient.fullName} was opened from the patient file, so AI Buddy is using the live structured form values, current nudges, and access rules captured in the shell.`
+          : `${patient.fullName} is being reviewed from the home workspace. AI Buddy is grounding the review in registry data, configured rule packs, and cohort patterns before surfacing the next-step pathway.`;
+
+      const sourceCards = [
+        {
+          title: 'Guideline pack',
+          badge: 'guideline',
+          body: signals.needsPsma
+            ? 'High-risk disease keeps the imaging branch open until PSMA PET-CT or the staging fallback is closed. The brain keeps treatment-field decisions and systemic escalation locked behind complete staging.'
+            : signals.needsBoneProtection || signals.needsDexa
+              ? 'Long-course ADT keeps bone-health checks, DEXA, and protection agents in the mandatory pathway rather than optional reminders.'
+              : signals.m1Disease
+                ? 'Metastatic disease keeps systemic control, progression checkpoints, and line-of-therapy branching at the center of the review.'
+                : 'The pathway is anchored to configured prostate guidance rules for staging, treatment sequencing, follow-up cadence, and supportive care.'
+        },
+        {
+          title: 'Site practice pattern',
+          badge: 'practice',
+          body: signals.overdue
+            ? `In ${doctorProfile.hospital}, delayed symptom-driven cases are usually re-routed through same-cycle triage, MDT review, and treatment-date reset rather than waiting for the next routine follow-up slot.`
+            : signals.arsiNotStarted
+              ? `For similar ${signals.riskLabel.toLowerCase()} cases in ${doctorProfile.department}, treatment intensification is usually reviewed only after imaging, payer, and MDT readiness are all visible in one place.`
+              : `The practice layer mirrors how ${doctorProfile.name} and the site team typically sequence diagnostics, MDT documentation, and treatment starts for comparable cases.`
+        },
+        {
+          title: 'Retrospective cohort signal',
+          badge: 'data',
+          body: signals.needsBoneProtection || signals.needsDexa
+            ? 'In recent ADT-active high-risk records, bone-health gaps closed faster when DEXA, calcium/Vit D, and the bone agent were ordered together rather than as separate follow-ups.'
+            : signals.needsPsma || signals.needsBoneScan
+              ? 'Retrospective staging-complete cases reached a stable treatment plan sooner than cases where imaging was left open across multiple visits.'
+              : signals.overdue
+                ? 'Retrospective delayed-start cases showed less pathway drift when the same review cycle also documented symptom burden, access blockers, and the revised treatment date.'
+                : 'The retrospective layer checks similar cases for how quickly gaps closed and where pathway drift typically started.'
+        },
+        {
+          title: 'Access and study route',
+          badge: 'access',
+          body: signals.coverageBlock
+            ? `${region} access logic keeps formulary availability, payer clearance, and study-route escalation visible before a preferred option is surfaced as operationally ready.`
+            : `${region} access logic checks formulary availability, regional tertiary-site options, and the clinical-study search route before flagging the next therapy branch.`
+        }
+      ];
+
+      const liveSignals = [
+        { title: 'Current registry context', body: `${patient.reason} · ${patient.status}` },
+        { title: 'Risk and urgency', body: `${signals.riskLabel}${signals.overdue ? ' · overdue / delayed case' : ''}${signals.m1Disease ? ' · metastatic branch visible' : ''}` }
+      ];
+
+      if (Array.isArray(patient.flags) && patient.flags.length) {
+        liveSignals.push({
+          title: 'Active flags',
+          body: patient.flags.join(' · ')
+        });
+      }
+
+      nudges.slice(0, 3).forEach((nudge) => {
+        liveSignals.push({
+          title: `Live nudge: ${nudge.h}`,
+          body: stripInlineHtml(nudge.b)
+        });
+      });
+
+      const nextActions = [];
+
+      if (signals.overdue && signals.painEscalation) {
+        nextActions.push({
+          title: 'Reset the current review cycle as urgent',
+          body: 'Capture symptom burden, pain trajectory, and the exact reason for the delayed start now so the pathway is re-opened with the right urgency instead of rolling into another routine visit.'
+        });
+      }
+
+      if (signals.needsPsma) {
+        nextActions.push({
+          title: 'Close the staging branch first',
+          body: 'Book PSMA PET-CT or the approved staging fallback before locking the next treatment branch, because field design, systemic intensification, and study fit all depend on complete staging.'
+        });
+      }
+
+      if (signals.needsBoneScan) {
+        nextActions.push({
+          title: 'Do not leave skeletal staging implicit',
+          body: 'Bone imaging remains an explicit pathway checkpoint for high-risk disease. AI Buddy keeps it visible until either PSMA or the fallback bone-imaging route is completed and logged.'
+        });
+      }
+
+      if (signals.needsDexa || signals.needsBoneProtection) {
+        nextActions.push({
+          title: 'Bundle bone-health actions in one order set',
+          body: 'Pair DEXA, calcium/Vit D, and the bone-protection decision in the same cycle so long-term ADT is not left without a documented skeletal-risk plan.'
+        });
+      }
+
+      if (signals.needsGenetics) {
+        nextActions.push({
+          title: 'Open the genomics branch now rather than later',
+          body: 'Genetic testing should be visible before progression makes biomarker-dependent options time-sensitive. The pathway should show sample status, report ETA, and how the result will change the next branch.'
+        });
+      }
+
+      if (signals.arsiNotStarted && (signals.riskLabel.includes('High') || signals.riskLabel.includes('Very'))) {
+        nextActions.push({
+          title: 'Review intensification readiness in MDT terms',
+          body: 'If imaging, tolerability, and payer readiness align, bring the ARSI branch into the same review rather than treating it as a later optional add-on.'
+        });
+      }
+
+      if (signals.pendingFollowUp) {
+        nextActions.push({
+          title: 'Lock the next monitoring checkpoint before closing the visit',
+          body: 'The pathway should not close without the next PSA and follow-up checkpoint, because that is what keeps progression, tolerance, and access changes observable early.'
+        });
+      }
+
+      if (!nextActions.length) {
+        nextActions.push({
+          title: 'Keep the pathway synchronized',
+          body: 'No major structured blocker is open right now, so the next value is making sure treatment, monitoring, and documentation checkpoints stay aligned in the same cycle.'
+        });
+      }
+
+      const progressionActions = [
+        {
+          title: 'If the case progresses',
+          body: signals.m1Disease
+            ? 'Re-check performance status, staging, current line exposure, and biomarker status before moving the patient to the next metastatic branch. AI Buddy should reopen the drug-availability and study-fit checks at the same time.'
+            : 'If PSA, imaging, or symptoms suggest progression, re-stage first, reopen the MDT branch, and re-run the pathway with the updated disease state before surfacing a different systemic option.'
+        },
+        {
+          title: 'If the current option is not tolerated or not available',
+          body: signals.coverageBlock
+            ? 'Switch the review from preference mode to feasibility mode: confirm what is on formulary, what is regionally available, what payer route failed, and whether a study or sponsor-access path becomes the operational route.'
+            : 'Re-run the pathway with the tolerance constraint visible, then narrow to the options that remain clinically acceptable, locally available, and documentable in the same treatment cycle.'
+        }
+      ];
+
+      const drugCards = [];
+
+      if (signals.needsBoneProtection || signals.needsDexa) {
+        drugCards.push({
+          title: 'Bone protection branch',
+          body: `${region}: keep denosumab or zoledronic acid visible only after DEXA / skeletal-risk review, with calcium and Vitamin D documented in the same plan.`
+        });
+      }
+
+      if (signals.arsiNotStarted) {
+        drugCards.push({
+          title: 'ARSI branch',
+          body: `${region}: check abiraterone, enzalutamide, or apalutamide availability against formulary, affordability, and MDT readiness before the branch is surfaced as active.`
+        });
+      }
+
+      if (signals.m1Disease) {
+        drugCards.push({
+          title: 'Metastatic next-line branch',
+          body: 'For progressed metastatic disease, keep taxane, radioligand, biomarker-linked, and study routes visible only after line exposure and tolerance are fully captured.'
+        });
+      }
+
+      if (signals.overdue && signals.painEscalation) {
+        drugCards.push({
+          title: 'Symptom-control branch',
+          body: 'Pain-control and supportive therapy options should stay operationally visible while the disease-state branch is being re-opened, so symptom relief does not wait for the full line-change decision.'
+        });
+      }
+
+      if (!drugCards.length) {
+        drugCards.push({
+          title: 'Current line remains available',
+          body: 'No major access blocker is visible in the structured record, so AI Buddy keeps the current pathway active while monitoring and documentation checkpoints remain on schedule.'
+        });
+      }
+
+      const studies = [
+        {
+          title: 'Clinical-study screen',
+          body: `${region}: search the tertiary-site / trial-desk route only after disease state, prior line, ECOG, biomarker status, and payer constraint are visible together. That keeps the study list constrained to realistic fits instead of broad trial noise.`
+        },
+        {
+          title: 'Preferred line unavailable scenario',
+          body: 'If the preferred standard branch is not operationally available, AI Buddy shifts to the available standard options first, then surfaces study and sponsor-access routes as governed fallbacks rather than free-text alternatives.'
+        }
+      ];
+
+      const procurement = [
+        'Confirm the exact blocker: clinical unsuitability, toxicity, stock-out, formulary restriction, or payer denial.',
+        'Check hospital formulary status, empanelled pharmacy stock, and named payer route before declaring the line unavailable.',
+        'If a clinical-study route is needed, send pathology, staging, ECOG, prior-line summary, biomarker status, and consent readiness to the site trial coordinator or PI desk.',
+        'If sponsor or special-access procurement is explored, capture medical rationale, approval owner, and pharmacy receipt trail before administration.'
+      ];
+
+      const caseSnapshot = [
+        { label: 'Patient', value: `${patient.fullName} · ${patient.age} yrs` },
+        { label: 'UHID / clinic', value: `${patient.uhid} · ${patient.clinic}` },
+        { label: 'Current focus', value: patient.reason },
+        { label: 'Region', value: region },
+        { label: 'Current risk', value: signals.riskLabel }
+      ];
+
+      if (signals.launchedFromLiveForm) {
+        caseSnapshot.push({
+          label: 'Live form branch',
+          value: `Risk ${snapshot?.risk || 'Not set'} · PSMA ${snapshot?.psma || 'Not set'} · Genetics ${snapshot?.genetics || 'Not set'} · ARSI ${snapshot?.arsi || 'Not set'}`
+        });
+      }
+
+      return {
+        patient,
+        region,
+        signals,
+        caseTitle,
+        summaryCopy,
+        sourceCards,
+        liveSignals,
+        nextActions,
+        progressionActions,
+        drugCards,
+        studies,
+        procurement,
+        caseSnapshot,
+        footerNote: 'Governed output only: AI Buddy does not invent options outside the configured guideline pack, structured patient fields, practice logs, retrospective cohort rules, and access pathways.'
+      };
+    }
+
+    function renderAiBuddyPatientOptions() {
+      return getAiBuddyCandidatePatients().map((patient) => {
+        const active = aiBuddyState.patient?.id === patient.id ? ' active' : '';
+        return `
+          <button class="ai-buddy-patient-btn${active}" type="button" onclick="selectAiBuddyPatient('${escapeHtml(patient.id)}')">
+            <div class="ai-buddy-patient-top">
+              <div>
+                <div class="ai-buddy-patient-name">${escapeHtml(patient.shortName || patient.fullName)}</div>
+                <div class="ai-buddy-patient-meta">${escapeHtml(patient.uhid)} · ${escapeHtml(patient.status)}</div>
+              </div>
+              <span class="ai-buddy-mini-tag">${escapeHtml(patient.statusTone || 'review')}</span>
+            </div>
+            <div class="ai-buddy-line-copy">${escapeHtml(patient.reason)}</div>
+            <div class="ai-buddy-patient-tags">${(patient.flags || []).slice(0, 3).map((flag) => `<span class="ai-buddy-mini-tag">${escapeHtml(flag)}</span>`).join('')}</div>
+          </button>
+        `;
+      }).join('');
+    }
+
+    function renderAiBuddyCaseSnapshot(items) {
+      return items.map((item) => `
+        <div class="ai-buddy-kv">
+          <div class="ai-buddy-kv-label">${escapeHtml(item.label)}</div>
+          <div class="ai-buddy-kv-value">${escapeHtml(item.value)}</div>
+        </div>
+      `).join('');
+    }
+
+    function renderAiBuddyStepContent(analysis) {
+      if (aiBuddyState.step === 0) {
+        if (isAiBuddyPatientFileLaunch()) {
+          return `
+            <div class="ai-buddy-summary-hero">
+              <div class="ai-buddy-summary-title">${escapeHtml(analysis.caseTitle)}</div>
+              <div class="ai-buddy-summary-copy">${escapeHtml(analysis.summaryCopy)}</div>
+              <div class="ai-buddy-chip-row">
+                <span class="ai-buddy-chip">${escapeHtml(analysis.patient.shortName || analysis.patient.fullName)}</span>
+                <span class="ai-buddy-chip">${escapeHtml(analysis.region)}</span>
+                <span class="ai-buddy-chip">${escapeHtml(analysis.signals.riskLabel)}</span>
+                <span class="ai-buddy-chip">Live record mode</span>
+                <button class="ai-buddy-chip actionable" type="button" onclick="switchAiBuddyToWorkspace()">${escapeHtml('Browse other patients')}</button>
+              </div>
+            </div>
+            <div class="ai-buddy-context-grid">
+              <div class="ai-buddy-panel">
+                <div class="ai-buddy-panel-title">Current case</div>
+                <div class="ai-buddy-kv-list">${renderAiBuddyCaseSnapshot(analysis.caseSnapshot)}</div>
+                <div class="ai-buddy-patient-tags">${(analysis.patient.flags || []).slice(0, 4).map((flag) => `<span class="ai-buddy-mini-tag">${escapeHtml(flag)}</span>`).join('')}</div>
+              </div>
+              <div class="ai-buddy-live-stack">
+                <div class="ai-buddy-panel">
+                  <div class="ai-buddy-panel-title">Live record context</div>
+                  <div class="ai-buddy-study-list">
+                    ${analysis.liveSignals.slice(0, 4).map((signal) => `
+                      <div class="ai-buddy-study-card">
+                        <div class="ai-buddy-study-head">
+                          <div class="ai-buddy-study-title">${escapeHtml(signal.title)}</div>
+                        </div>
+                        <div class="ai-buddy-study-body">${escapeHtml(signal.body)}</div>
+                      </div>
+                    `).join('')}
+                  </div>
+                </div>
+                <div class="ai-buddy-note-box">
+                  <strong>Seamless record mode</strong>
+                  <span>AI Buddy stays anchored to the open patient file here. If you want to compare another patient, switch to workspace mode without leaving the drawer.</span>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+
+        return `
+          <div class="ai-buddy-summary-hero">
+            <div class="ai-buddy-summary-title">${escapeHtml(analysis.caseTitle)}</div>
+            <div class="ai-buddy-summary-copy">${escapeHtml(analysis.summaryCopy)}</div>
+            <div class="ai-buddy-chip-row">
+              <span class="ai-buddy-chip">${escapeHtml(analysis.patient.shortName || analysis.patient.fullName)}</span>
+              <span class="ai-buddy-chip">${escapeHtml(analysis.region)}</span>
+              <span class="ai-buddy-chip">${escapeHtml(analysis.signals.riskLabel)}</span>
+              ${aiBuddyState.source === 'patient-file' ? '<span class="ai-buddy-chip">Live patient-file values</span>' : '<span class="ai-buddy-chip">Home workspace launch</span>'}
+            </div>
+          </div>
+          <div class="ai-buddy-grid cols-2">
+            <div class="ai-buddy-panel">
+              <div class="ai-buddy-panel-title">Choose patient</div>
+              <div class="ai-buddy-patient-list">${renderAiBuddyPatientOptions()}</div>
+            </div>
+            <div class="ai-buddy-panel">
+              <div class="ai-buddy-panel-title">Case snapshot</div>
+              <div class="ai-buddy-kv-list">${renderAiBuddyCaseSnapshot(analysis.caseSnapshot)}</div>
+            </div>
+          </div>
+        `;
+      }
+
+      if (aiBuddyState.step === 1) {
+        return `
+          <div class="ai-buddy-summary-hero">
+            <div class="ai-buddy-summary-title">What the brain checked before surfacing a pathway</div>
+            <div class="ai-buddy-summary-copy">Each suggestion stays constrained to configured evidence layers. Nothing here is produced as free-text reasoning without a backing source inside the platform.</div>
+          </div>
+          <div class="ai-buddy-grid cols-2">
+            <div class="ai-buddy-panel">
+              <div class="ai-buddy-panel-title">Governed inputs</div>
+              <div class="ai-buddy-source-list">
+                ${analysis.sourceCards.map((card) => `
+                  <div class="ai-buddy-source-card">
+                    <div class="ai-buddy-source-head">
+                      <div class="ai-buddy-source-title">${escapeHtml(card.title)}</div>
+                      <span class="ai-buddy-badge ${escapeHtml(card.badge)}">${escapeHtml(card.badge)}</span>
+                    </div>
+                    <div class="ai-buddy-source-body">${escapeHtml(card.body)}</div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+            <div class="ai-buddy-panel">
+              <div class="ai-buddy-panel-title">Current case signals</div>
+              <div class="ai-buddy-study-list">
+                ${analysis.liveSignals.map((signal) => `
+                  <div class="ai-buddy-study-card">
+                    <div class="ai-buddy-study-head">
+                      <div class="ai-buddy-study-title">${escapeHtml(signal.title)}</div>
+                    </div>
+                    <div class="ai-buddy-study-body">${escapeHtml(signal.body)}</div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      if (aiBuddyState.step === 2) {
+        return `
+          <div class="ai-buddy-summary-hero">
+            <div class="ai-buddy-summary-title">Suggested pathway checkpoints for this case</div>
+            <div class="ai-buddy-summary-copy">This step stays operational: what to close now, what to monitor next, and what branch to reopen if the patient progresses or the current option stops being feasible.</div>
+          </div>
+          <div class="ai-buddy-grid cols-2">
+            <div class="ai-buddy-panel">
+              <div class="ai-buddy-panel-title">Next actions</div>
+              <div class="ai-buddy-action-list">
+                ${analysis.nextActions.map((action, index) => `
+                  <div class="ai-buddy-action-card">
+                    <div class="ai-buddy-action-row">
+                      <span class="ai-buddy-action-index">${index + 1}</span>
+                      <div>
+                        <div class="ai-buddy-action-title">${escapeHtml(action.title)}</div>
+                        <div class="ai-buddy-action-body">${escapeHtml(action.body)}</div>
+                      </div>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+            <div class="ai-buddy-grid">
+              ${analysis.progressionActions.map((action) => `
+                <div class="ai-buddy-callout">
+                  <div class="ai-buddy-callout-title">${escapeHtml(action.title)}</div>
+                  <div class="ai-buddy-callout-body">${escapeHtml(action.body)}</div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      return `
+        <div class="ai-buddy-summary-hero">
+          <div class="ai-buddy-summary-title">Drug availability, study route, and procurement path</div>
+          <div class="ai-buddy-summary-copy">If the preferred line is unavailable or unsuitable, AI Buddy keeps the fallback path explicit: what is locally available, what study route is worth screening, and how procurement must be documented.</div>
+        </div>
+        <div class="ai-buddy-grid cols-2">
+          <div class="ai-buddy-panel">
+            <div class="ai-buddy-panel-title">Drug and access check</div>
+            <div class="ai-buddy-drug-grid">
+              ${analysis.drugCards.map((card) => `
+                <div class="ai-buddy-drug-card">
+                  <div class="ai-buddy-drug-head">
+                    <div class="ai-buddy-drug-title">${escapeHtml(card.title)}</div>
+                  </div>
+                  <div class="ai-buddy-drug-body">${escapeHtml(card.body)}</div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+          <div class="ai-buddy-grid">
+            <div class="ai-buddy-panel">
+              <div class="ai-buddy-panel-title">Clinical-study route</div>
+              <div class="ai-buddy-study-list">
+                ${analysis.studies.map((study) => `
+                  <div class="ai-buddy-study-card">
+                    <div class="ai-buddy-study-head">
+                      <div class="ai-buddy-study-title">${escapeHtml(study.title)}</div>
+                    </div>
+                    <div class="ai-buddy-study-body">${escapeHtml(study.body)}</div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+            <div class="ai-buddy-callout">
+              <div class="ai-buddy-callout-title">Procurement and trial-drug path</div>
+              <div class="ai-buddy-ordered-list">
+                ${analysis.procurement.map((step, index) => `
+                  <div class="ai-buddy-ordered-item">
+                    <strong>${index + 1}</strong>
+                    <div class="ai-buddy-callout-body">${escapeHtml(step)}</div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function normalizeAiBuddyLaunch(input, source = 'home') {
+      if (!input) {
+        return {
+          patient: getAiBuddyCandidatePatients()[0] || normalizePatientRecord(visitingPatients[0]),
+          snapshot: null,
+          nudges: [],
+          source: 'home',
+          launchNote: ''
+        };
+      }
+
+      if (input.patient || input.snapshot || input.nudges) {
+        return {
+          patient: normalizePatientRecord(input.patient || input),
+          snapshot: input.snapshot || null,
+          nudges: Array.isArray(input.nudges) ? input.nudges : [],
+          source,
+          launchNote: input.launchNote || ''
+        };
+      }
+
+      return {
+        patient: normalizePatientRecord(input),
+        snapshot: null,
+        nudges: [],
+        source,
+        launchNote: ''
+      };
+    }
+
+    function getAiBuddyVisibleSteps() {
+      return isAiBuddyPatientFileLaunch() ? AI_BUDDY_STEPS.slice(1) : AI_BUDDY_STEPS;
+    }
+
+    function getAiBuddyVisibleStepIndex() {
+      const firstStep = isAiBuddyPatientFileLaunch() ? 1 : 0;
+      return Math.max(0, aiBuddyState.step - firstStep);
+    }
+
+    function getAiBuddyActualStepFromVisibleIndex(index) {
+      const visibleSteps = getAiBuddyVisibleSteps();
+      const boundedIndex = Math.max(0, Math.min(index, visibleSteps.length - 1));
+      const actualIndex = AI_BUDDY_STEPS.findIndex((step) => step.key === visibleSteps[boundedIndex].key);
+      return actualIndex === -1 ? 0 : actualIndex;
+    }
+
+    function renderAiBuddy() {
+      const overlay = document.getElementById('ai-buddy-overlay');
+      const modal = document.getElementById('ai-buddy-modal');
+      const content = document.getElementById('ai-buddy-content');
+      const steps = document.getElementById('ai-buddy-steps');
+      const subtitle = document.getElementById('ai-buddy-subtitle');
+      const footerNote = document.getElementById('ai-buddy-footer-note');
+      const prev = document.getElementById('ai-buddy-prev');
+      const next = document.getElementById('ai-buddy-next');
+      const openFile = document.getElementById('ai-buddy-open-file');
+      if (!overlay || !modal || !content || !steps || !subtitle || !footerNote || !prev || !next || !openFile) return;
+
+      overlay.classList.toggle('on', aiBuddyState.open);
+      if (!aiBuddyState.open) {
+        overlay.classList.remove('patient-context');
+        modal.classList.remove('patient-context');
+        document.body.style.overflow = '';
+        return;
+      }
+
+      if (!aiBuddyState.patient) {
+        aiBuddyState.patient = getAiBuddyCandidatePatients()[0] || normalizePatientRecord(visitingPatients[0]);
+      }
+
+      const analysis = buildAiBuddyAnalysis(aiBuddyState.patient, aiBuddyState.snapshot, aiBuddyState.nudges);
+      const sourceLabel = isAiBuddyPatientFileLaunch() ? 'Live patient file launch' : 'Home workspace launch';
+      const visibleSteps = getAiBuddyVisibleSteps();
+      const visibleStepIndex = getAiBuddyVisibleStepIndex();
+      overlay.classList.toggle('patient-context', isAiBuddyPatientFileLaunch());
+      modal.classList.toggle('patient-context', isAiBuddyPatientFileLaunch());
+      subtitle.textContent = `${sourceLabel} · ${analysis.patient.fullName} · ${analysis.region}`;
+      footerNote.textContent = isAiBuddyPatientFileLaunch()
+        ? 'Live record mode uses the current patient file values and nudges already visible in this record.'
+        : analysis.footerNote;
+      steps.innerHTML = visibleSteps.map((step, index) => `
+        <button class="ai-buddy-step-pill${index === visibleStepIndex ? ' active' : ''}" type="button" onclick="setAiBuddyStep(${getAiBuddyActualStepFromVisibleIndex(index)})">
+          <strong>${index + 1}</strong><span>${escapeHtml(step.label)}</span>
+        </button>
+      `).join('');
+      content.innerHTML = renderAiBuddyStepContent(analysis);
+      prev.disabled = visibleStepIndex === 0;
+      next.textContent = visibleStepIndex === visibleSteps.length - 1 ? 'Close' : 'Continue';
+      openFile.disabled = !analysis.patient;
+      openFile.textContent = isAiBuddyPatientFileLaunch() ? 'Return to record' : 'Open patient file';
+      openFile.classList.toggle('record-mode', isAiBuddyPatientFileLaunch());
+      document.body.style.overflow = 'hidden';
+    }
+
+    function openAiBuddy(input = null, source = 'home') {
+      const launch = normalizeAiBuddyLaunch(input, source);
+      aiBuddyState.open = true;
+      aiBuddyState.step = launch.source === 'patient-file' ? 1 : 0;
+      aiBuddyState.patient = launch.patient;
+      aiBuddyState.snapshot = launch.snapshot;
+      aiBuddyState.nudges = launch.nudges;
+      aiBuddyState.source = launch.source;
+      aiBuddyState.launchNote = launch.launchNote || '';
+      aiBuddyState.launchPatientId = launch.patient?.id || '';
+      renderAiBuddy();
+    }
+
+    function closeAiBuddy() {
+      aiBuddyState.open = false;
+      renderAiBuddy();
+    }
+
+    function setAiBuddyStep(index) {
+      aiBuddyState.step = Math.max(0, Math.min(index, AI_BUDDY_STEPS.length - 1));
+      renderAiBuddy();
+    }
+
+    function nextAiBuddyStep() {
+      const visibleSteps = getAiBuddyVisibleSteps();
+      const visibleStepIndex = getAiBuddyVisibleStepIndex();
+      if (visibleStepIndex >= visibleSteps.length - 1) {
+        closeAiBuddy();
+        return;
+      }
+      aiBuddyState.step = getAiBuddyActualStepFromVisibleIndex(visibleStepIndex + 1);
+      renderAiBuddy();
+    }
+
+    function prevAiBuddyStep() {
+      const visibleStepIndex = getAiBuddyVisibleStepIndex();
+      if (visibleStepIndex === 0) return;
+      aiBuddyState.step = getAiBuddyActualStepFromVisibleIndex(visibleStepIndex - 1);
+      renderAiBuddy();
+    }
+
+    function selectAiBuddyPatient(patientOrId) {
+      const nextPatient = normalizePatientRecord(patientOrId);
+      if (!nextPatient) return;
+      const keepLiveContext = isAiBuddyPatientFileLaunch() && aiBuddyState.launchPatientId === nextPatient.id;
+      aiBuddyState.patient = nextPatient;
+      if (!keepLiveContext) {
+        aiBuddyState.snapshot = null;
+        aiBuddyState.nudges = [];
+        aiBuddyState.source = 'home';
+      }
+      renderAiBuddy();
+    }
+
+    function openAiBuddyPatientFile() {
+      if (!aiBuddyState.patient) return;
+      if (isAiBuddyPatientFileLaunch() && aiBuddyState.launchPatientId === aiBuddyState.patient.id) {
+        closeAiBuddy();
+        return;
+      }
+      closeAiBuddy();
+      openPatientFile(aiBuddyState.patient, 'home');
+    }
+
+    function switchAiBuddyToWorkspace() {
+      aiBuddyState.source = 'home';
+      aiBuddyState.snapshot = null;
+      aiBuddyState.nudges = [];
+      aiBuddyState.step = 0;
+      renderAiBuddy();
+    }
+
+    function handleAiBuddyOverlay(event) {
+      if (event.target === document.getElementById('ai-buddy-overlay')) {
+        closeAiBuddy();
+      }
+    }
+
     let homeDrillRegistry = {};
     const defaultHomeDrillNote = 'Click a patient name or use <strong>Open file</strong> to view the patient record. The viewer will return you to this table.';
     let activeHomeDrill = null;
+    const SHELL_ASSET_VERSION = '20260630-ai-buddy-ui-2';
 
     function makeHomeDrillPatient(source, overrides = {}) {
       const base = typeof source === 'string' ? (findVisitingPatientById(source) || {}) : (source || {});
@@ -6124,7 +7607,7 @@
         department: patient.department,
         clinic: patient.clinic
       }));
-      return `./patient-file.html?patient=${payload}`;
+      return `./patient-file.html?patient=${payload}&v=${encodeURIComponent(SHELL_ASSET_VERSION)}`;
     }
 
     let activeQueueFilter = null;
@@ -6268,7 +7751,7 @@
       frame.removeAttribute('srcdoc');
 
       if (patient.isNew) {
-        frame.src = './patient-file.html?new=true';
+        frame.src = `./patient-file.html?new=true&v=${encodeURIComponent(SHELL_ASSET_VERSION)}`;
       } else {
         frame.src = buildPatientFileUrl(patient);
       }
@@ -6313,9 +7796,9 @@
           datasets: [
             { label: 'Open', data: data.open, backgroundColor: 'rgba(211, 75, 82, 0.7)', stack: 'stack0' },
             { label: 'Viewed', data: data.viewed, backgroundColor: 'rgba(245, 164, 42, 0.7)', stack: 'stack0' },
-            { label: 'Acted Upon', data: data.acted, backgroundColor: 'rgba(110, 126, 235, 0.7)', stack: 'stack0' },
+            { label: 'Acted Upon', data: data.acted, backgroundColor: 'rgba(15, 159, 179, 0.7)', stack: 'stack0' },
             { label: 'Resolved', data: data.resolved, backgroundColor: 'rgba(30, 155, 97, 0.7)', stack: 'stack0' },
-            { label: 'Net Active', data: data.netTrend, type: 'line', borderColor: '#8a78e6', borderWidth: 3, pointRadius: 4, pointBackgroundColor: '#8a78e6', fill: false, tension: 0.4 }
+            { label: 'Net Active', data: data.netTrend, type: 'line', borderColor: '#0b9fa8', borderWidth: 3, pointRadius: 4, pointBackgroundColor: '#0b9fa8', fill: false, tension: 0.4 }
           ]
         },
         options: {
@@ -6455,6 +7938,10 @@
           persistDashboardRoute(dashboardRouteState.section, dashboardRouteState.focus);
         }
       }
+
+      if (event.data.type === 'open-ai-buddy') {
+        openAiBuddy(event.data.payload || null, 'patient-file');
+      }
     });
 
 
@@ -6484,7 +7971,7 @@
         { label: 'PSMA PET-CT missing (High Risk)', n: 31, pct: 54, color: '#E8737A', change: 'new', drillKey: 'gap-psma' },
         { label: 'No DEXA scan on ADT', n: 28, pct: 43, color: '#F0A840', change: 'same', drillKey: 'gap-dexa' },
         { label: 'Germline testing not ordered', n: 24, pct: 38, color: '#F0A840', change: 'same', drillKey: 'gap-genetics' },
-        { label: 'ARSI intensification gap', n: 58, pct: 29, color: '#9B8FD4', change: 'new', drillKey: 'gap-arsi' },
+        { label: 'ARSI intensification gap', n: 58, pct: 29, color: '#6B9FA5', change: 'new', drillKey: 'gap-arsi' },
       ];
       (function () {
         const el = document.getElementById('gap-list-render'); if (!el) return;
@@ -6538,7 +8025,7 @@
       </div>
       <div style="text-align:right;flex-shrink:0;">
         <div class="ir-pct">${r.pct}%</div>
-        <div style="font-size:9px;color:#ABA6C8;margin-top:1px;">${r.fields}</div>
+        <div style="font-size:9px;color:#8BA6AA;margin-top:1px;">${r.fields}</div>
           </div>
     </div>`;
         });
@@ -6561,6 +8048,10 @@
     window.addEventListener('beforeunload', persistCurrentShellRoute);
 
     document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && document.getElementById('ai-buddy-overlay')?.classList.contains('on')) {
+        closeAiBuddy();
+        return;
+      }
       if (event.key === 'Escape' && document.getElementById('home-drill-overlay')?.classList.contains('on')) {
         closeHomeDrill();
       }
@@ -6571,7 +8062,7 @@
     <div class="patient-modal">
       <button class="modal-close" onclick="closeAddPatientModal()">×</button>
       <div style="margin-bottom: 2rem;">
-        <h2 style="font-size: 24px; color: #1A1340; margin-bottom: 4px; font-weight: 800;">New Patient Onboarding</h2>
+        <h2 style="font-size: 24px; color: #123B45; margin-bottom: 4px; font-weight: 800;">New Patient Onboarding</h2>
         <p style="color: #64748B; font-size: 14px;">Fill in the demographic and clinical identifiers.</p>
       </div>
       <form id="add-patient-form" onsubmit="handleNewPatientSubmit(event)">
