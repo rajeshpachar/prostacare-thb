@@ -132,8 +132,8 @@ None is a blocker; each is additive on top of the config baseline.
 | # | Gap | Impact | Mitigation / effort |
 |---|---|---|---|
 | **G1** | **Confirm/extend frontend chart renderers** (line, percentile band, Kaplan-Meier) | PSA-over-time, survival curves | Platform doesn't restrict chart subtype; the renderer lives in `metadata-auto-ui` (not audited). Verify line/area exist; KM is custom. **Re-scoped down from "platform can't do it."** |
-| **G2** | **No MDT / tumour-board concept** on the platform | The collaborative review object ProstaCare centers on | **Net-new:** `mdt_review` + `mdt_participant` + `discussion_entry` entities, review lifecycle, discussion UI. Notification plumbing already exists. |
-| **G3** | **Guideline rule evaluation is yours to own** | The clinical "why a gap exists" logic | Build as in-platform workflows (Option A) or upstream (Option B). Platform gives lifecycle/dedup/audit/scheduling, not NCCN/EAU rules. |
+| **G2** | **MDT model** | What ProstaCare needs (per the upstream PRD/FR §8) is **notify-member-or-all + discussion log**, *not* a full tumour-board review object | **Mostly config:** the notify routing exists; add a `discussion_entry` entity + the team-directory. A structured `mdt_review` lifecycle is only needed if scope expands beyond "discussion log" — downgraded from "net-new." |
+| **G3** | **Guideline rule evaluation is yours to own** | The clinical "why a gap exists" logic | **Now fully specified** by the upstream Nudge Logic Handoff (8 rules, exact field inputs/conditions/severities — see §7). Build as in-platform workflows (Option A) or upstream (Option B). Platform gives lifecycle/dedup/audit/scheduling, not the rules themselves. |
 | **G4** | **No ABHA / ABDM connector; FHIR has no wire layer** | India health-ID + EMR interop | FHIR read = config; FHIR write/ABDM = net-new connector project (external facade + Go). De-risked by FHIR-aligned schemas + data-driven adapter resolver. |
 | **G5** | **Numeric/cross-row computed fields** not in the `compute` DSL | ADT-months, PSA doubling time, completeness % | Materialized views / workflow steps (the DSL covers string composition only). |
 | **G6** | **No field-level PHI encryption toggle** in schema | Column-encrypt for Aadhaar/ABHA | At-rest/DB encryption + `read_roles` + `context_mask`; add `Encrypted` attr usage / column-encrypt if compliance requires. |
@@ -159,7 +159,52 @@ None is a blocker; each is additive on top of the config baseline.
 
 ---
 
-## 7. One-line answer
+## 7. Impact of the upstream requirement docs (PRD / FR / SCOPE / Nudge Handoff)
+
+The upstream repo added four requirement docs (`PRD.md`, `FUNCTIONAL_REQUIREMENTS.md`, `SCOPE.md`, `ProstaCare_Nudge_Logic_Handoff.md`). They **validate and sharpen** this plan rather than change its direction. Three concrete impacts:
+
+### 7.1 The nudge ruleset is now fully specified → Option A becomes a drop-in mapping
+The Nudge Logic Handoff documents the exact `computeNudges()` ruleset. Each rule maps directly to a row in a `guideline_rule` config entity + a condition in the parameterized rules workflow (§2 F-Nudges, Option A):
+
+| Rule | Inputs (field IDs) | Condition | Severity / Tag | nova-edge authoring |
+|---|---|---|---|---|
+| Bone scan / SPECT not done | `bone-s`, `risk-s` | `bone-s='Not done'` AND `risk-s` ∈ {High, Very, M1} | urgent / Action required | `sql_exec` WHERE on `staging.risk_tier` + `imaging.bone_scan` |
+| PSMA PET-CT not done | `psma-s`, `risk-s` | `psma-s='Not done'` AND `risk-s` ∈ {High, Very} | urgent / Action required | same pattern, `imaging.psma` |
+| Bone protection not initiated | `bp-s` | `bp-s='Not started'` | urgent / Action required | `treatment.bone_protection` |
+| DEXA not done | `dexa-s` | `dexa-s='Not done'` | warning / Recommendation | `imaging.dexa` |
+| Germline/somatic not ordered | `gen-s` | `gen-s='Not done'` | warning / Recommendation | `imaging.genomics` |
+| ARSI intensification | `cast-s`, `risk-s`, `arsi-s` | `cast-s='HSPC'` AND `risk-s`⊇High AND `arsi-s='Not initiated'` | warning / Recommendation | multi-field `branch`/WHERE |
+| Follow-up PSA not scheduled | `fup-d` | `fup-d` empty | info / Reminder | NULL check on `treatment.followup_date` |
+| Psychosocial/sexual-health screening | — | always | info / Reminder | unconditional reminder row |
+
+Each becomes one `guideline_rule` config row (`rule_id`, `inputs`, `condition`, `severity`, `tag`, `version`), so the clinical team edits **data, not SQL** — exactly the governance the Handoff §7 asks for.
+
+### 7.2 The Handoff's "production next steps" are this plan, almost verbatim
+The Handoff §7 lists the production architecture it recommends; each line is already covered by a nova-edge mechanism:
+
+| Handoff "next step" | nova-edge mechanism (this plan) |
+|---|---|
+| Move rule definitions out of front-end code | `guideline_rule` config entity (§7.1) |
+| Evaluate on a backend / governed rules engine | workflow `sql_exec` scan + `policies` cron / `on_update` subscription |
+| Version each rule with clinical sign-off metadata | `version` + sign-off columns on `guideline_rule`; canonical compute-spec validation |
+| Separate `opened` / `viewed` / `acted` / `resolved` states | nudge `status` lifecycle — matches the care-gap `workflow_status` enum and the existing nudge-trend stacked bar |
+| Connect patient-level nudge events to cohort analytics | nudge entity → RLS-scoped `mat_views` → dashboard widgets (fixes the Handoff's §6.1 "static trend arrays" limitation) |
+
+This is strong external validation: the demo team independently arrived at the same target architecture this feasibility study maps onto the platform.
+
+### 7.3 A nuance the Handoff makes explicit (and the platform already honors)
+Handoff §5: *"Acknowledge & log does **not** resolve the nudge — it reappears unless the underlying source fields change."* That is **precisely** the platform's idempotent behavior: the `INSERT…SELECT…WHERE <rule> AND NOT EXISTS(open nudge)` re-scan keeps the nudge open while the condition holds, and the care-gap auto-close (condition clears → status flips) resolves it when the field changes. No custom logic needed — the demo's intended semantics are the platform's default.
+
+### 7.4 Phasing aligned to FR priorities
+The FR doc's `Must / Should / Future` columns give a clean build phasing:
+- **Must / Should (FR-0xx, mostly "Implemented" in demo)** → all config-buildable on nova-edge now: shell nav, home KPIs/drilldowns, patient list, patient file sections, nudges (FR-060/061/062), team discussion + log (FR-070..075), Rx upload (FR-080..083), population analytics + drilldowns (FR-100..106), privacy masking (FR-111).
+- **Future (FR-003/043/064/076/084/092/112/113)** → exactly this plan's gaps: production auth/RBAC, durable persistence, rules governance/versioning, **real** notification delivery, secure document storage, guideline content governance, server-side audit, encryption/compliance. None blocks the config build; each is the additive work in §4–§5.
+
+SCOPE.md §6 ("Future Production Scope") and PRD §5 (Non-Goals defer HIS/LIS/PACS/ABHA/email "in this repository version") confirm the integration frontier (G4) is intentionally future — consistent with phasing the connectors after the config build.
+
+---
+
+## 8. One-line answer
 
 > **Yes — ProstaCare can run on nova-edge-pg, and the build is pure configuration to stand up.** The platform supplies records, dashboards, RBAC/PII, notifications, documents, care-gap lifecycle, audit, search, partitioned time-series, computed columns, and a data-driven HIS adapter. The genuinely net-new work is the **MDT/tumour-board model**, the **guideline rule logic itself** (authored as workflows), and **India health-system connectors** (ABHA/ABDM greenfield; FHIR write needs an adapter). Chart richness is a frontend-renderer question, not a platform limit.
 
