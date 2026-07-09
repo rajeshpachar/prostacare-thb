@@ -274,7 +274,7 @@ OUTPUT : nudge shows "Logged with team"; discussion trail entry
 DERIVED: nudge-trend "acted" count increments
 ```
 
-### W7 · MDT notify & discussion
+### W7 · MDT notify & discussion (explicit steps + email via AWS SES)
 ```mermaid
 flowchart LR
   A[From nudge or patient] --> M{Recipient?}
@@ -283,18 +283,45 @@ flowchart LR
   M1 --> F[Reason + subject + note]
   M2 --> F
   F --> P[Preview message]
-  P --> S[Send in-app + email]
-  S --> L[Append discussion_entry + delivery status]
+  P --> Q[Create Notification queued]
+  Q --> IN[In-app inbox item + task]
+  Q --> EM[Send email via AWS SES]
+  EM --> DS[Record delivery status: sent / bounced / failed]
+  IN --> L[Append discussion_entry]
+  DS --> L
 ```
 ```
-TRIGGER: acknowledge-from-nudge (W6) OR "Discuss with Team"
+TRIGGER: acknowledge-from-nudge (W6)  OR  "Discuss with Team"  OR  new-patient (W1)
 INPUTS : recipient_mode, recipient(s), reason, subject, note, patient_code
-LOGIC  : resolve recipients (member OR mdt_panel of department)
-         create Notification(reason, body, recipients); send via channel(s)
-         APPEND discussion_entry to patient trail; record delivery status
-OUTPUT : MDT informed; per-patient discussion log updated; toast
-DERIVED: MDT-review-rate, collaboration audit
+LOGIC (explicit steps):
+  1. RESOLVE recipients:
+        IF mode = member → [selected app_user]
+        IF mode = all    → mdt_panel(department) members
+     recipient_emails = [u.email for u in recipients]        // email = the login identity
+  2. RENDER template(reason, subject, note, patient_code, de-identified summary link)
+  3. CREATE Notification(status = queued, recipients, body, at = now)
+  4. FOR EACH recipient:
+        a. CREATE in_app_notification  → inbox item (+ optional task) + live push (sse)
+        b. SEND email via AWS SES      → from = configured verified sender,
+                                          to  = recipient.email
+        c. ON SES accept  → delivery_status = sent (store SES messageId)
+           ON SES failure → delivery_status = failed → retry (transient) / flag (hard bounce)
+  5. APPEND discussion_entry to the patient's discussion trail
+  6. IF source = nudge → LOG Nudge_event(routed_to_mdt)
+OUTPUT : MDT informed (inbox + email); per-patient discussion log; per-recipient delivery status; toast
+DERIVED: MDT-review-rate, collaboration audit, notification delivery metrics
 ```
+
+**Notification triggers · channels · delivery (covers the whole notification surface):**
+| Trigger | Fires from | Channel |
+|---|---|---|
+| Care-gap routed to MDT | W6 acknowledge | in-app + **email (SES)** |
+| New patient registered | W1 | in-app + email (SES) to MDT panel |
+| MDT review request / case discussion | Patient File "Discuss with Team" | in-app + email (SES) |
+| Urgent escalation *(if SLA enabled)* | unactioned urgent nudge after N days | in-app + email (SES) to HOD/coordinator |
+
+- **Email transport = AWS SES.** Users log in with their **email ID** (the identity), and every configured notification is delivered to that email via SES. Sender is a verified SES domain/address; `messageId` + status (sent / bounced / complaint / failed) are stored on `Notification` for audit and delivery metrics; transient failures retry, hard bounces are flagged.
+- **In-app inbox** is the primary channel (each notification creates an inbox item and, where relevant, a task); **email (SES)** mirrors it so nothing is missed. SMS / WhatsApp are future channels behind the same `Notification` record.
 
 ### W8 · Cohort analytics (derivation)
 ```mermaid

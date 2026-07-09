@@ -11,6 +11,8 @@ ORDER = [
     ("Functional & Logic Spec", "PROSTACARE_FUNCTIONAL_LOGIC_SPEC.md"),
     ("NOVA Edge Alignment Review", "NOVAEDGE_ALIGNMENT_REVIEW.md"),
     ("Build Spec (v1)", "PROSTACARE_BUILD_SPEC_V1.md"),
+    ("Cross-Tenant Aggregation", "CROSS_TENANT_AGGREGATION_SPEC.md"),
+    ("Tenant Onboarding Plan", "TENANT_ONBOARDING_PLAN.md"),
     ("Field Dictionary", "FIELD_DICTIONARY.md"),
     ("Flow Clarity & Open Questions", "FLOW-CLARITY-AND-OPEN-QUESTIONS.md"),
 ]

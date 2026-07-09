@@ -36,7 +36,9 @@ We will not start the `prostate_cancer` preset until the team model, data bounda
 | O-S1 | Patients created here vs synced from HIS (match key) | ⬜ OPEN (P0) |
 | O-TMPL1 | Single-disease vs templatable multi-disease core | ⬜ OPEN (P0) |
 | O-PH1/2/3 | Pharma role (NVS=Novartis?), data model, rule governance/COI | ⬜ OPEN (P0) |
-| O-N* / O-CH* | Nudge ownership/SLA + notification channels | ⬜ OPEN (P1) |
+| O-CH | Notification channels = **in-app inbox + email via AWS SES** (login identity = email); SMS/WhatsApp future | ✅ DECIDED |
+| O-N* | Nudge ownership + SLA/escalation + snooze | ⬜ OPEN (P1) |
+| O-AGG | Cross-tenant aggregation via Zygo Data Cloud (de-identified `sponsor_metric` → pull → sponsor) | 🟡 SPEC'D — see `CROSS_TENANT_AGGREGATION_SPEC.md` |
 | O-REP* | Reporting grain & destination | ⬜ OPEN (P1) |
 | O-DOM* | Domain / hosting / data-residency / IP | ⬜ OPEN (P2) |
 

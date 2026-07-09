@@ -109,6 +109,8 @@ Materialized, RLS-scoped; refresh on cron. Covers the whole `Home_Dashboard` + `
 | `guideline_rule` | config | The 8 care-gap rules as versioned, signed-off config (§6) |
 | `evidence_pack` / `guideline_pack` | config | The bounded "brain" for AI Buddy (§8) |
 
+**Notifications & email (AWS SES).** Identity = **email** (users log in with their email ID). The MDT-notify workflow (functional spec W7) sends every configured notification via **AWS SES**: resolve recipients → in-app inbox item (+task) → **SES email** to `recipient.email` → store SES `messageId` + delivery status (sent/bounced/complaint/failed) on `Notification` → append discussion log. NOVA Edge encoding: the workflow `email` step is backed by an **SES integration** (verified sender domain; credentials in `system_integrations`); in-app via `in_app_notification` + `sse_publish`. SMS/WhatsApp are future channels behind the same `Notification` record. Triggers covered: care-gap→MDT, new patient, discuss-with-team, urgent escalation.
+
 ---
 
 ## 5. Sheet → entity migration map
