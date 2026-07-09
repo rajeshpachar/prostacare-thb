@@ -20,17 +20,18 @@ That promise is only structurally possible if the data model is **longitudinal, 
 
 ---
 
-## 2. Terminology — "multi-tenant" reconciled with the single-tenant decision
+## 2. Terminology — tenancy model (updated): **tenant = institution**
 
-The product is **multi-institution and multi-doctor** — it onboards many institutions and their doctors. On NOVA Edge this is implemented as **one NOVA Edge tenant (one Postgres schema)** with **institution / department / doctor modelled as org-units + row-level scopes** inside it. This is the decision already recorded (`FLOW-CLARITY §9.1`): single tenant, chosen so **cross-institution / cross-doctor cohort reporting is native**.
+**Decision (confirmed): each onboarded institution is its own NOVA Edge tenant** (one Postgres schema per hospital). Therefore **no `institution_id` column is stored anywhere** — the tenant boundary *is* the institution, and every row already belongs to that institution. Inside a tenant, **department / doctor / role** are modelled as org-units + row-level scopes to enforce the department-scoped access boundary.
 
-| Business word | Technical implementation on NOVA Edge |
+| Reporting need | How it works under tenant-per-institution |
 |---|---|
-| "Multi-tenant platform" / "onboard institutions & doctors" | **Single** NOVA Edge tenant + `institution`/`department`/`app_user` org-units + scopes |
-| "Each doctor/team isolated" | Row-level `scopes` (not separate tenants) — see §10 |
-| Alternative: per-doctor dedicated tenant (internet SaaS) | `O-DEP` — **still open**; breaks native cross-reporting, needs a separate de-identified registry layer. Not v1. |
+| Cross-**doctor** / cross-**department** cohort reporting (within a hospital) | **Native** — one schema per institution; scopes control who sees what |
+| Cross-**institution** reporting (sponsor / registry / benchmarking) | A separate **de-identified aggregation layer above the tenants** — pushes de-identified cohort metrics up; matches "sponsor sees de-identified aggregate only" |
+| "Each doctor/team isolated" (within a hospital) | Row-level `scopes` inside the institution's tenant |
+| Per-**doctor** dedicated tenant (internet SaaS, `O-DEP`) | Different again — not chosen; would isolate each doctor and needs the same de-identified layer to report across them |
 
-> If the business later chooses per-doctor dedicated tenants (`O-DEP`), that is a different control-plane project; this spec assumes the confirmed single-tenant + org-unit model.
+> Net: cross-reporting splits into two — **within-institution** (native, in-tenant) and **cross-institution** (de-identified aggregation layer). The de-identified layer is also exactly the sponsor/pharma surface (§10), so it does double duty.
 
 ---
 
@@ -60,11 +61,12 @@ The V2 workbook is **fully de-identified** (`patient_code` is "the only patient-
 Legend for cardinality: **1:1** = one row per patient (current-state) · **1:N dated** = many dated rows per patient (longitudinal) · **derived** = computed, never typed.
 
 ### 4.0 Tier 0 — Tenancy & identity (NEW; absent from workbook)
+> **Tenant = institution.** The institution is the tenant boundary, so there is **no `institution` entity and no `institution_id`** inside the schema — the tenant provides it. The entities below live inside each institution's tenant.
+
 | Entity | Cardinality | Key fields | Notes |
 |---|---|---|---|
-| `institution` | org-unit | id, name, type, city, state, region | The onboarded hospital/site |
-| `department` | org-unit | id, institution_id→, name (e.g. "Urology & Radiation Oncology") | Scope boundary for clinical visibility |
-| `app_user` | — | id, institution_id→, department_id→, display_name, specialty, role→, identity_ref, status | Doctor/coordinator/ops/admin login |
+| `department` | org-unit | id, name (e.g. "Urology & Radiation Oncology") | Scope boundary for clinical visibility |
+| `app_user` | — | id, department_id→, display_name, specialty, role→, identity_ref, status | Doctor/coordinator/ops/admin login |
 | `role` | config | HOD, Treating Clinician, MDT Member, Coordinator, Ops/Quality, Admin | Drives capability matrix (§10) |
 | `care_team_member` | link | patient_code→, app_user→, relation (treating/primary/member), from, to | Per-patient care team (O-T, design-ready) |
 | `mdt_panel` / `mdt_panel_member` | config/link | department_id→, app_user→ | The department MDT roster (notify-all target) |
@@ -73,7 +75,7 @@ Legend for cardinality: **1:1** = one row per patient (current-state) · **1:N d
 ### 4.1 Tier 1 — Patient hub & current-state (1:1 per patient)
 | Entity | Source sheet/section | Key fields (from Field_Dictionary) |
 |---|---|---|
-| `patient` (hub) | Demographics_Entry + `diagnosis_date` moved here | patient_code (PK), institution_id→, department_id→, primary_clinician_id→, registry_enrolment_date, age_at_diagnosis_years, language_preference, healthcare_coverage, referring_hospital_centre, referral_source, state, travel_distance_km, diagnosis_date |
+| `patient` (hub) | Demographics_Entry + `diagnosis_date` moved here | patient_code (PK), department_id→, primary_clinician_id→, registry_enrolment_date, age_at_diagnosis_years, language_preference, healthcare_coverage, referring_hospital_centre, referral_source, state, travel_distance_km, diagnosis_date *(no institution_id — tenant = institution)* |
 | `pathology` | Clinical_Entry · Presenting Complaint + DRE + Biopsy | primary_complaint, duration, ipss_score, bowel_rectal_symptoms, dre_findings, prostate_volume_cc, biopsy_date, biopsy_type, pi_rads_score, gleason_score, isup_grade_group, cores_positive_total, core_involvement_pct, perineural_invasion, ece_extracapsular_extension — **1:1** (re-biopsy → new row + journey event) |
 | `patient_condition` | Clinical_Entry · comorbidity_1..9 + family_history_1..6 | type (comorbidity\|family_history), condition, present — **normalized** (replaces 15 flag columns; enables clean cohort pivots) |
 | `treatment_plan` | Treatment_Entry · Intent & MDT | treatment_intent, mdt_tumour_board_status, date_of_mdt_review, clinical_trial_eligibility, treatment_start_date — **1:1** header |
@@ -121,7 +123,7 @@ Materialized, RLS-scoped; refresh on cron. Covers the whole `Home_Dashboard` + `
 | `Journey_Events` | `journey_event` | Keep. Role narrows to milestone narrative (staging/treatment now have their own history). Wire the "Add to Timeline" action. |
 | `Care_Gap_Tracker` | `nudge` + `nudge_event` (**NEW**) + derived read-model | Flag sheet → lifecycle. All counts/severity become **derived** over `nudge`. |
 | `Home_/Population_Dashboard`, `Dashboard_Derived`, `Dashboard_Coverage` | Tier-3 materialized views | Inventory → mat-view specs (§7). |
-| *(none)* | `institution`, `department`, `app_user`, `role`, `care_team_member`, `mdt_panel`, `notification`, `document`, `audit_event`, `guideline_rule`, `evidence_pack` | Net-new — the workbook has no home for these (which is the signal it's an entry surface, not the system of record). |
+| *(none)* | `department`, `app_user`, `role`, `care_team_member`, `mdt_panel`, `notification`, `document`, `audit_event`, `guideline_rule`, `evidence_pack` | Net-new — the workbook has no home for these (which is the signal it's an entry surface, not the system of record). *(No `institution` entity — the institution is the tenant.)* |
 
 ### 5.5 Bugs that close as a consequence of the migration
 | Demo bug (PRODUCT-PRD §6) | Root cause | Closes because |
@@ -178,14 +180,16 @@ The workbook's `Governed_Intelligence` tab defines a strict boundary: AI Buddy i
 
 ## 9. Multi-institution onboarding & provisioning
 
-Since the workbook has no tenancy layer, onboarding is net-new. Flow (admin-provisioned, single tenant):
+Since the workbook has no tenancy layer, onboarding is net-new. Because **tenant = institution**, onboarding a hospital = provisioning its tenant, then setting up departments and doctors inside it:
 
 ```
-Admin → create institution → create department(s) → onboard app_users (doctors/coordinators/ops)
+Platform admin → PROVISION institution tenant (new schema, seed preset, theme)
+Institution admin (in-tenant) → create department(s) → onboard app_users (doctors/coordinators/ops)
       → assign role + department scope + MDT-panel membership
       → (per patient) set primary_clinician + care-team
-Patient registry entry (Add New Patient) → scoped to institution/department → appears in cohort
+Patient registry entry (Add New Patient) → scoped to department → appears in that institution's cohort
 ```
+Cross-institution rollup (sponsor/registry) reads the **de-identified aggregation layer** above tenants, never the tenants directly.
 
 - **Identity source (`O-ONB4`, open):** hospital SSO (Azure AD — NOVA Edge supports it) or platform-local accounts; confirm per institution.
 - **Onboarding roster (`O-ONB`, open):** no predefined doctor-team list exists in any doc — must be supplied per launch institution.

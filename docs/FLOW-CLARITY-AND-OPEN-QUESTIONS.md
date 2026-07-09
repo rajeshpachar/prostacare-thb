@@ -25,7 +25,7 @@ We will not start the `prostate_cancer` preset until the team model, data bounda
 ### Decisions log (live)
 | ID | Decision | Status |
 |---|---|---|
-| O-TEN | **Single tenant** (one shared schema) — chosen for cross-reporting | ✅ DECIDED |
+| O-TEN | **Tenant = institution** (one schema per hospital; no `institution_id`). Within-institution cross-doctor/dept reporting is native; cross-institution = de-identified aggregation layer above tenants. *(Supersedes the earlier "single shared tenant" note.)* | ✅ DECIDED (updated) |
 | O-DEP | Deployment model: institutional single tenant **vs** per-doctor SaaS tenant ("tenant-C", internet self-serve) | ⬜ OPEN (P0) |
 | O-ONB | Predefined doctor-teams to onboard? **None found in docs/scope** | ⬜ OPEN (P0) |
 | O-ACC (A) | Clinical operational visibility = **department/team-scoped** (HOD/coordinator may be tenant-wide) | ✅ DECIDED |
