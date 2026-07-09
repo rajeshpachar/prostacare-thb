@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ProstaCare — Spec Viewer</title>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<style>
+ :root{--ink:#1D4F91;--sky:#2E92FF;--wash:#EAF4FF;--red:#D34B52;--amber:#D58A1C;--green:#4DB57A;--mut:#5b6478;}
+ *{box-sizing:border-box}
+ body{margin:0;font-family:-apple-system,"DM Sans",Segoe UI,Roboto,sans-serif;color:#132a45;background:#f5f9ff}
+ header{position:sticky;top:0;z-index:20;background:linear-gradient(90deg,#1D4F91,#2E92FF);color:#fff;padding:12px 22px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 12px rgba(20,40,80,.18)}
+ header h1{font-size:16px;margin:0;font-weight:700}
+ header .sub{font-size:12px;opacity:.9}
+ header .actions{margin-left:auto;display:flex;gap:8px}
+ header button{font-size:12px;border:1px solid rgba(255,255,255,.5);background:rgba(255,255,255,.12);color:#fff;border-radius:8px;padding:5px 11px;cursor:pointer}
+ header button:hover{background:rgba(255,255,255,.25)}
+ nav.tabs{position:sticky;top:49px;z-index:19;background:#fff;border-bottom:1px solid #dbe6f5;display:flex;flex-wrap:wrap;gap:4px;padding:8px 18px}
+ nav.tabs button{font-size:13px;border:1px solid #cfe0f5;background:#fff;color:#1D4F91;border-radius:999px;padding:5px 13px;cursor:pointer}
+ nav.tabs button.active{background:var(--sky);color:#fff;border-color:var(--sky)}
+ main{max-width:1080px;margin:0 auto;padding:26px 26px 90px}
+ .md h1{font-size:24px;color:var(--ink);border-bottom:2px solid var(--wash);padding-bottom:8px;margin-top:6px}
+ .md h2{font-size:19px;color:var(--ink);margin-top:30px}
+ .md h3{font-size:16px;color:#245c9e;margin-top:22px}
+ .md h4{font-size:14px;color:#245c9e}
+ .md p,.md li{font-size:14px;line-height:1.62}
+ .md code{background:#eef4fc;padding:1px 5px;border-radius:5px;font-family:"DM Mono",ui-monospace,monospace;font-size:12.5px;color:#0b3a6b}
+ .md pre{background:#0f2138;color:#e7eefb;padding:14px 16px;border-radius:12px;overflow:auto;font-size:12.5px;line-height:1.5}
+ .md pre code{background:none;color:inherit;padding:0}
+ .md table{border-collapse:collapse;width:100%;margin:14px 0;font-size:13px;display:block;overflow-x:auto}
+ .md th,.md td{border:1px solid #dbe6f5;padding:7px 10px;text-align:left;vertical-align:top}
+ .md th{background:var(--wash);color:var(--ink)}
+ .md tr:nth-child(even) td{background:#fafcff}
+ .md blockquote{border-left:4px solid var(--sky);background:var(--wash);margin:14px 0;padding:8px 14px;border-radius:0 8px 8px 0}
+ .md .mermaid{background:#fff;border:1px solid #e2ecfa;border-radius:12px;padding:14px;margin:16px 0;text-align:center;overflow-x:auto}
+ .md a{color:var(--sky)}
+ footer{text-align:center;color:var(--mut);font-size:12px;padding:24px}
+ @media print{header,nav.tabs,.actions{position:static}.doc{display:block!important;page-break-after:always}}
+</style></head>
+<body>
+<header>
+ <h1>ProstaCare — Specification Viewer</h1>
+ <span class="sub">clinical + build review · rendered from repo docs</span>
+ <div class="actions"><button onclick="window.print()">Print / PDF</button></div>
+</header>
+<nav class="tabs" id="tabs"></nav>
+<main id="main"></main>
+<footer>ProstaCare · self-contained spec viewer · diagrams via Mermaid</footer>
+<script id="payload" type="application/json">__DATA__</script>
+<script>
+ const DOCS = JSON.parse(document.getElementById('payload').textContent);
+ mermaid.initialize({startOnLoad:false, theme:'base', securityLevel:'loose',
+   themeVariables:{primaryColor:'#EAF4FF',primaryBorderColor:'#2E92FF',primaryTextColor:'#1D4F91',lineColor:'#2E92FF',fontFamily:'DM Sans, sans-serif'}});
+ const tabs=document.getElementById('tabs'), main=document.getElementById('main');
+ DOCS.forEach((d,i)=>{
+   const b=document.createElement('button'); b.textContent=d.title; b.onclick=()=>show(i);
+   if(i===0)b.classList.add('active'); tabs.appendChild(b);
+   const sec=document.createElement('section'); sec.className='doc md'; sec.id='doc-'+i;
+   sec.style.display=i===0?'block':'none'; sec.innerHTML=marked.parse(d.md); main.appendChild(sec);
+ });
+ function renderMermaidIn(sec){
+   sec.querySelectorAll('code.language-mermaid').forEach(code=>{
+     const pre=code.closest('pre')||code; const div=document.createElement('div');
+     div.className='mermaid'; div.textContent=code.textContent; pre.replaceWith(div);
+   });
+   try{ mermaid.run({nodes:sec.querySelectorAll('.mermaid')}); }catch(e){ console.error(e); }
+ }
+ const rendered=new Set();
+ function show(i){
+   DOCS.forEach((_,j)=>document.getElementById('doc-'+j).style.display=j===i?'block':'none');
+   [...tabs.children].forEach((b,j)=>b.classList.toggle('active',j===i));
+   if(!rendered.has(i)){rendered.add(i);renderMermaidIn(document.getElementById('doc-'+i));}
+   window.scrollTo(0,0);
+ }
+ rendered.add(0); renderMermaidIn(document.getElementById('doc-0'));
+</script>
+</body></html>
