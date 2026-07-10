@@ -61,12 +61,12 @@ The V2 workbook is **fully de-identified** (`patient_code` is "the only patient-
 Legend for cardinality: **1:1** = one row per patient (current-state) · **1:N dated** = many dated rows per patient (longitudinal) · **derived** = computed, never typed.
 
 ### 4.0 Tier 0 — Tenancy & identity (NEW; absent from workbook)
-> **Tenant = institution.** The institution is the tenant boundary, so there is **no `institution` entity and no `institution_id`** inside the schema — the tenant provides it. The entities below live inside each institution's tenant.
+> **Tenant = institution.** The institution is the tenant boundary, so there is **no `institution` entity and no `institution_id`**. **There is also no `department` entity** — access differs by **role**, not department; all clinical users see that institution's patients. The MDT panel is a **notification group, not an access boundary**.
 
 | Entity | Cardinality | Key fields | Notes |
 |---|---|---|---|
-| `department` | org-unit | id, name (e.g. "Urology & Radiation Oncology") | Scope boundary for clinical visibility |
-| `app_user` | — | id, department_id→, display_name, specialty, role→, identity_ref, status | Doctor/coordinator/ops/admin login |
+| `app_user` | — | id, display_name, **email (login identity)**, specialty, role→, status | Clinician / HOD / Coordinator / Ops / Admin |
+| **record-lock fields** | on every entered entity | `created_at`, `created_by`, `last_edited_at`, `locked`, `locked_at`, `unlocked_until`, `unlock_reason` | Edit window → auto-lock → HOD time-bound unlock (functional spec §1.8 / W10) |
 | `role` | config | HOD, Treating Clinician, MDT Member, Coordinator, Ops/Quality, Admin | Drives capability matrix (§10) |
 | `care_team_member` | link | patient_code→, app_user→, relation (treating/primary/member), from, to | Per-patient care team (O-T, design-ready) |
 | `mdt_panel` / `mdt_panel_member` | config/link | department_id→, app_user→ | The department MDT roster (notify-all target) |
@@ -204,7 +204,8 @@ Cross-institution rollup (sponsor/registry) reads the **de-identified aggregatio
 
 | Layer | Decision | NOVA Edge mechanism |
 |---|---|---|
-| Operational visibility | Department/team-scoped; HOD/coordinator tenant-wide | `row_policies`/`scopes` with `$user.department`/`$user.teams`; role grants |
+| Operational visibility | **Tenant-wide for clinical roles** (no department scoping); HOD is the privileged role | role grants; the tenant *is* the boundary |
+| Record immutability | Edit window → auto-lock → **HOD-only, time-bound unlock** (reason required, audited) | lock fields + scheduled `auto_lock` workflow + `unlock` workflow gated on role |
 | Non-clinical / ops / sponsor | De-identified aggregate only | Exposed **only** to RLS-scoped, **de-identified** materialized views; no entity-row access |
 | Identifiers (if §3-B/C) | Masked-by-default + audited reveal | isolated `patient_identity`; column `read_roles` + `context_mask`; reveal → `audit_event` |
 | Rules/AI governance | Independent clinical sign-off; sponsor can't edit | `guideline_rule`/`evidence_pack` write-restricted to Admin+clinical-committee role |

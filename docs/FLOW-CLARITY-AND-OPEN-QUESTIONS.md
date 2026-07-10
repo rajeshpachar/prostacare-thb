@@ -28,7 +28,9 @@ We will not start the `prostate_cancer` preset until the team model, data bounda
 | O-TEN | **Tenant = institution** (one schema per hospital; no `institution_id`). Within-institution cross-doctor/dept reporting is native; cross-institution = de-identified aggregation layer above tenants. *(Supersedes the earlier "single shared tenant" note.)* | ✅ DECIDED (updated) |
 | O-DEP | Deployment model: institutional single tenant **vs** per-doctor SaaS tenant ("tenant-C", internet self-serve) | ⬜ OPEN (P0) |
 | O-ONB | Predefined doctor-teams to onboard? **None found in docs/scope** | ⬜ OPEN (P0) |
-| O-ACC (A) | Clinical operational visibility = **department/team-scoped** (HOD/coordinator may be tenant-wide) | ✅ DECIDED |
+| O-ACC (A) | **Simplified (supersedes department-scoping):** **no `department` entity**; all clinical roles see the institution's patients (tenant is the boundary); **HOD = privileged role** (unlock, notify-all-MDT, audit). MDT panel = notification group, not access. | ✅ DECIDED (updated) |
+| O-LOCK | **Record edit window → auto-lock → HOD time-bound unlock** (defaults 48 h / 24 h, reason required, audited). Append-only tiers need no unlock to continue care. | ✅ DECIDED (durations to confirm) |
+| O-CARD | Every model is **entered on a named screen or derived** (no orphan layers); 1:1 vs 1:N marked per model (one treatment *plan*, many treatment *lines*); duplicates blocked by unique keys | ✅ DECIDED |
 | O-ACC (B) | Non-clinical / ops / quality / **pharma sponsor = de-identified aggregate only** (PHI firewall) | ✅ DECIDED |
 | O-ACC (C) | Identifiers **masked-by-default + audited reveal** | ✅ DECIDED |
 | O-A1 | Multi-user vs single console | ⬜ OPEN (P0) |

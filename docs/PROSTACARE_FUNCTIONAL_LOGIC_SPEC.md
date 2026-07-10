@@ -19,15 +19,24 @@
 Each box below is one "data model" (a table of records). **Cardinality** tells you how many rows exist per patient:
 `1 per patient` = current state · `many (dated)` = a history log · `derived` = calculated, never typed.
 
-### 1.1 Who & where (organisation) — *added for multi-institution onboarding*
-> **Tenant = institution.** Each onboarded hospital is its own tenant, so **no `institution_id` is stored** — the tenant boundary already scopes every row to one hospital. Cross-doctor/department reporting is native inside a tenant; cross-*institution* (sponsor/registry) reporting is a separate **de-identified aggregation layer above tenants** (see §5 access rule).
+### 1.1 Who uses it (roles) — *simplified: no department*
+> **Tenant = institution.** Each onboarded hospital is its own tenant, so **no `institution_id` is stored**. There is **no `department` entity**: all clinical users see that institution's patients, and access differs by **role**, not by department. "Teams" (the MDT panel) are a **notification group, not an access boundary**. Cross-*institution* reporting is a separate **de-identified aggregation layer above tenants**.
 
 | Model | Cardinality | Key variables | Plain meaning |
 |---|---|---|---|
-| **Department** | org | `department_id`, name | e.g. "Urology & Radiation Oncology" — the visibility boundary within the institution |
-| **Doctor / User** | org | `user_id`, name, specialty, role, department | A clinician/coordinator/admin who logs in |
-| **Care team** | link | patient ↔ user, relation, dates | Who looks after this patient |
-| **MDT panel** | link | department ↔ users | The tumour-board roster (the "notify all MDT" target) |
+| **User** | many per tenant | `user_id`, name, **`email` (login identity)**, specialty, `role` | Anyone who logs in |
+| **Role** | config | Clinician · **HOD (privileged)** · Coordinator · Ops/Quality · Admin | What you may do |
+| **MDT panel member** | many | `user_id` | The "notify all MDT" group — **no access implication** |
+| **Primary clinician** | 1 per patient | `patient.primary_clinician_id` | The treating clinician (attribution, not restriction) |
+
+**Access by role (the whole model):**
+| Role | Sees | May do |
+|---|---|---|
+| **Clinician** | all patients in the institution | enter/edit clinical data **within the edit window** (§1.8); act on nudges; notify a member |
+| **HOD** | all patients | everything a Clinician can **+ privileged:** **unlock a locked record** (time-bound), notify all MDT, view audit |
+| **Coordinator** | all patients | clinical entry + manage roster / MDT panel |
+| **Ops / Quality** | **de-identified aggregates only** | dashboards; no patient records |
+| **Admin** | no clinical data | users, roles, rules, config |
 
 ### 1.2 The patient & current clinical state
 | Model | Cardinality | Key variables | Example |
@@ -61,10 +70,8 @@ Each box below is one "data model" (a table of records). **Cardinality** tells y
 ### 1.5 How the models relate (visual)
 ```mermaid
 erDiagram
-  DEPARTMENT ||--o{ USER : staffs
-  DEPARTMENT ||--o{ PATIENT : registers
-  USER ||--o{ CARE_TEAM : "member of"
-  PATIENT ||--o{ CARE_TEAM : "cared by"
+  USER ||--o{ PATIENT : "primary clinician (1:N)"
+  USER ||--o{ MDT_PANEL_MEMBER : "notify group"
   PATIENT ||--|| PATHOLOGY : "1:1"
   PATIENT ||--|| TREATMENT_PLAN : "1:1"
   PATIENT ||--|| OUTCOME : "1:1"
@@ -102,6 +109,70 @@ visit_status(patient):
 **Recommended (hybrid, low-cost):** add an **optional `Encounter`** — `encounter_id`, `encounter_date`, `type` (OPD / review / procedure / MDT), `clinician` — and a **nullable `encounter_id`** on each dated event. Events may reference an encounter (to group "everything done at the 2026-06-15 visit") but are **not required** to (registry backfill has no clean visits). Turn it on per-site when visit grouping or HIS-appointment sync is needed. This maps cleanly to the platform's appointment/encounter model later without reworking the event tiers.
 
 > **Sign-off question (added to §7):** confirm registry-by-event for v1 with an optional Encounter, or require encounter-bound entry.
+
+---
+
+### 1.7 Cardinality & provenance — every model, how it is populated
+
+**The two rules that keep the model honest:**
+1. **Nothing exists that isn't either *entered on a named screen* or *derived*.** No orphan tables, no invisible layers.
+2. **1:1 when the fact can only be true once at a time** (current state) · **1:N when the fact recurs over time** (history). This is what prevents duplicate rows.
+
+| Model | Per patient | How it is populated (UX flow) | Or derived from | Editable? |
+|---|---|---|---|---|
+| **Patient** (hub) | **1:1** | *Add New Patient* → Demographics form | — | edit window → lock |
+| **Pathology** | **1:1** | *Clinical Assessment* → Complaint / DRE / Biopsy | — | edit window → lock |
+| **Treatment plan** (intent, MDT status/date, trial) | **1:1** | *Treatment Plan* → Intent & MDT | — | edit window → lock |
+| **Outcome** | **1:1** | *Outcomes* form | — | edit window → lock |
+| **Patient condition** (comorbidity / family hx) | **1:N** | *Clinical Assessment* → chip groups | — | edit window → lock |
+| **PSA reading** | **1:N dated** | *Clinical Assessment* → “+ Add PSA Entry” | — | append-only |
+| **Staging assessment** | **1:N dated** | *Clinical Assessment* → TNM & Risk (each save = new dated row) | — | append-only |
+| **Imaging study** | **1:N dated** | *Clinical Assessment* → Imaging & Molecular | — | append-only |
+| **Treatment line** | **1:N dated** | *Treatment Plan* → ADT / Anti-androgen / ARSI / Chemo / RT | — | append-only |
+| **Supportive-care event** | **1:N dated** | *Treatment Plan* → Bone Health & Supportive Care | — | append-only |
+| **Journey event** | **1:N dated** | *Patient Journey* → Add Event | — | append-only |
+| **Encounter** *(optional)* | **1:N dated** | Visit entry (optional) | — | append-only |
+| **Notification / discussion** | **1:N** | *Team modal* → Send | — | immutable |
+| **Document (Rx)** | **1:N** | *Upload Rx* | — | immutable (removal audited) |
+| **Nudge** | **1:N** | ❌ never entered | care-gap rules over current state | system |
+| **Nudge event** | **1:N** | ❌ never entered | lifecycle actions | system |
+| **Audit event** | **1:N** | ❌ never entered | every action | system |
+| **Current state** (stage / line / castration / latest PSA) | derived | ❌ never entered | latest dated row per model (§2) | derived |
+| **Dashboards, protocol score, completeness, benchmarks** | derived | ❌ never entered | aggregates | derived |
+| **`sponsor_metric`** | derived | ❌ never entered | de-identified aggregates + suppression | derived |
+| **Guideline rule** | config | *Admin* → Rules console | — | versioned config |
+| **User / Role / MDT panel** | config | *Admin* → Users console | — | config |
+
+**Worked answer to the cardinality question:**
+```
+A patient has ONE treatment PLAN  (intent + MDT status)          → 1:1
+A patient has MANY treatment LINES (ADT → ARSI → chemo → RT)      → 1:N
+  ...because prostate therapy is sequential: the patient is on ADT,
+     later ARSI is added, later chemo. Each is its own dated line.
+     Collapsing them into one row would make sequence unrepresentable.
+```
+
+**Duplicate prevention (enforced in the database):**
+- 1:1 models → **unique key on `patient_code`** (a patient cannot have two Pathology rows).
+- 1:N dated models → **unique key on `(patient_code, <date>, <type>)`** (e.g. one `imaging_study` per modality per date; one `psa_reading` per date) — accidental double-entry is rejected, genuine repeats are distinguished by date/type.
+
+---
+
+### 1.8 Record edit window, lock & HOD unlock *(new requirement)*
+
+Once data is entered it should not stay editable forever — the record must become audit-grade. But clinicians need a correction path.
+
+| Concept | Rule (all values configurable) |
+|---|---|
+| **Edit window** | A record is editable for **`EDIT_WINDOW`** after creation (default **48 h**) |
+| **Auto-lock** | After the window it **locks** (immutable) |
+| **HOD unlock** | An **HOD** may unlock a specific record for **`UNLOCK_WINDOW`** (default **24 h**) with a **mandatory reason**; it then re-locks automatically |
+| **Audit** | Every edit, lock, unlock (with reason), and removal is written to `audit_event` |
+| **No hard delete** | Corrections never destroy data |
+
+**Why locking is safe here (important):** the longitudinal tiers are **append-only**. Clinical progress never needs an unlock — if bone protection is started, you **append a new `supportive_care_event`**; if the patient is restaged, you **append a new `staging_assessment`**. The nudge auto-resolves from the *new* row. So the lock only prevents **rewriting history**; it never blocks care. An unlock is needed only to **correct a mistake** in a 1:1 current-state record (demographics, pathology, treatment plan, outcome) or a mistyped dated row.
+
+Fields carried on every entered record: `created_at`, `created_by`, `last_edited_at`, `locked`, `locked_at`, `unlocked_until`, `unlock_reason`.
 
 ---
 
@@ -361,6 +432,49 @@ OUTPUT : explainable, step-by-step next-path view; links back to the file
 DERIVED: none (read-only); every step audited
 ```
 
+### W10 · Record edit window, lock & HOD unlock
+```mermaid
+stateDiagram-v2
+  [*] --> Editable : record created
+  Editable --> Locked : EDIT_WINDOW elapses (auto)
+  Locked --> Unlocked : HOD unlocks (reason required, audited)
+  Unlocked --> Locked : UNLOCK_WINDOW elapses (auto re-lock)
+  Editable --> Editable : edit by clinician (audited)
+  Unlocked --> Unlocked : corrective edit (audited)
+```
+```
+CONFIG : EDIT_WINDOW = 48h        // editable after creation
+         UNLOCK_WINDOW = 24h      // HOD-granted correction window
+         UNLOCK_ROLES = [HOD]
+
+FUNCTION can_edit(record, actor):
+    IF record.locked = false AND now < record.created_at + EDIT_WINDOW      → TRUE
+    IF record.unlocked_until IS NOT NULL AND now < record.unlocked_until    → TRUE
+    ELSE                                                                    → FALSE
+
+WORKFLOW auto_lock  (scheduled, hourly):
+    FOR EACH record WHERE locked = false AND now >= created_at + EDIT_WINDOW:
+        SET locked = true, locked_at = now
+    FOR EACH record WHERE unlocked_until IS NOT NULL AND now >= unlocked_until:
+        SET locked = true, unlocked_until = null          // auto re-lock
+
+WORKFLOW unlock  (HOD only):
+    INPUTS : record_id, reason (mandatory), actor
+    IF actor.role NOT IN UNLOCK_ROLES        → deny (403)
+    IF reason is empty                       → deny (reason required)
+    SET locked = false, unlocked_until = now + UNLOCK_WINDOW, unlock_reason = reason
+    LOG audit_event(action = 'unlock', record, actor, reason, at = now)
+    OUTPUT: record editable until unlocked_until, then auto re-locks
+
+ON EDIT (any record):
+    IF NOT can_edit(record, actor) → deny "record locked — request HOD unlock"
+    ELSE apply change; LOG audit_event(action='edit', old→new, actor)
+
+NOTE: append-only tiers (PSA, staging, imaging, treatment_line, supportive_care,
+      journey) never require an unlock to record clinical progress — you APPEND a
+      new dated row. Unlock exists to correct mistakes, not to continue care.
+```
+
 ---
 
 ## 4. The 8 care-gap rules (full) + worked example
@@ -465,6 +579,9 @@ Please confirm, amend, or reject each:
 8. **Identity model** — de-identified registry (recommended) vs identified — confirm (drives everything downstream).
 9. **Visit / Encounter (§1.6)** — confirm **registry-by-event with an optional Encounter** for v1 (recommended), or require every entry to be encounter-bound.
 10. **Tenancy** — confirmed **tenant = institution** (no `institution_id`); cross-institution reporting via a de-identified aggregation layer — agreed?
+11. **Roles & access (§1.1)** — **no department**; every clinician sees that institution's patients; **HOD is the privileged role** (unlock, notify-all-MDT, audit); Ops/Quality see de-identified aggregates only. Agreed?
+12. **Record locking (§1.8)** — confirm **`EDIT_WINDOW` = 48 h**, **`UNLOCK_WINDOW` = 24 h**, **unlock restricted to HOD** with a mandatory reason. Do these durations suit clinic practice? Should Coordinator also unlock?
+13. **Cardinality & provenance (§1.7)** — confirm every model is either entered on a named screen or derived, and the 1:1 / 1:N calls — in particular **one treatment *plan* (1:1) vs many treatment *lines* (1:N)**.
 
 Once §7 is signed, this spec becomes the build contract; engineering maps it to the platform per `PROSTACARE_BUILD_SPEC_V1.md` / `NOVA-EDGE-FEASIBILITY.md`.
 
