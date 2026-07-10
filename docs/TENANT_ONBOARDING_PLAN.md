@@ -12,17 +12,17 @@
 
 | Preset file | What it seeds (same for all institutions) |
 |---|---|
-| `schemas.json` | All entities (Tier 0/1/2/3) — patient hub, pathology, staging_assessment, imaging_study, treatment_line, supportive_care_event, psa_reading (partitioned), outcome, journey_event, nudge + nudge_event, notification/discussion, document, guideline_rule, evidence_pack, department/app_user/role/care_team/mdt_panel, `sponsor_metric` |
-| `workflows.json` | Care-gap engine (8 rules), MDT notify, patient onboarding, outcome derivations, **nightly `sponsor_metric` aggregation** |
+| `schemas.json` | All entities — patient hub, pathology (incl. comorbidity/family flags), staging_assessment, imaging_study, treatment_line, supportive_care_event, psa_reading, outcome, journey_event, nudge + nudge_event, notification/discussion, document, guideline_rule, app_user (+`is_mdt_member`)/role, `sponsor_metric`. *(No department/care_team/mdt_panel/patient_condition/encounter; no partitioning.)* |
+| `workflows.json` | Care-gap engine (8 rules, **on-write**), MDT notify (SES), patient onboarding, **record auto-lock / HOD unlock**, outcome derivations, **nightly `sponsor_metric` aggregation** |
 | `guideline_rule` seed | The 8 versioned, signed-off care-gap rules |
 | `mat_views.json` | Current-state projections + Home/Population dashboards + de-identified sponsor views |
 | `pages.json` + `ui/schema_ui.json` | Home, Patient List, Patient File (detail), Population Dashboard, Admin console |
-| `agents.json` + `evidence_pack` | AI Buddy (bounded) + evidence/guideline packs |
-| `roles.json` | HOD, Treating Clinician, MDT Member, Coordinator, Ops/Quality, Admin + scopes |
+| ~~`agents.json` + `evidence_pack`~~ | **AI Buddy — Phase 2** (not in the v1 preset) |
+| `roles.json` | **Clinician · HOD (privileged) · Admin** (Ops/Quality optional) |
 | `Value_Lists` / enums | All dropdown option sets (from the workbook) |
 | `app_theme.json` | ProstaCare palette (Visual Language) |
 
-**Key point:** because the clinical logic, rules, dashboards, and AI are all in the blueprint, per-institution onboarding never touches schemas or workflows — it is **configuration + users only**.
+**Key point:** because the clinical logic, rules, and dashboards are all in the blueprint, per-institution onboarding never touches schemas or workflows — it is **configuration + users only**.
 
 ---
 
@@ -34,9 +34,8 @@ Collected **before** provisioning (intake form):
 |---|---|---|
 | Institution profile | name, city, state, logo | `config.json`, theme (optional) |
 | `institution_code` (anonymised) | `INST-017` | cross-tenant aggregation |
-| Department(s) | "Urology & Radiation Oncology" | scope boundary |
-| **User roster** | doctors/coordinators/ops: name, specialty, role, email | `app_user` + role + scope |
-| MDT panel members | subset of the roster | "notify all MDT" target |
+| **User roster** | clinicians/HOD/admin: name, specialty, role, email | `app_user` + role |
+| MDT members | subset of the roster | `is_mdt_member` — "notify all MDT" target |
 | Identity source | Azure AD SSO **or** platform-local accounts | auth setup |
 | Facility/enum overrides | local RT facilities, referring centres | dropdown localisation (optional) |
 | Governance sign-offs | identity model (de-identified vs identified), rule-pack version, aggregation contract | go-live gate |
@@ -60,26 +59,26 @@ flowchart LR
 
 ### Day 1 AM — Provision the tenant
 1. `POST /bootstrap/system` → create the institution's tenant (schema, canonical entities, roles).
-2. Seed the golden preset: `seed-preset.py prostate_cancer` → all entities, workflows, rules, mat-views, dashboards, AI Buddy, theme.
-3. Configure institution: `config.json` (name/branding), `institution_code`, department(s), facility/enum overrides.
+2. Seed the golden preset: `seed-preset.py prostate_cancer` → all entities, workflows, rules, mat-views, dashboards, theme.
+3. Configure institution: `config.json` (name/branding), `institution_code`, facility/enum overrides.
 4. Wire aggregation: enable the nightly `sponsor_metric` job + S3 export prefix for this tenant.
 5. Configure auth: Azure AD SSO **or** local accounts.
 - **Gate:** tenant up; preset seeded; login works.
 
 ### Day 1 PM — Users & smoke test
-6. Onboard `app_user` roster → assign role + department scope + MDT-panel membership.
+6. Onboard `app_user` roster → assign role (Clinician/HOD/Admin) + set `is_mdt_member`.
 7. Load initial data (empty, or seed/migrate existing registry).
 8. **Smoke test the golden path:** create a patient → enter staging/imaging/treatment → **8 nudges fire correctly** → acknowledge → **MDT notify** delivers → **dashboards populate** → **`sponsor_metric` row computes** (de-identified, suppressed).
 - **Gate:** end-to-end path green.
 
 ### Day 2 — UAT & go-live
-9. Walkthrough with the clinical lead + coordinator (roster review, scopes, nudges, MDT flow, dashboards, AI Buddy boundary).
-10. Fix any config/roster tweaks; confirm access boundaries (department-scoped; ops/sponsor de-identified).
+9. Walkthrough with the clinical lead (roster review, roles, nudges, MDT flow, record lock/unlock, dashboards).
+10. Fix any config/roster tweaks; confirm access (role-based; HOD unlock; ops/sponsor de-identified).
 11. Confirm first aggregation export reaches Zygo Data Cloud.
 12. **Go-live**; handover admin console + support contact.
 - **Gate:** clinical sign-off → live.
 
-> Institutions with **existing data to migrate** or **custom SSO** may extend into a 2nd day; a greenfield single-department site can complete in **~1 day**.
+> Institutions with **existing data to migrate** or **custom SSO** may extend into a 2nd day; a greenfield site can complete in **~1 day**.
 
 ---
 
@@ -89,7 +88,6 @@ flowchart LR
 INTAKE (Day 0)
   [ ] Institution profile + logo
   [ ] institution_code assigned
-  [ ] Department(s) defined
   [ ] User roster (name/specialty/role/email)
   [ ] MDT panel members
   [ ] Identity source (SSO / local) confirmed
@@ -98,16 +96,16 @@ INTAKE (Day 0)
 
 PROVISION (Day 1)
   [ ] Tenant bootstrapped
-  [ ] Golden preset seeded (schemas/workflows/rules/mat-views/dashboards/AI)
-  [ ] config.json + institution_code + departments + facilities set
+  [ ] Golden preset seeded (schemas/workflows/rules/mat-views/dashboards)
+  [ ] config.json + institution_code + facilities set
   [ ] sponsor_metric nightly job + S3 export prefix enabled
   [ ] Auth (SSO/local) configured
-  [ ] Users onboarded (role + scope + MDT panel)
+  [ ] Users onboarded (role + is_mdt_member)
   [ ] Initial data loaded (empty / seeded / migrated)
 
 VERIFY (Day 1 PM – Day 2)
   [ ] Smoke test: patient → nudges (8 rules) → MDT notify → dashboards → sponsor_metric
-  [ ] Access boundaries verified (department-scoped; de-identified for ops/sponsor)
+  [ ] Access verified (role-based; de-identified for ops/sponsor)
   [ ] Clinical-lead UAT walkthrough
   [ ] First aggregation export reaches Zygo Data Cloud
   [ ] Go-live + admin handover
@@ -116,8 +114,8 @@ VERIFY (Day 1 PM – Day 2)
 ---
 
 ## 5. Why 1–2 days is realistic
-- **No build per institution** — schemas, workflows, the 8 rules, dashboards, and AI Buddy are all in the golden preset; provisioning is a seed + config.
-- **Config, not code** — institution profile, departments, facilities, users, scopes, and the aggregation hook are all JSON/console settings.
+- **No build per institution** — schemas, workflows, the 8 rules, and dashboards are all in the golden preset; provisioning is a seed + config.
+- **Config, not code** — institution profile, facilities, users, roles, and the aggregation hook are all JSON/console settings.
 - **Repeatable & idempotent** — `bootstrap` + `seed-preset` are idempotent; the runbook is a checklist.
 - **The only variable work** is the **user roster + SSO** and **optional data migration**, which is what can push a complex site toward the 2-day end.
 

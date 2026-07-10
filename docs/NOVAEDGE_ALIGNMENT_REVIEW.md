@@ -2,35 +2,35 @@
 
 **Purpose:** verify the ProstaCare canonical model + workflows (`PROSTACARE_FUNCTIONAL_LOGIC_SPEC.md`, `PROSTACARE_BUILD_SPEC_V1.md`) map **seamlessly** onto NOVA Edge primitives (schemas, scopes, workflows, subscriptions/cron, materialized views, ADK agents), and to surface every gap before the preset build.
 
-**Verdict:** **Strongly aligned.** Every entity maps to a NOVA Edge schema and every workflow to existing operators/triggers — no new platform primitive is required. There are **two items that need an explicit design decision/component** before it is truly "seamless" (cross-institution aggregation; rule-config encoding) and **six "encode-it-this-way" notes**. All are called out below with resolutions. None is a blocker.
+**Verdict:** **Strongly aligned.** Every entity maps to a NOVA Edge schema and every workflow to existing operators/triggers — no new platform primitive is required. There are **two items that need an explicit design decision/component** before it is truly "seamless" (cross-institution aggregation; rule-config encoding) and **three "encode-it-this-way" notes** (down from six after the `SIMPLIFICATION_REVIEW.md` trims closed G5/G6). All are called out below with resolutions. None is a blocker.
 
 ---
 
 ## 1. Entity → NOVA Edge schema mapping
 
-Field types available: `string/text/integer/number/float/boolean/datetime/date/json/enum(enumValues)/uuid/phone/email/file/tags` + per-field `required/unique/indexed/default/references`. Enums → `enumValues`; FKs → `references`; time-series → `PartitionConfig`. (Platform gotcha: use `datetime` not `date`.)
+Field types available: `string/text/integer/number/float/boolean/datetime/date/json/enum(enumValues)/uuid/phone/email/file/tags` + per-field `required/unique/indexed/default/references`. Enums → `enumValues`; FKs → `references`. *(Partitioning available but **not used in v1**.)* (Platform gotcha: use `datetime` not `date`.)
 
 | Canonical entity | NOVA Edge construct | Notes / field-type mapping | Status |
 |---|---|---|---|
-| `department`, `app_user`, `role`, `care_team_member`, `mdt_panel` | entities + `roles.json` + org-units | app_user carries `department` for scopes | ✅ aligned |
+| `app_user` (+`is_mdt_member`), `role` | entities + `roles.json` | 3 roles: Clinician · HOD · Admin. **No `department`/`care_team`/`mdt_panel`** — role-based access; tenant is the boundary | ✅ aligned |
 | `patient` (hub) | canonical `patients` **extension** via PATCH | de-identified; enums for coverage/state/referral; **no `institution_id`** (tenant = institution) | ✅ aligned |
 | `pathology` (1:1) | entity, FK→patient | enums (gleason/isup/pi-rads/dre); text for cores | ✅ aligned |
-| `patient_condition` (normalized) | entity, FK→patient | **import transform** pivots workbook flag columns → rows (see G6) | ✅ aligned |
+| comorbidity / family history | **15 boolean columns on `pathology`** | as in the workbook + chip-group UI; no separate table, no import transform | ✅ aligned |
 | `treatment_plan` (1:1) | entity | enums + dates | ✅ aligned |
 | `outcome` (1:1) | entity | enums + milestone dates | ✅ aligned |
-| `psa_reading` (dated) | entity + **RANGE partition** on `psa_date` | composite PK `(id, psa_date)`; lookback caveat (G5) | ✅ aligned |
+| `psa_reading` (dated) | entity, indexed on `(patient_code, psa_date)` | **no partitioning in v1** (unnecessary at this scale) | ✅ aligned |
 | `staging_assessment` (dated) | entity | enums (T/N/M/risk/ecog/castration) + `assessed_on` | ✅ aligned |
 | `imaging_study` (dated) | entity | `modality` enum + `result` enum + `study_date` | ✅ aligned |
 | `treatment_line` (dated) | entity | `line_type` enum; RT + CGHS fields on the RT line | ✅ aligned |
 | `supportive_care_event` (dated) | entity | bone/dexa/phq9/follow-up + `at` | ✅ aligned |
 | `journey_event` (dated) | entity | `event_type` enum | ✅ aligned |
 | `nudge` | entity | `rule_id`, `severity`, `current_status`, dates | ✅ aligned |
-| `nudge_event` | entity (optionally partitioned) | lifecycle log for trend + audit | ✅ aligned |
+| `nudge_event` | entity | lifecycle log (opened · acknowledged · resolved) for trend + audit | ✅ aligned |
 | `notification` / `discussion_entry` | entities | recipients (json), delivery status | ✅ aligned |
 | `document` | `file` field + attachment entity + object storage | S3/MinIO per `communication.json` | ✅ aligned |
 | `guideline_rule` | **config entity** | `version` + `signed_off_by/at` + `active` (G2) | ✅ aligned |
-| `evidence_pack` / `guideline_pack` | config entities | bounded brain for AI Buddy | ✅ aligned |
-| `encounter` (optional) | entity + **nullable** `encounter_id` on events | maps to platform appointment/encounter later | ✅ aligned |
+| ~~`evidence_pack` / `guideline_pack`~~ | config entities | **Phase 2** (with AI Buddy) | ⏸ deferred |
+| ~~`encounter`~~ | — | **not in v1**; visit timing derives from follow-up dates | ⏸ deferred |
 | `audit_event` | platform `activity` + subscriptions | ensure full coverage (G7) | ✅ aligned |
 | `patient_identity` *(only if identified model)* | isolated entity + `read_roles`/`context_mask` | audited reveal | ✅ aligned |
 
@@ -38,7 +38,7 @@ Field types available: `string/text/integer/number/float/boolean/datetime/date/j
 
 ## 2. Workflow → NOVA Edge mechanism mapping
 
-Triggers: API run · entity `subscriptions` (on_create/update) · schema `policies` (cron) · webhook. Step types used: `create/upsert/query/sql_exec/branch/for_each/email/in_app_notification/sse_publish/llm/api_call`.
+Triggers: API run · entity `subscriptions` (on_create/update) · schema `policies` (cron) · webhook. Step types used: `create/upsert/query/sql_exec/branch/for_each/email/in_app_notification`. *(No `sse_publish`/`llm` in v1.)*
 
 | Workflow | Trigger | Steps used | Status |
 |---|---|---|---|
@@ -46,11 +46,11 @@ Triggers: API run · entity `subscriptions` (on_create/update) · schema `polici
 | W2 workup/staging | save → `on_create` sub on staging/imaging | `upsert`(pathology) + `create`(dated) + fire W5 | ✅ aligned |
 | W3 PSA capture | save → `on_create` sub | `create`; scheduled mat-view refresh | ✅ aligned |
 | W4 treatment | save → `on_create` sub | `create`(line/supportive) + fire W5 | ✅ aligned |
-| **W5 care-gap engine** | `on_write` subs (staging/imaging/treatment/supportive) **+** daily `policies` cron | `sql_exec` `INSERT…SELECT…WHERE <rule> AND NOT EXISTS(open)` + `sql_exec` auto-resolve `UPDATE` | ✅ aligned — see G2 (rule encoding) + G4 (current-state) |
+| **W5 care-gap engine** | `on_write` subs (staging/imaging/treatment/supportive) — **no cron in v1** (all 8 rules are state-based) | `sql_exec` `INSERT…SELECT…WHERE <rule> AND NOT EXISTS(open)` + `sql_exec` auto-resolve `UPDATE` | ✅ aligned — see G2 (rule encoding) + G4 (current-state) |
 | W6 nudge lifecycle | Acknowledge API | `create`(nudge_event) + open W7 | ✅ aligned |
-| W7 MDT notify | from nudge/patient | `query`(resolve mdt_panel) + `for_each` + `email`+`in_app_notification`+`sse_publish` + `create`(discussion_entry) | ✅ aligned |
+| W7 MDT notify | from nudge/patient | `query`(users WHERE is_mdt_member) + `for_each` + `email` (SES) + `in_app_notification` + `create`(discussion_entry). *No `sse_publish`, no auto-task, no digest in v1.* | ✅ aligned |
 | W8 analytics | on-write + cron refresh | **materialized views** (RLS-scoped) + `reports` | ✅ aligned — see G1 (charts) + G3 (cross-tenant) |
-| W9 AI Buddy | user opens | ADK `agent` (chat) + read tools + evidence packs + `require_human_approval` | ✅ aligned |
+| ~~W9 AI Buddy~~ | user opens | ADK `agent` + read tools + evidence packs | ⏸ **Phase 2** (absent from functional requirements) |
 
 ---
 
@@ -72,8 +72,8 @@ Triggers: API run · entity `subscriptions` (on_create/update) · schema `polici
 | **G2** | `guideline_rule` as **data-driven config** vs one `sql_exec` per rule | Clinical team wants to edit rules without code | Recommended: `guideline_rule` config holds **metadata** (rule_id, severity, next_step, inputs, version, sign-off, active); the engine workflow holds **one predicate step per rule (8)**, gated by `active`. Clinicians tune severity/wording/thresholds in config; changing the *logic shape* is a versioned workflow edit. (Fully dynamic predicate-from-config is possible via stored SQL fragments + `tables` allowlist, but adds risk — defer.) |
 | **G3** | **Cross-institution** de-identified reporting is **not native** (tenants are isolated schemas) | Sponsor/registry benchmarking spans hospitals | **Net-new component:** a cross-tenant **de-identified aggregation layer** (scheduled export of each tenant's de-identified cohort metrics → a registry store the sponsor reads). This is the one piece that isn't in-tenant config. Owner + cadence = open decision (`O-REP`). |
 | **G4** | Current-state = latest row (cross-row) | Header badges + rule inputs | Mat-view + lateral subquery (see §3). Not a computed column. |
-| **G5** | Partitioned `psa_reading`/`nudge_event` need composite PK + lookback | Old rows can drop from plain ID lookups | Composite PK `(id, <date>)`; queries use the date range; acceptable for time-series reads. |
-| **G6** | Workbook comorbidity/family **flag columns** → normalized `patient_condition` rows | Entry pack uses one Yes/No column per condition | One-time/import **transform** pivots the 15 flags into rows on ingest; UI keeps chip-group control. |
+| ~~**G5**~~ | ~~Partitioning composite PK + lookback~~ | — | ✅ **CLOSED** — partitioning dropped from v1 (unnecessary at this scale). Gap was self-inflicted. |
+| ~~**G6**~~ | ~~flag columns → normalized rows import transform~~ | — | ✅ **CLOSED** — comorbidity/family stay as boolean columns. Transform no longer exists. |
 | **G7** | **Audit coverage** must be complete | R-AUTH-3; identity reveal | Cross-cutting `audit_event` subscription on all entities + explicit reveal audit on `patient_identity`. |
 
 **None blocks the build.** G3 is the only genuinely net-new *component*; the rest are encode-it-this-way notes or a frontend task.
@@ -89,10 +89,10 @@ Triggers: API run · entity `subscriptions` (on_create/update) · schema `polici
 | Tenancy = institution = one tenant schema | 🟢 |
 | Department/role scopes (`row_policies` + `$user.department`) | 🟢 |
 | De-identified analytics via RLS-scoped mat-views | 🟢 |
-| Care-gap engine via `sql_exec` + subs + cron | 🟢 (encode per G2/G4) |
+| Care-gap engine via `sql_exec` + on-write subs (no cron) | 🟢 (encode per G2/G4) |
 | Nudge lifecycle + trend from `nudge_event` | 🟢 |
 | MDT notify via comms steps | 🟢 |
-| AI Buddy via bounded ADK agent | 🟢 |
+| AI Buddy via bounded ADK agent | ⏸ Phase 2 |
 | Onboarding = provision tenant per institution + seed preset | 🟢 |
 | Cross-institution de-identified rollup | 🟡 net-new component (G3) |
 | Clinical chart renderers (line/KM) | 🟡 frontend confirm (G1) |
@@ -105,7 +105,7 @@ Triggers: API run · entity `subscriptions` (on_create/update) · schema `polici
 2. **Scope G3** (cross-tenant de-identified aggregation layer) — owner, store, cadence; it is the sponsor surface too.
 3. **Confirm G1** (frontend line/KM renderers).
 4. Pin **G4** current-state as mat-view + lateral subquery in the schema/workflow design.
-5. Include **G6** import transform + **G7** audit subscription in the preset from day one.
+5. Include **G7** audit subscription in the preset from day one. *(G5 and G6 are closed — see `SIMPLIFICATION_REVIEW.md`.)*
 
 Everything else is standard NOVA Edge configuration: fork `novahub_v2`, add the entities (§1), the workflows (§2), the mat-views (§5/W8), the ADK agent (W9), scopes + roles, and the theme.
 

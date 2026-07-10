@@ -12,7 +12,7 @@ The workbook is a **platform bible first, data-entry pack second** (its own word
 
 That promise is only structurally possible if the data model is **longitudinal, computed, and tenant-aware** — which the workbook itself is not (it is a flat, de-identified, single-institution snapshot). So this spec does three things the workbook does not:
 
-1. **Adds the tenancy/identity layer** (institution → department → doctor/user → role → scope) so institutions and doctors can be onboarded.
+1. **Adds the tenancy/identity layer** (institution = tenant; users + roles inside it) so institutions and doctors can be onboarded.
 2. **Promotes snapshot columns to longitudinal event tiers** (staging, imaging, treatment lines, nudges) so restaging, sequential therapy, and nudge-trend history become expressible.
 3. **Makes every displayed number derived** (Tier 3), never typed — the workbook already flags this need in `Dashboard_Derived`/`Dashboard_Coverage`.
 
@@ -22,13 +22,13 @@ That promise is only structurally possible if the data model is **longitudinal, 
 
 ## 2. Terminology — tenancy model (updated): **tenant = institution**
 
-**Decision (confirmed): each onboarded institution is its own NOVA Edge tenant** (one Postgres schema per hospital). Therefore **no `institution_id` column is stored anywhere** — the tenant boundary *is* the institution, and every row already belongs to that institution. Inside a tenant, **department / doctor / role** are modelled as org-units + row-level scopes to enforce the department-scoped access boundary.
+**Decision (confirmed): each onboarded institution is its own NOVA Edge tenant** (one Postgres schema per hospital). Therefore **no `institution_id` column is stored anywhere** — the tenant boundary *is* the institution, and every row already belongs to that institution. Inside a tenant there is **no department** — all clinical users see that institution's patients and access differs by **role** (Clinician · HOD · Admin).
 
 | Reporting need | How it works under tenant-per-institution |
 |---|---|
-| Cross-**doctor** / cross-**department** cohort reporting (within a hospital) | **Native** — one schema per institution; scopes control who sees what |
+| Cross-**doctor** cohort reporting (within a hospital) | **Native** — one schema per institution |
 | Cross-**institution** reporting (sponsor / registry / benchmarking) | A separate **de-identified aggregation layer above the tenants** — pushes de-identified cohort metrics up; matches "sponsor sees de-identified aggregate only" |
-| "Each doctor/team isolated" (within a hospital) | Row-level `scopes` inside the institution's tenant |
+| "Each doctor/team isolated" (within a hospital) | **Not required** — all clinicians share access; HOD is the privileged role |
 | Per-**doctor** dedicated tenant (internet SaaS, `O-DEP`) | Different again — not chosen; would isolate each doctor and needs the same de-identified layer to report across them |
 
 > Net: cross-reporting splits into two — **within-institution** (native, in-tenant) and **cross-institution** (de-identified aggregation layer). The de-identified layer is also exactly the sponsor/pharma surface (§10), so it does double duty.
@@ -38,8 +38,9 @@ That promise is only structurally possible if the data model is **longitudinal, 
 ## 3. Foundational decisions (locked) + the one big open decision
 
 **Locked (from prior discovery):**
-- Single NOVA Edge tenant; institution/department/doctor = org-units + scopes.
-- Clinical operational visibility = **department/team-scoped** (HOD/coordinator may be tenant-wide).
+- **Tenant = institution** (one schema per hospital); no `institution_id`, **no `department`**.
+- Clinical operational visibility = **tenant-wide for clinical roles**; **HOD = privileged** (unlock, notify-all-MDT, audit).
+- **Record lock:** edit window → auto-lock → HOD time-bound unlock.
 - Non-clinical / ops / quality / **pharma sponsor = de-identified aggregate only** (PHI firewall).
 - Care-gap rules = **config-owned, versioned, clinically signed-off**; 8 rules specified.
 
@@ -67,17 +68,17 @@ Legend for cardinality: **1:1** = one row per patient (current-state) · **1:N d
 |---|---|---|---|
 | `app_user` | — | id, display_name, **email (login identity)**, specialty, role→, status | Clinician / HOD / Coordinator / Ops / Admin |
 | **record-lock fields** | on every entered entity | `created_at`, `created_by`, `last_edited_at`, `locked`, `locked_at`, `unlocked_until`, `unlock_reason` | Edit window → auto-lock → HOD time-bound unlock (functional spec §1.8 / W10) |
-| `role` | config | HOD, Treating Clinician, MDT Member, Coordinator, Ops/Quality, Admin | Drives capability matrix (§10) |
-| `care_team_member` | link | patient_code→, app_user→, relation (treating/primary/member), from, to | Per-patient care team (O-T, design-ready) |
-| `mdt_panel` / `mdt_panel_member` | config/link | department_id→, app_user→ | The department MDT roster (notify-all target) |
+| `role` | config | **Clinician · HOD (privileged) · Admin** *(+ Ops/Quality only if in-product de-identified dashboards are needed)* | Drives capability matrix (§10) |
+| MDT membership | **flag on `app_user`** | `is_mdt_member` (boolean) | Notify-all target. *No `mdt_panel` table* — MDT is a notification group, not an access boundary. |
+| Primary clinician | field on `patient` | `primary_clinician_id→` | Attribution, not restriction. *No `care_team_member` table in v1.* |
 | `patient_identity` *(only if §3-B/C)* | 1:1, isolated | patient_code→, name, abha, aadhaar_masked, phone | The **only** PHI table; column `read_roles`+`context_mask`; audited reveal |
 
 ### 4.1 Tier 1 — Patient hub & current-state (1:1 per patient)
 | Entity | Source sheet/section | Key fields (from Field_Dictionary) |
 |---|---|---|
-| `patient` (hub) | Demographics_Entry + `diagnosis_date` moved here | patient_code (PK), department_id→, primary_clinician_id→, registry_enrolment_date, age_at_diagnosis_years, language_preference, healthcare_coverage, referring_hospital_centre, referral_source, state, travel_distance_km, diagnosis_date *(no institution_id — tenant = institution)* |
+| `patient` (hub) | Demographics_Entry + `diagnosis_date` moved here | patient_code (PK), primary_clinician_id→, registry_enrolment_date, age_at_diagnosis_years, language_preference, healthcare_coverage, referring_hospital_centre, referral_source, state, travel_distance_km, diagnosis_date *(no institution_id — tenant = institution)* |
 | `pathology` | Clinical_Entry · Presenting Complaint + DRE + Biopsy | primary_complaint, duration, ipss_score, bowel_rectal_symptoms, dre_findings, prostate_volume_cc, biopsy_date, biopsy_type, pi_rads_score, gleason_score, isup_grade_group, cores_positive_total, core_involvement_pct, perineural_invasion, ece_extracapsular_extension — **1:1** (re-biopsy → new row + journey event) |
-| `patient_condition` | Clinical_Entry · comorbidity_1..9 + family_history_1..6 | type (comorbidity\|family_history), condition, present — **normalized** (replaces 15 flag columns; enables clean cohort pivots) |
+| comorbidity / family history | Clinical_Entry · comorbidity_1..9 + family_history_1..6 | **Kept as 15 boolean flag columns on `pathology`** (exactly as the workbook and the chip-group UI). *No `patient_condition` table* — the list is fixed and the cohort pivots are trivial SQL over booleans. |
 | `treatment_plan` | Treatment_Entry · Intent & MDT | treatment_intent, mdt_tumour_board_status, date_of_mdt_review, clinical_trial_eligibility, treatment_start_date — **1:1** header |
 | `outcome` | Outcomes_Entry | last_follow_up_date, best_response, psa_nadir_value, psa_nadir_date, psa_doubling_time_months, biochemical_recurrence_status/date, crpc_progression_status/date, rt_outcome_status — **1:1** (milestone dates inline) |
 
@@ -107,7 +108,7 @@ Materialized, RLS-scoped; refresh on cron. Covers the whole `Home_Dashboard` + `
 | `document` | Rx upload workflow | Prescription/report blobs → secure object storage refs + metadata + audit |
 | `audit_event` | cross-cutting | Every view/edit/reveal/nudge-action/notification (R-AUTH-3) |
 | `guideline_rule` | config | The 8 care-gap rules as versioned, signed-off config (§6) |
-| `evidence_pack` / `guideline_pack` | config | The bounded "brain" for AI Buddy (§8) |
+| ~~`evidence_pack` / `guideline_pack`~~ | config | **Deferred to Phase 2 with AI Buddy** (absent from the agreed functional requirements) |
 
 **Notifications & email (AWS SES).** Identity = **email** (users log in with their email ID). The MDT-notify workflow (functional spec W7) sends every configured notification via **AWS SES**: resolve recipients → in-app inbox item (+task) → **SES email** to `recipient.email` → store SES `messageId` + delivery status (sent/bounced/complaint/failed) on `Notification` → append discussion log. NOVA Edge encoding: the workflow `email` step is backed by an **SES integration** (verified sender domain; credentials in `system_integrations`); in-app via `in_app_notification` + `sse_publish`. SMS/WhatsApp are future channels behind the same `Notification` record. Triggers covered: care-gap→MDT, new patient, discuss-with-team, urgent escalation.
 
@@ -117,15 +118,15 @@ Materialized, RLS-scoped; refresh on cron. Covers the whole `Home_Dashboard` + `
 
 | Workbook sheet | Target entity(ies) | What moves / changes |
 |---|---|---|
-| `Demographics_Entry` | `patient` (hub) | Keep 1:1. Make `patient_code` a real PK with FK integrity. Move `diagnosis_date` here. Add tenancy FKs (institution/department/primary_clinician). |
-| `Clinical_Entry` | **splits into** `pathology` (1:1) + `staging_assessment` (1:N dated, **NEW**) + `imaging_study` (1:N dated, **NEW**) + `patient_condition` (normalized) | The single sheet holding four lifecycles is decomposed by lifecycle. Staging & imaging become dated events. |
+| `Demographics_Entry` | `patient` (hub) | Keep 1:1. Make `patient_code` a real PK with FK integrity. Move `diagnosis_date` here. Add `primary_clinician_id` FK. *(No institution/department FKs — tenant = institution.)* |
+| `Clinical_Entry` | **splits into** `pathology` (1:1, incl. comorbidity/family flags) + `staging_assessment` (1:N dated, **NEW**) + `imaging_study` (1:N dated, **NEW**) | The single sheet holding several lifecycles is decomposed by lifecycle. Staging & imaging become dated events. |
 | `PSA_History` | `psa_reading` | Structurally correct already; partition on date; **the Patient-File chart binds to this table** (closes the decoupled-chart bug). |
 | `Treatment_Entry` | `treatment_line` (1:N dated, **NEW**) + `treatment_plan` (1:1 header) + `supportive_care_event` (1:N dated) | One mashed row → dated therapy lines + a small current-state header + dated supportive care. |
 | `Outcomes_Entry` | `outcome` (1:1, milestone dates inline) | Keep 1:1; milestone dates already present. |
 | `Journey_Events` | `journey_event` | Keep. Role narrows to milestone narrative (staging/treatment now have their own history). Wire the "Add to Timeline" action. |
 | `Care_Gap_Tracker` | `nudge` + `nudge_event` (**NEW**) + derived read-model | Flag sheet → lifecycle. All counts/severity become **derived** over `nudge`. |
 | `Home_/Population_Dashboard`, `Dashboard_Derived`, `Dashboard_Coverage` | Tier-3 materialized views | Inventory → mat-view specs (§7). |
-| *(none)* | `department`, `app_user`, `role`, `care_team_member`, `mdt_panel`, `notification`, `document`, `audit_event`, `guideline_rule`, `evidence_pack` | Net-new — the workbook has no home for these (which is the signal it's an entry surface, not the system of record). *(No `institution` entity — the institution is the tenant.)* |
+| *(none)* | `app_user` (+`is_mdt_member`), `role`, `notification`/`discussion_entry`, `document`, `audit_event`, `guideline_rule`, `sponsor_metric` | Net-new — the workbook has no home for these (the signal it's an entry surface, not the system of record). *(No `institution`, `department`, `care_team`, `mdt_panel`, `patient_condition`, or `encounter` entities — see `SIMPLIFICATION_REVIEW.md`.)* |
 
 ### 5.5 Bugs that close as a consequence of the migration
 | Demo bug (PRODUCT-PRD §6) | Root cause | Closes because |
@@ -168,7 +169,9 @@ The workbook's `Population_Dashboard` (36 widgets across Overview/Clinical/Treat
 
 ---
 
-## 8. Governed Intelligence — AI Buddy as a bounded ADK agent
+## 8. Governed Intelligence — AI Buddy (⏸ **DEFERRED TO PHASE 2**)
+
+> **Scope decision:** AI Buddy appears **zero times** in `FUNCTIONAL_REQUIREMENTS.md`, `PRD.md`, or `SCOPE.md` — it exists only in the newer workbook. It is the single largest subsystem in this spec and is **not required for v1**. Ship registry + care-gap engine + dashboards first. The design below stands for Phase 2. *(`SIMPLIFICATION_REVIEW.md` T12.)*
 
 The workbook's `Governed_Intelligence` tab defines a strict boundary: AI Buddy is **stepwise, evidence-anchored, and must not free-generate, invent gaps, claim autonomous decisions, or imply drug access the config denies.** Mapping to NOVA Edge:
 
@@ -182,14 +185,14 @@ The workbook's `Governed_Intelligence` tab defines a strict boundary: AI Buddy i
 
 ## 9. Multi-institution onboarding & provisioning
 
-Since the workbook has no tenancy layer, onboarding is net-new. Because **tenant = institution**, onboarding a hospital = provisioning its tenant, then setting up departments and doctors inside it:
+Since the workbook has no tenancy layer, onboarding is net-new. Because **tenant = institution**, onboarding a hospital = provisioning its tenant, then setting up its users:
 
 ```
 Platform admin → PROVISION institution tenant (new schema, seed preset, theme)
-Institution admin (in-tenant) → create department(s) → onboard app_users (doctors/coordinators/ops)
-      → assign role + department scope + MDT-panel membership
-      → (per patient) set primary_clinician + care-team
-Patient registry entry (Add New Patient) → scoped to department → appears in that institution's cohort
+Institution admin (in-tenant) → onboard app_users (clinicians / HOD / admin)
+      → assign role (Clinician · HOD · Admin) + set is_mdt_member
+      → (per patient) set primary_clinician
+Patient registry entry (Add New Patient) → appears in that institution's cohort
 ```
 Cross-institution rollup (sponsor/registry) reads the **de-identified aggregation layer** above tenants, never the tenants directly.
 
@@ -204,7 +207,7 @@ Cross-institution rollup (sponsor/registry) reads the **de-identified aggregatio
 
 | Layer | Decision | NOVA Edge mechanism |
 |---|---|---|
-| Operational visibility | **Tenant-wide for clinical roles** (no department scoping); HOD is the privileged role | role grants; the tenant *is* the boundary |
+| Operational visibility | **Tenant-wide for clinical roles** (no department scoping); HOD is the privileged role | role grants only; the tenant *is* the boundary — no row-level scopes needed |
 | Record immutability | Edit window → auto-lock → **HOD-only, time-bound unlock** (reason required, audited) | lock fields + scheduled `auto_lock` workflow + `unlock` workflow gated on role |
 | Non-clinical / ops / sponsor | De-identified aggregate only | Exposed **only** to RLS-scoped, **de-identified** materialized views; no entity-row access |
 | Identifiers (if §3-B/C) | Masked-by-default + audited reveal | isolated `patient_identity`; column `read_roles` + `context_mask`; reveal → `audit_event` |
@@ -226,9 +229,9 @@ Capability × role matrix is in `FLOW-CLARITY-AND-OPEN-QUESTIONS.md §5` (straw-
 |---|---|---|
 | **P0 Foundation** | Tenancy + patient hub + Tier-1 current-state + de-identified access | schemas + scopes + roles + onboarding console |
 | **P1 Longitudinal** | PSA, staging, imaging, treatment-line, journey, supportive-care | Tier-2 entities + partitioning + current-state projections |
-| **P2 Care-gap engine** | 8 rules + nudge/nudge_event lifecycle + MDT notify | `guideline_rule` + evaluation workflow + notify workflow |
+| **P2 Care-gap engine** | 8 rules (**on-write only, no cron**) + nudge/nudge_event lifecycle + MDT notify (SES) | `guideline_rule` + evaluation workflow + notify workflow |
 | **P3 Analytics** | Home + Population dashboards, benchmarks, protocol score | mat-views + `pages.json`; confirm line/KM renderers (G1) |
-| **P4 Governed AI** | AI Buddy bounded agent + evidence packs | ADK agent + packs + guardrails |
+| **P4 Governed AI** *(Phase 2)* | AI Buddy bounded agent + evidence packs | ADK agent + packs + guardrails |
 | **P5 Integrations** | HIS/registry sync, FHIR read, (later) ABHA/ABDM | adapters/remote entities (net-new, see feasibility §4) |
 
 ---
@@ -237,8 +240,8 @@ Capability × role matrix is in `FLOW-CLARITY-AND-OPEN-QUESTIONS.md §5` (straw-
 
 **P0 — settle before P0 build:**
 1. **Identity model (§3):** de-identified registry (A) / identified (B) / de-identified + optional identity module (C). *Recommend A or C.*
-2. **`O-A1` multi-user vs single console** — the department-scoped access decision implies multi-user; confirm.
-3. **`O-T1/T2` team model** — care-team (per-patient) vs department MDT panel vs both; care-team ≠ tumour-board?
+2. **`O-A1` multi-user vs single console** — the role-based access model implies multi-user; confirm.
+3. **`O-T*` roles & MDT (simplified)** — confirm roles = Clinician · HOD · Admin, MDT = `is_mdt_member` notify flag, no department, no care-team table.
 4. **`O-S1` patient source of truth** — created in ProstaCare vs synced from HIS (key = `patient_code`?).
 5. **`O-PH1/2/3` pharma** — confirm sponsor (NVS = Novartis?), data model (de-identified aggregate), and independent rule-governance/COI.
 6. **`O-TMPL1` disease scope** — prostate-only vs templatable core (recommend: prostate on a shared oncology core).

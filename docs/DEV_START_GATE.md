@@ -3,7 +3,7 @@
 **Purpose:** one consolidated list of everything we need from the client (business / clinical / legal) before, and shortly after, development begins. Every item carries a **recommended default** so the client can simply **confirm or amend** rather than design from scratch.
 
 **Status summary**
-- ✅ **7 decisions already settled** (§1) — no need to revisit.
+- ✅ **10 decisions already settled** (§1) — no need to revisit.
 - 🔴 **10 blockers (P0)** — must be answered before dev starts (§2).
 - 🟠 **7 items (P1)** — needed within the first sprint (§3).
 - 🟡 **7 items (P2)** — needed before go-live, not before dev (§4).
@@ -24,6 +24,9 @@
 | 5 | **Notifications = in-app inbox + email via AWS SES**; **login identity = email** |
 | 6 | **Cross-tenant aggregation** = in-tenant `sponsor_metric` → Zygo Data Cloud → sponsor (architecture spec'd) |
 | 7 | **8 care-gap rules** specified (conditions/severities) — pending clinical sign-off (B8) |
+| 8 | **Nudge lifecycle** = open → acknowledged → **auto-resolve** (no snooze, no dismiss); engine runs **on-write** (no cron) |
+| 9 | **Roles = Clinician · HOD (privileged) · Admin**; MDT = `is_mdt_member` notify flag; **no department** |
+| 10 | **Record lock:** edit window → auto-lock → **HOD** time-bound unlock (reason required, audited) |
 
 ---
 
@@ -38,7 +41,7 @@
 | **B3c** | **Cardinality confirmation:** every model is either entered on a named screen or derived; **one treatment *plan* (1:1)** vs **many treatment *lines* (1:N)**; duplicates blocked by unique keys | Prevents duplicate/ambiguous rows; confirms no orphan layers | Clinical | Confirm the provenance/cardinality table (`PROSTACARE_FUNCTIONAL_LOGIC_SPEC.md §1.7`) |
 | **B4** | **Patient source of truth:** created in ProstaCare, or **synced from hospital HIS/registry**? If synced — match key (`patient_code`? UHID? ABHA?) and which fields are read-only | Determines onboarding flow, integration scope, and patient entity ownership | Business + IT | **Created in ProstaCare** for v1 (registry), keyed on `patient_code`; HIS sync as a later phase |
 | **B5** | **Disease scope:** prostate only, or the first of several tumour frameworks? | Determines whether we build a shared clinical core + disease overlay, or a single-disease schema | Business | **Prostate first, on a templatable core** (so breast/lung can be added later without rework) |
-| **B6** | **Visit / Encounter:** registry organised by clinical event date (recommended) or every entry bound to a visit/encounter? | Determines the event-tier design and data-entry burden | Clinical | **Registry-by-event**, with an **optional** `encounter` (nullable link) for visit grouping / future HIS-appointment sync |
+| **B6** | **Confirm the v1 scope cuts** (`SIMPLIFICATION_REVIEW.md`): no snooze · no dismiss · **AI Buddy → Phase 2** · no SLA/escalation · no encounter · roles = Clinician·HOD·Admin · comorbidities stay as Yes/No flags | Removes ~7 entities and a whole AI subsystem from v1; nothing in FR/PRD/SCOPE requires them | Clinical + Business | **Confirm all cuts.** Each is unsupported by any stated requirement; each is cheap to add back later. |
 | **B7** | **Sponsor:** confirm **NVS = Novartis**; their role (funder / data consumer / both); and the **independent clinical governance** that owns the rule pack (conflict-of-interest control) | Determines the aggregation contract, governance model, and consent basis | Business + Legal | Sponsor receives **de-identified aggregate only**; rule pack owned by an **independent clinical committee** with versioned sign-off; hard firewall |
 | **B8** | **Clinical sign-off on the 8 care-gap rules** — conditions, severities, next-step wording — and the **benchmark targets** (ARSI 60%, PSMA 85%, bone protection 85%, MDT review 95%) | The care-gap engine is the core product; rules cannot be coded unsigned | Clinical | Confirm as specified in `PROSTACARE_FUNCTIONAL_LOGIC_SPEC.md §4`; amend thresholds/wording as needed |
 | **B9** | **Aggregation contract:** confirm the `metric_key` catalogue; **small-cell suppression threshold** (default **11**); institution shown as **anonymised code** vs named | Determines what `sponsor_metric` computes and exports | Clinical + Legal | Catalogue as spec'd; threshold **11**; **anonymised `institution_code`** |
