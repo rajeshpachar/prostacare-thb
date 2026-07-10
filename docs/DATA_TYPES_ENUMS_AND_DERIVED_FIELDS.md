@@ -70,30 +70,30 @@ A metastatic patient who progresses to castration-resistance keeps a risk label 
 
 The workbook names **22** derived fields but only describes them in prose ("bucket into configured bands") — **the band edges were never defined**. Below: the explicit formula for each, with **proposed band edges recovered from the demo dashboard**, marked for clinical confirmation.
 
-Notation: `current(M)` = latest dated row of model `M` for the patient (see functional spec §2).
+Each table has a **plain-English** column (what it means clinically) and a **precise definition** column (what engineers implement). `current(X)` simply means *"the most recent dated entry of X for this patient"*.
 
 ### 3.1 Today's status — read from the most recent entry
 *(these drive the patient header and feed the care-gap rules)*
-| Derived | Formula |
-|---|---|
-| `current_risk` | `current(staging_assessment).eau_risk_category` |
-| `current_castration` | `current(staging_assessment).castration_status` |
-| `current_line` | `current(treatment_line WHERE status='Active')` |
-| `current_bone_protection` | `current(supportive_care_event).bone_protection_therapy` |
-| `latest_psa` | `current(psa_reading).psa_ng_ml` |
-| `imaging_status(m)` | `current(imaging_study WHERE modality=m).result` **else `'Not done'`** *(absence = not done)* |
+| Figure | In plain English | Precise definition |
+|---|---|---|
+| Current risk category | The risk from the **latest staging assessment** | `current(staging_assessment).eau_risk_category` |
+| Current castration status | HSPC or CRPC, from the **latest staging assessment** | `current(staging_assessment).castration_status` |
+| Current treatment | The therapy line currently marked **Active** | `current(treatment_line WHERE status='Active')` |
+| Current bone protection | From the **latest supportive-care entry** | `current(supportive_care_event).bone_protection_therapy` |
+| Latest PSA | The **most recent** PSA result | `current(psa_reading).psa_ng_ml` |
+| Is a scan done? | The **latest result** for that scan — and if **no entry exists at all**, it counts as **"Not done"** | `current(imaging_study WHERE modality=m).result` else `'Not done'` |
 
 ### 3.2 Figures calculated for one patient
-| Derived | Formula | Notes |
+| Figure | In plain English | Precise definition |
 |---|---|---|
-| `adt_duration_months` | `DATEDIFF(month, treatment_line[ADT].start_date, COALESCE(end_date, today))` | |
-| `time_to_treatment_days` | `treatment_plan.treatment_start_date − patient.diagnosis_date` | |
-| `cghs_delay_days` | `COALESCE(cghs_approval_date, today) − cghs_request_date` | only when `cghs_preauth_status ≠ 'Not required'` |
-| `time_to_nadir_months` | `DATEDIFF(month, treatment_start_date, outcome.psa_nadir_date)` | `'Not reached'` if nadir date null |
-| `treatment_started_flag` | `treatment_plan.treatment_start_date IS NOT NULL` | |
-| `rt_completed_flag` | `treatment_line[RT].rt_status = 'Completed' OR rt_completion_date IS NOT NULL` | |
-| `visit_status` | `next_follow_up_psa_date > today → 'Upcoming'`; `< today → 'Missed/Overdue'`; else `'Last Visit'` (use `last_follow_up_date`) | why no Encounter entity is needed |
-| `diagnostic_psa` | earliest `psa_reading` within the diagnosis window (or flagged diagnostic) | ⚠ needs a rule — see §4 |
+| Time on ADT | Months from the ADT start date until it stopped (or until today if ongoing) | `DATEDIFF(month, treatment_line[ADT].start_date, COALESCE(end_date, today))` |
+| Time to treatment | Days from **diagnosis** to the **first active treatment** | `treatment_start_date − diagnosis_date` |
+| CGHS approval delay | Days from the pre-auth request to approval (or to today if still pending) | `COALESCE(cghs_approval_date, today) − cghs_request_date`; only when pre-auth is required |
+| Time to PSA nadir | Months from starting treatment to the lowest PSA | `DATEDIFF(month, treatment_start_date, psa_nadir_date)`; `'Not reached'` if no nadir yet |
+| Has treatment started? | Yes, once a treatment start date exists | `treatment_start_date IS NOT NULL` |
+| Is RT complete? | Yes, if RT status says Completed **or** a completion date exists | `rt_status='Completed' OR rt_completion_date IS NOT NULL` |
+| Visit status | *Upcoming* if the next PSA date is in the future; *Missed/Overdue* if it has passed; otherwise show the last visit | based on `next_follow_up_psa_date` / `last_follow_up_date` — this is why we need **no separate Visit record** |
+| PSA at diagnosis | The PSA reading taken around the time of diagnosis | ⚠️ **the selection rule is not yet defined — see §4 (F4)** |
 
 ### 3.3 Tidying answers into groups for reporting
 | Derived | Formula |
