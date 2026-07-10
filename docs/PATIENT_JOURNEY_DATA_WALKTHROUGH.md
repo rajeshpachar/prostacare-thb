@@ -394,6 +394,110 @@ dim1 = risk_group/High     | numerator = 18 | denominator = 62 | patient_n = 62 
 
 ---
 
+# PART G — From one patient to the whole cohort (how the department numbers are built)
+
+Parts A–D followed **one** patient. Every figure on the Home screen and the Population Dashboard is simply **the same data, counted across all patients**. Nothing is typed by hand.
+
+## G1 · How a care-gap **count** becomes a cohort figure
+
+Take the department's 347 patients on the day of the demo.
+
+```
+Open care gaps = 63
+   ↳ simply: count every nudge whose status is still "open", across all patients.
+     PCR-001 contributed 7 of these before the team closed them; it now contributes 0.
+```
+
+## G2 · How a **benchmark percentage** is calculated
+
+Each benchmark is *"how many patients who should have had this, actually had it."*
+
+```
+Bone protection on ADT  =  patients on ADT WITH bone protection
+                           ───────────────────────────────────   =  66 / 198  =  33%
+                           all patients on ADT
+NCCN benchmark = 85%      →  gap of 52 percentage points
+Clicking the 33% opens the 132 patients on ADT who have no bone protection.
+```
+The same shape produces the other three benchmarks:
+
+| Benchmark | Numerator (had it) | Denominator (should have had it) | Cohort | Target |
+|---|---|---|---|---|
+| ARSI intensification | ARSI started | HSPC **and** risk ≥ High | 29% | 60% |
+| PSMA PET-CT | PSMA done | risk High / Very High | 46% | 85% |
+| Bone protection | bone protection started | on ADT | 33% | 85% |
+| MDT review | MDT status = *Reviewed* | all patients | 77% | 95% |
+
+> Every one of these is **drillable**: click the percentage → see the exact patients in the denominator who are missing the action → open any patient file. That is the product promise.
+
+## G3 · How the **nudge trend** chart is calculated
+
+This is the one figure that needs the **lifecycle log** (`nudge_event`), not just today's snapshot.
+
+```
+For each week (or month):
+   Opened        = count of nudge_event where action = 'opened'
+   Acknowledged  = count of nudge_event where action = 'acknowledged'
+   Resolved      = count of nudge_event where action = 'resolved'
+   Net active    = (all opened so far) − (all resolved so far)      ← the running backlog
+```
+Worked example for `PCR-001`'s month:
+| Week | Opened | Acknowledged | Resolved | Net active |
+|---|---|---|---|---|
+| W1 | 7 | 0 | 0 | 7 |
+| W2 | 0 | 4 | 2 | 5 |
+| W3 | 0 | 3 | 3 | 2 |
+| W4 | 0 | 0 | 2 | **0** |
+
+This is exactly why a nudge cannot be a simple flag on the patient row — a flag has no history, so the chart could never be drawn.
+
+## G4 · How the **protocol adherence score** is built
+
+Ten protocol steps are each scored *"what % of eligible patients had it"*, then averaged:
+
+```
+MDT review 77% · Staging complete 71% · PSMA 46% · RT dose/target 88% · ADT duration 82%
+Bone Rx 33% · Genetics 62% · PSA monitoring 78% · ARSI intensity 29% · Psych screen 44%
+                       → weighted mean = 73 / 100
+Biggest drags: Bone Rx (33%) and ARSI intensity (29%).
+```
+
+## G5 · How **record completeness** is measured
+
+For each group of fields (Demographics, PSA, Biopsy, Staging, Imaging, Treatment, Bone health, Outcomes), the system counts how many of the **required** fields have an answer:
+```
+completeness(group) = required fields answered ÷ required fields in that group
+cohort completeness = average across patients      → 68% (235 of 347 records complete)
+```
+> ⚠️ **Open question (F5):** the workbook marks only **4 of 108 fields** as required, so we need the clinical team to state which fields are mandatory per group — otherwise this figure has no agreed basis.
+
+## G6 · Supportive care and reporting — where they surface
+
+| Concern | Where it is captured | Where it is reported |
+|---|---|---|
+| **Bone protection, Ca/Vit D, DEXA follow-up** | `supportive_care_event` (dated) — Treatment screen | Bone-health donut · bone-protection benchmark · the largest care gap |
+| **Testosterone monitoring, PHQ-9, nutrition** | `supportive_care_event` (dated) | Protocol score (psych-screen axis) · psychosocial nudge |
+| **Toxicity / side-effects** | `safety_side_effects` on the treatment line | Clinical review; not a cohort chart today |
+| **Follow-up scheduling** | `next_follow_up_psa_date`, `last_follow_up_date` | Patient List timing segments (Upcoming / Missed) |
+| **Access & approvals** | `cghs_preauth_status` + request/approval dates | CGHS delay chart · pending-approvals KPI |
+| **Reporting out** | all of the above | Home KPIs · 6 dashboard sections · printable summary · the de-identified sponsor extract (Part D4) |
+
+## G7 · The full chain, end to end
+
+```mermaid
+flowchart LR
+  E[Clinician saves an entry] --> R[Rules re-checked → nudge opens or closes]
+  R --> L[nudge_event lifecycle log]
+  E --> C[Cohort counts + benchmarks recalculated]
+  L --> T[Nudge trend chart]
+  C --> D[Home KPIs + Population dashboard]
+  D --> DR[Click any figure → the patients behind it]
+  DR --> F[Open a patient file]
+  C --> S[Monthly de-identified summary → sponsor]
+```
+
+---
+
 # PART E — OPEN QUESTIONS, MADE ANSWERABLE (examples for the clinical team)
 
 ## E1 — Enum localisation per site *(the concrete ask)*
@@ -676,3 +780,102 @@ All **108** workbook fields mapped to their canonical entity and the journey sta
 | Bone health + supportive fields | **`supportive_care_event` rows** (dated) | bone-protection start/stop needs an audit trail |
 | 9 comorbidity + 6 family-history columns | **boolean flags on `pathology`** | fixed list; kept exactly as the workbook/UI |
 | `diagnosis_date` (Clinical_Entry) | **moved to `patient`** | it is a patient-level fact |
+
+---
+
+# PART H — Every screen and widget, and the data behind it
+
+This is the completeness check for the **user interface**: every surface and every widget in the product, and which record type or calculated figure supplies it. If a widget had no data source, it could never be built — none do.
+
+
+## H1 · The product surfaces
+
+| Surface | Its job | Data behind it |
+|---|---|---|
+| **Home** | Start-of-day command centre | `app_user` / `audit_event` |
+| **Patient List** | Operational roster and search | — |
+| **Patient File Shell** | Single-patient command centre | — |
+| **Patient File · Nudges & Alerts** | Make missing steps visible | — |
+| **Patient File · Demographics** | Capture de-identified registry and access context | `patient` |
+| **Visit-wise entry** |  | — |
+| **Patient File · Clinical Assessment** | Capture disease workup and current state | `psa_reading` (dated) |
+| **Patient File · Treatment Plan** | Capture intent and active management | `treatment_line` / `treatment_plan` |
+| **Patient File · Patient Journey** | Show the whole case longitudinally | `journey_event` (dated) |
+| **Team Discussion / Nudge Modal** | Close the loop across the MDT | `nudge_event` (lifecycle log) |
+| **Guidelines Surface** | Keep guideline context close to the case | — |
+| **Population Dashboard** | Read the department or site as a living cohort | — |
+| **AI Buddy** | Guided, stepwise pathway review | ⏸ **AI Buddy — Phase 2** |
+
+## H2 · Home screen widgets
+
+| Widget | What it shows | Data behind it |
+|---|---|---|
+| Doctor welcome + cohort chips | Doctor identity, role, department, hospital, cohort count, active care-gap count | `app_user` / `audit_event` |
+| Department at a glance | Last visit, upcoming, missed/overdue, population alerts | derived (see §3.5 of Types·Enums·Derived) |
+| AI Buddy | Step-by-step pathway review | ⏸ **Phase 2** |
+| Open Patient File | Department roster and patient queue | derived (see §3.5 of Types·Enums·Derived) |
+| Go to Dashboard | Population charts and insight cards | derived (see §3.5 of Types·Enums·Derived) |
+| Review Missed and High-Priority Patients | Flagged critical and recommendation patients | derived (see §3.5 of Types·Enums·Derived) |
+| Review Care Gaps | Quality & gaps view | derived (see §3.5 of Types·Enums·Derived) |
+| Add New Patient | New registry entry | derived (see §3.5 of Types·Enums·Derived) |
+| Protocol adherence score | Overall cohort protocol score | derived (see §3.5 of Types·Enums·Derived) |
+| Open care gaps | Total active care gaps | `nudge_event` (lifecycle log) |
+| Record completeness | Fully entered records vs total | derived (see §3.5 of Types·Enums·Derived) |
+| New registrations | New patients this month | derived (see §3.5 of Types·Enums·Derived) |
+| ARSI intensification | Cohort vs NCCN benchmark | derived (see §3.5 of Types·Enums·Derived) |
+| PSMA PET-CT (high risk) | Cohort vs NCCN benchmark | derived (see §3.5 of Types·Enums·Derived) |
+| Bone protection on ADT | Cohort vs NCCN benchmark | derived (see §3.5 of Types·Enums·Derived) |
+| MDT review rate | Cohort vs NCCN benchmark | derived (see §3.5 of Types·Enums·Derived) |
+| Nudge trend analysis | Opened, viewed, acted upon, resolved, net active | `nudge_event` (lifecycle log) |
+| Surfaced critical / recommendation patients | Surfaced cases requiring follow-up | derived (see §3.5 of Types·Enums·Derived) |
+| Insight of the day | Auto-generated cohort insight | derived (see §3.5 of Types·Enums·Derived) |
+| Care gap breakdown | Most common care gaps with counts | derived (see §3.5 of Types·Enums·Derived) |
+| Recently viewed patients | Recently opened patient files | `app_user` / `audit_event` |
+| Incomplete records — data entry pending | Patients missing key fields | derived (see §3.5 of Types·Enums·Derived) |
+
+## H3 · Population dashboard widgets
+
+| Section | Chart / KPI | Data behind it | Drill-down |
+|---|---|---|---|
+| Overview | Sidebar snapshot | `nudge` + `nudge_event` | Persistent sidebar state |
+| Overview | Total Patients / High-VH Risk / Median PSA / Active ADT / Protocol Score | `patient` | No chart drilldown; section-level anchors |
+| Overview | Monthly registrations + cumulative cohort | `patient` | Click month to patient list |
+| Overview | Risk distribution | `staging_assessment` (latest) | Click segment to patient list |
+| Overview | Age at diagnosis | `patient` | Click bar to patient list |
+| Overview | Healthcare coverage | `patient` | Legend-only in demo |
+| Overview | Stage at presentation | `staging_assessment` (latest) | Click bar to patient list |
+| Clinical | PSA at diagnosis — distribution | `psa_reading` (dated) | Click band to patient list |
+| Clinical | PSA trend — cohort median + percentile bands | `psa_reading` (dated) | No patient-level drill in demo |
+| Clinical | Gleason / ISUP grade | `pathology` | Click grade to patient list |
+| Clinical | PSA density distribution | `psa_reading` (dated) | No explicit drilldown label in UI |
+| Clinical | Free PSA % — diagnostic distribution | `psa_reading` (dated) | No explicit drilldown label in UI |
+| Clinical | Comorbidity burden across cohort | `pathology` / `staging_assessment` | Click condition to patient list |
+| Clinical | PSA x Gleason heatmap | `psa_reading` (dated) | Visual scan only in demo |
+| Treatment | On ADT / RT Completed-Active / ARSI Intensified / Active Surveillance / CGHS Approval Pending | `pathology` / `staging_assessment` | No explicit drilldown |
+| Treatment | Treatment pathway — patient flow funnel | — | Visual pathway only |
+| Treatment | ADT landscape | `treatment_line` (dated) | No explicit drilldown label in UI |
+| Treatment | RT distribution | `treatment_line` (dated) | Legend-driven |
+| Treatment | ARSI intensification landscape | `treatment_line` (dated) | No explicit drilldown label in UI |
+| Treatment | ADT duration distribution | `treatment_line` (dated) | No explicit drilldown label in UI |
+| Outcomes | Outcome headline cards | `psa_reading` (dated) | No drilldown in the cards |
+| Outcomes | PSA response over time — stratified by treatment | `psa_reading` (dated) | Click line point to patient set |
+| Outcomes | BCR-free survival — Kaplan-Meier by risk group | `outcome` | No direct chart drill documented |
+| Outcomes | Time to PSA nadir | `outcome` | Click bar to patient list |
+| Outcomes | PSA doubling time distribution | `outcome` | Click bar to patient list |
+| Outcomes | Treatment outcome by RT fractionation | `outcome` | No explicit drilldown label in UI |
+| Outcomes | Time from diagnosis to treatment start | `pathology` / `staging_assessment` | Click bar to patient list |
+| Outcomes | PSA response at 6 months — ADT+ARSI vs ADT alone | `psa_reading` (dated) | Click bar to patient list |
+| Quality | Nudges trend analysis | `nudge_event` (lifecycle log) | Section-level drill into quality workflow |
+| Quality | Protocol adherence — cohort vs NCCN benchmark | `nudge` + `nudge_event` | No patient-level drill documented |
+| Quality | Top care gaps — patients affected | `nudge` + `nudge_event` | Visual ranking |
+| Quality | CGHS pre-auth delay — time to approval | `treatment_line` (dated) | No explicit drilldown label in UI |
+| Quality | Bone health gap — ADT cohort | `nudge` + `nudge_event` | Click donut segment to patient list |
+| Quality | Data completeness by field group | — | No explicit drilldown label in UI |
+| Quality | MDT review rate — monthly trend | `treatment_plan` | Click point to patient list |
+| Demographics | Patients by state of origin | `patient` | Visual ranking only |
+| Demographics | Coverage by state | `patient` | No explicit drilldown label in UI |
+| Demographics | Referral source | `patient` | Legend-driven |
+| Demographics | Travel distance to centre | `patient` | No explicit drilldown label in UI |
+| Demographics | Language preference | `patient` | No explicit drilldown label in UI |
+| Demographics | Comorbidity co-occurrence — top pairs | `pathology` / `staging_assessment` | No explicit drilldown label in UI |
+| Demographics | ECOG performance status | `staging_assessment` (latest) | Click donut segment to patient list |
