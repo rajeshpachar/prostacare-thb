@@ -9,6 +9,7 @@ DOCS = ROOT / "docs"
 
 ORDER = [
     ("▶ Dev-Start Gate (open questions)", "DEV_START_GATE.md"),
+    ("✂ Simplification Review", "SIMPLIFICATION_REVIEW.md"),
     ("Functional & Logic Spec", "PROSTACARE_FUNCTIONAL_LOGIC_SPEC.md"),
     ("NOVA Edge Alignment Review", "NOVAEDGE_ALIGNMENT_REVIEW.md"),
     ("Build Spec (v1)", "PROSTACARE_BUILD_SPEC_V1.md"),

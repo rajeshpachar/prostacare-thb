@@ -302,7 +302,9 @@ flowchart TD
   R --> B
 ```
 ```
-TRIGGER: (a) any staging/imaging/treatment/supportive save  (b) daily cron
+TRIGGER: any staging/imaging/treatment/supportive save  (on-write only —
+         all 8 rules are state-based, not time-based, so no daily cron is
+         needed in v1; add one when a time-based rule appears)
 INPUTS (current state per patient):
   risk = current(Staging).eau_risk_category
   castration = current(Staging).castration_status
@@ -328,14 +330,14 @@ NOTE  : "Acknowledge" (W6) does NOT resolve a nudge — only a changed source fi
 ### W6 · Nudge lifecycle (acknowledge → route → resolve)
 ```mermaid
 stateDiagram-v2
-  [*] --> Open : rule fires
-  Open --> Logged : acknowledge & route to MDT (W7)
-  Logged --> Resolved : source field changed → rule no longer fires (W5)
-  Open --> Resolved : source field changed
-  Open --> Dismissed : clinically not applicable (reason, audited)
+  [*] --> Open : rule fires (on write)
+  Open --> Acknowledged : acknowledge & route to MDT (W7)
+  Acknowledged --> Resolved : source field changed → rule stops firing (W5, auto)
+  Open --> Resolved : source field changed (auto)
   Resolved --> Open : condition recurs
   Resolved --> [*]
 ```
+> **No `snoozed` or `dismissed` state.** Clinical non-applicability is already expressed **in the data** — `bone_protection = "Not indicated"`, `mdt_status = "Not applicable"`, `germline = "Pending"` — so the rule simply never fires. Resolution is always data-driven. *(See `SIMPLIFICATION_REVIEW.md` T1/T2.)*
 ```
 TRIGGER: clinician clicks Acknowledge & log on a nudge
 INPUTS : nudge_id, actor
