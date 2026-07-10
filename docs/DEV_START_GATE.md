@@ -3,10 +3,10 @@
 **Purpose:** one consolidated list of everything we need from the client (business / clinical / legal) before, and shortly after, development begins. Every item carries a **recommended default** so the client can simply **confirm or amend** rather than design from scratch.
 
 **Status summary**
-- ✅ **10 decisions already settled** (§1) — no need to revisit.
+- ✅ **13 decisions already settled** (§1) — no need to revisit.
 - 🔴 **10 blockers (P0)** — must be answered before dev starts (§2).
 - 🟠 **7 items (P1)** — needed within the first sprint (§3).
-- 🟡 **7 items (P2)** — needed before go-live, not before dev (§4).
+- 🟡 **4 items (P2)** — needed before go-live, not before dev (§4).
 - ⚙️ **6 internal decisions** — ours to make, no client input needed (§5).
 
 > Fastest path: a single **90-minute workshop** covering §2, with clinical + business + legal present. Everything in §2 has a recommended default; most should be a "confirm."
@@ -27,6 +27,9 @@
 | 8 | **Nudge lifecycle** = open → acknowledged → **auto-resolve** (no snooze, no dismiss); engine runs **on-write** (no cron) |
 | 9 | **Roles = Clinician · HOD (privileged) · Admin**; MDT = `is_mdt_member` notify flag; **no department** |
 | 10 | **Record lock:** edit window → auto-lock → **HOD** time-bound unlock (reason required, audited) |
+| 11 | **Deployment model = one tenant per institution, with separation** (per-doctor SaaS tenant `O-DEP` is explicitly **not** the model) |
+| 12 | **Hosting & data residency = AWS Mumbai (`ap-south-1`)**; **THB provides domain, hosting, and infrastructure** (DPDP-compliant India residency) |
+| 13 | **AWS SES is already in place** — verified sender domain + **production access** (out of sandbox). No SES prerequisite work needed. |
 
 ---
 
@@ -45,7 +48,7 @@
 | **B7** | **Sponsor:** confirm **NVS = Novartis**; their role (funder / data consumer / both); and the **independent clinical governance** that owns the rule pack (conflict-of-interest control) | Determines the aggregation contract, governance model, and consent basis | Business + Legal | Sponsor receives **de-identified aggregate only**; rule pack owned by an **independent clinical committee** with versioned sign-off; hard firewall |
 | **B8** | **Clinical sign-off on the 8 care-gap rules** — conditions, severities, next-step wording — and the **benchmark targets** (ARSI 60%, PSMA 85%, bone protection 85%, MDT review 95%) | The care-gap engine is the core product; rules cannot be coded unsigned | Clinical | Confirm as specified in `PROSTACARE_FUNCTIONAL_LOGIC_SPEC.md §4`; amend thresholds/wording as needed |
 | **B9** | **Aggregation contract:** confirm the `metric_key` catalogue; **small-cell suppression threshold** (default **11**); institution shown as **anonymised code** vs named | Determines what `sponsor_metric` computes and exports | Clinical + Legal | Catalogue as spec'd; threshold **11**; **anonymised `institution_code`** |
-| **B10** | **Launch institution + user roster + identity source:** which hospital(s) go first, the doctor/coordinator roster (name, specialty, role, email), and **Azure AD SSO vs email/local accounts** | Cannot provision a tenant or onboard users without it. No roster exists in any document today. | Business + IT | Start with **one institution**; SSO if available, else email/local. Also needs an **SES verified sender domain + SES production access** (see P2-1). |
+| **B10** | **Launch institution + user roster + identity source:** which hospital(s) go first, the doctor/coordinator roster (name, specialty, role, email), and **Azure AD SSO vs email/local accounts** | Cannot provision a tenant or onboard users without it. No roster exists in any document today. | Business + IT | Start with **one institution**; SSO if available, else email/local. *(SES is already provisioned — no prerequisite.)* |
 
 ---
 
@@ -67,13 +70,13 @@
 
 | ID | Question | Owner |
 |---|---|---|
-| P2-1 | **SES prerequisites** — verified sender domain/address + SES **production access** (out of sandbox) | IT |
+| ~~P2-1~~ | ~~SES prerequisites~~ — ✅ **ANSWERED:** THB's existing SES has a verified sender domain and production access | — |
 | P2-2 | **Export mechanism & cadence** to Zygo Data Cloud — S3 push (recommended) vs pull API; nightly compute, weekly/monthly export | Business + Platform |
 | P2-3 | **Consent / legal basis** for aggregate secondary use (DPDP Act; ethics committee if applicable) | Legal |
-| P2-4 | **Domain, hosting, data residency, IP ownership** | Business + Legal |
+| ~~P2-4~~ | ~~Domain/hosting/residency/IP~~ — ✅ **ANSWERED:** **AWS Mumbai (`ap-south-1`)**; **THB provides** domain, hosting, infrastructure | — |
 | P2-5 | **Clinical chart renderers** — PSA line, percentile bands, Kaplan-Meier (frontend work) | Platform |
 | P2-6 | **Enum localisation** per site (RT facilities, referring centres) | Clinical |
-| P2-7 | **Deployment model** — per-doctor SaaS tenant (`O-DEP`) is *not* v1; confirm it stays out of scope | Business |
+| ~~P2-7~~ | ~~Deployment model~~ — ✅ **ANSWERED:** **one tenant per institution, with separation.** Per-doctor SaaS is not the model. | — |
 
 ---
 

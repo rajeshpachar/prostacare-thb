@@ -115,7 +115,7 @@ flowchart TD
 | Contract enforcement | governance | sponsor gets only the approved `metric_key` catalogue |
 | One-directional flow | pipeline | tenant → Data Cloud → sponsor; sponsor never touches a tenant |
 | Audit | both hops | every aggregation run + every export logged |
-| Data residency | both | India region (DPDP) |
+| Data residency | both | **AWS Mumbai `ap-south-1`** (DPDP compliant); THB-provided infrastructure |
 
 ---
 

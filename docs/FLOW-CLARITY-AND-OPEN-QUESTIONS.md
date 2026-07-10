@@ -26,7 +26,7 @@ We will not start the `prostate_cancer` preset until the team model, data bounda
 | ID | Decision | Status |
 |---|---|---|
 | O-TEN | **Tenant = institution** (one schema per hospital; no `institution_id`). Within-institution cross-doctor/dept reporting is native; cross-institution = de-identified aggregation layer above tenants. *(Supersedes the earlier "single shared tenant" note.)* | ✅ DECIDED (updated) |
-| O-DEP | Deployment model: institutional single tenant **vs** per-doctor SaaS tenant ("tenant-C", internet self-serve) | ⬜ OPEN (P0) |
+| O-DEP | **Deployment = one tenant per institution, with separation.** Per-doctor SaaS tenant explicitly **not** the model. | ✅ DECIDED |
 | O-ONB | Predefined doctor-teams to onboard? **None found in docs/scope** | ⬜ OPEN (P0) |
 | O-ACC (A) | **Simplified (supersedes department-scoping):** **no `department` entity**; all clinical roles see the institution's patients (tenant is the boundary); **HOD = privileged role** (unlock, notify-all-MDT, audit). MDT panel = notification group, not access. | ✅ DECIDED (updated) |
 | O-LOCK | **Record edit window → auto-lock → HOD time-bound unlock** (defaults 48 h / 24 h, reason required, audited). Append-only tiers need no unlock to continue care. | ✅ DECIDED (durations to confirm) |
@@ -42,7 +42,7 @@ We will not start the `prostate_cancer` preset until the team model, data bounda
 | O-N* | Nudge ownership + SLA/escalation + snooze | ⬜ OPEN (P1) |
 | O-AGG | Cross-tenant aggregation via Zygo Data Cloud (de-identified `sponsor_metric` → pull → sponsor) | 🟡 SPEC'D — see `CROSS_TENANT_AGGREGATION_SPEC.md` |
 | O-REP* | Reporting grain & destination | ⬜ OPEN (P1) |
-| O-DOM* | Domain / hosting / data-residency / IP | ⬜ OPEN (P2) |
+| O-DOM | **AWS Mumbai (`ap-south-1`)** residency; **THB provides** domain, hosting, infrastructure. **SES already provisioned** (verified domain + production access). | ✅ DECIDED |
 
 ---
 

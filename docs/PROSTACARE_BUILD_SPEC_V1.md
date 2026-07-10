@@ -29,7 +29,7 @@ That promise is only structurally possible if the data model is **longitudinal, 
 | Cross-**doctor** cohort reporting (within a hospital) | **Native** — one schema per institution |
 | Cross-**institution** reporting (sponsor / registry / benchmarking) | A separate **de-identified aggregation layer above the tenants** — pushes de-identified cohort metrics up; matches "sponsor sees de-identified aggregate only" |
 | "Each doctor/team isolated" (within a hospital) | **Not required** — all clinicians share access; HOD is the privileged role |
-| Per-**doctor** dedicated tenant (internet SaaS, `O-DEP`) | Different again — not chosen; would isolate each doctor and needs the same de-identified layer to report across them |
+| Per-**doctor** dedicated tenant (internet SaaS, `O-DEP`) | **Explicitly not the model.** Confirmed: **one tenant per institution, with separation.** |
 
 > Net: cross-reporting splits into two — **within-institution** (native, in-tenant) and **cross-institution** (de-identified aggregation layer). The de-identified layer is also exactly the sponsor/pharma surface (§10), so it does double duty.
 
@@ -212,7 +212,7 @@ Cross-institution rollup (sponsor/registry) reads the **de-identified aggregatio
 | Non-clinical / ops / sponsor | De-identified aggregate only | Exposed **only** to RLS-scoped, **de-identified** materialized views; no entity-row access |
 | Identifiers (if §3-B/C) | Masked-by-default + audited reveal | isolated `patient_identity`; column `read_roles` + `context_mask`; reveal → `audit_event` |
 | Rules/AI governance | Independent clinical sign-off; sponsor can't edit | `guideline_rule`/`evidence_pack` write-restricted to Admin+clinical-committee role |
-| Data residency / consent | India (DPDP) | India-region hosting; consent basis per §3 decision (de-identified ⇒ lightest) |
+| Data residency / consent | **AWS Mumbai `ap-south-1`** (DPDP); THB-provided hosting/domain | consent basis per §3 decision (de-identified ⇒ lightest) |
 
 Capability × role matrix is in `FLOW-CLARITY-AND-OPEN-QUESTIONS.md §5` (straw-man, pending confirmation).
 

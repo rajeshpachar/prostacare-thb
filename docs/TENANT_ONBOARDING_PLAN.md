@@ -62,7 +62,7 @@ flowchart LR
 2. Seed the golden preset: `seed-preset.py prostate_cancer` → all entities, workflows, rules, mat-views, dashboards, theme.
 3. Configure institution: `config.json` (name/branding), `institution_code`, facility/enum overrides.
 4. Wire aggregation: enable the nightly `sponsor_metric` job + S3 export prefix for this tenant.
-5. Configure auth: Azure AD SSO **or** local accounts.
+5. Configure auth: Azure AD SSO **or** email/local accounts. *(SES sender domain is already provisioned platform-wide — nothing per-tenant.)*
 - **Gate:** tenant up; preset seeded; login works.
 
 ### Day 1 PM — Users & smoke test
