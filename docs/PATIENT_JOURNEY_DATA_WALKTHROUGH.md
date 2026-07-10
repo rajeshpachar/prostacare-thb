@@ -2,8 +2,11 @@
 
 **Purpose:** show, stage by stage with real values, exactly **what a clinician enters**, **what records the system creates**, **which nudges fire or resolve**, and **what is derived**. Two journeys: a **new patient** (onboarding) and an **existing patient** (follow-up → response → progression). Ends with the **complete record summary**, the **derived layer**, and **fill-in examples** so the clinical team can answer the remaining open questions.
 
-**Notation:** `1:1` = one row per patient · `1:N` = a dated log (append-only) · **derived** = computed, never typed.
-All field keys and values come from the workbook `Field_Dictionary` / `Value_Lists`.
+**How to read this:**
+- **1:1** = the patient has **exactly one** of these (e.g. one biopsy record).
+- **1:N (dated)** = the patient has **many**, each with its own date, and we **never overwrite** an old one (e.g. every PSA result).
+- **Derived** = the system **works this out itself**; nobody types it.
+- Field names in `code style` are the exact names in the data-entry workbook, so clinical and technical teams are talking about the same box.
 
 ---
 
@@ -328,9 +331,9 @@ These close every remaining gap against the Field Dictionary. `PCR-001` is **CGH
 
 ---
 
-# PART C — THE COMPLETE RECORD (what we hold on `PCR-001`)
+# PART C — THE COMPLETE RECORD (everything we hold on `PCR-001`)
 
-| Model | Card. | Rows | What it holds |
+| Record type | One or many? | Entries | What it holds |
 |---|---|---|---|
 | `patient` | 1:1 | 1 | code, age@dx, coverage, geography, referral, enrolment, dx date, primary clinician |
 | `pathology` | 1:1 | 1 | complaint, IPSS, DRE, volume, biopsy, PI-RADS, Gleason, ISUP, cores, PNI, ECE + 15 comorbidity/family flags |
@@ -350,9 +353,9 @@ These close every remaining gap against the Field Dictionary. `PCR-001` is **CGH
 
 ---
 
-# PART D — DERIVED DATA & LOGIC OUTPUTS (never typed)
+# PART D — WHAT THE SYSTEM CALCULATES FOR YOU (never typed by hand)
 
-## D1 — Current state (latest dated row per log)
+## D1 — Today's status = simply the most recent entry in each history
 ```
 current_risk        = M1                        ← staging row #3 (2028-01-15)
 current_castration  = Castration-resistant      ← staging row #3
@@ -362,7 +365,7 @@ bone_protection     = Zoledronic acid 4 mg q3m  ← supportive_care latest
 ```
 → drives the **header badges** and the **rule inputs**.
 
-## D2 — Per-patient derived values
+## D2 — Numbers calculated for this patient
 | Derived | Formula | Value |
 |---|---|---|
 | ADT duration | `today − ADT start` | 19 months |
@@ -371,7 +374,7 @@ bone_protection     = Zoledronic acid 4 mg q3m  ← supportive_care latest
 | Open gap counts | `COUNT(nudge WHERE status=open GROUP BY severity)` | 0 / 0 / 0 |
 | Record completeness | % required fields present per field group | 94% |
 
-## D3 — Cohort roll-up (this patient's contribution)
+## D3 — How this patient counts towards the department's figures
 | Cohort metric | How PCR-001 contributes |
 |---|---|
 | `psma_completion_rate` | numerator **+1**, denominator +1 (high-risk) |
@@ -381,7 +384,7 @@ bone_protection     = Zoledronic acid 4 mg q3m  ← supportive_care latest
 | `open_gap_count` | **0** (was 7) |
 | `protocol_adherence_score` | pulls the cohort score **up** |
 
-## D4 — What leaves the tenant (sponsor)
+## D4 — What (and only what) the sponsor ever sees
 Only the de-identified aggregate row, small-cell suppressed:
 ```
 institution_code = INST-017 | period_month = 2026-09 | metric_key = bone_protection_rate
@@ -469,9 +472,9 @@ With threshold **11**: an institution reporting `psma_completion_rate` for High-
 
 ---
 
-# PART F — Field Dictionary coverage: **every field, where it lands**
+# PART F — Every field in the workbook, and where it is captured
 
-All **108** workbook fields mapped to their canonical entity and the journey stage that captures them. This is the traceability check: **no field is orphaned, and no entity holds a field that isn't entered.**
+All **108** workbook fields mapped to their canonical entity and the journey stage that captures them. This is the completeness check: **every box in the data-entry pack has a home, and no record type holds a field nobody ever fills in.**
 
 
 ### → (linkage key)  *( 6 fields )*

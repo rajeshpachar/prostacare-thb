@@ -14,15 +14,46 @@
 
 ---
 
-## 1. Data models — what the platform captures
+## 0. Plain-English glossary (read this first)
 
-Each box below is one "data model" (a table of records). **Cardinality** tells you how many rows exist per patient:
-`1 per patient` = current state · `many (dated)` = a history log · `derived` = calculated, never typed.
+This document is written for **clinicians and engineers together**. Wherever a technical word appears, here is what it actually means.
+
+| Term you'll see | What it means, plainly |
+|---|---|
+| **Record type** (also "entity" / "data model") | A *kind* of information we store — a PSA reading, a staging assessment, a treatment line |
+| **Cardinality** | Simply: **how many of these a patient can have** |
+| **1:1 ("one-to-one")** | The patient has **exactly one** — e.g. one demographics record, one biopsy record |
+| **1:N ("one-to-many")** | The patient can have **many**, each with its own date — e.g. many PSA readings over time |
+| **Dated log / "append-only"** | Each time something changes we **add a new dated entry**; we never overwrite the old one. History is preserved. |
+| **Current state** | The **most recent** dated entry — the patient's status *today* |
+| **Derived / calculated** | A number the system **works out by itself** from what you entered. Never typed by hand. |
+| **Fixed list of choices** (technically an "enum") | A dropdown where only the listed options are allowed — e.g. *Not done · Done — abnormal · Done — normal* |
+| **A rule "fires"** | The system spots a care gap and raises a nudge |
+| **Auto-resolve** | The nudge closes **by itself** once the underlying field changes. Nobody clicks "done". |
+| **Trigger** | The moment the system runs something — nearly always *"when you press Save"* |
+| **Audit trail** | A permanent record of who changed what, and when |
+| **Record lock** | After an editing window, a saved record becomes read-only (the HOD can reopen it briefly) |
+| **Tenant** | One hospital's own separate, isolated copy of the system |
+| **De-identified** | No name, no ABHA/Aadhaar, no phone — only a patient code |
+| **Aggregate** | A summary count or percentage across many patients — never one person's data |
+| **Pseudo-code** | A step-by-step recipe of the logic, written so engineers build exactly what you signed off. **You do not need to read the code blocks** — each one has a plain-English summary above it. |
+
+**The single most useful idea in this document:**
+> *One-to-one* means the fact can only be true once at a time — a patient has **one treatment plan**.
+> *One-to-many* means the fact repeats over time — a patient has **many treatment lines** (first ADT, later ARSI, later chemotherapy).
+> Getting this right is what stops duplicate and contradictory records.
+
+---
+
+## 1. What the platform captures
+
+
+Each box below is one **record type**. The "How many per patient" column tells you whether a patient has exactly one of these, or many dated entries over time.
 
 ### 1.1 Who uses it (roles) — *simplified: no department*
 > **Tenant = institution.** Each onboarded hospital is its own tenant, so **no `institution_id` is stored**. There is **no `department` entity**: all clinical users see that institution's patients, and access differs by **role**, not by department. "Teams" (the MDT panel) are a **notification group, not an access boundary**. Cross-*institution* reporting is a separate **de-identified aggregation layer above tenants**.
 
-| Model | Cardinality | Key variables | Plain meaning |
+| Record type | How many per patient | What it holds | Plain meaning |
 |---|---|---|---|
 | **User** | many per tenant | `user_id`, name, **`email` (login identity)**, specialty, `role` | Anyone who logs in |
 | **Role** | config | **Clinician · HOD (privileged) · Admin** *(Ops/Quality optional)* | What you may do |
@@ -37,8 +68,9 @@ Each box below is one "data model" (a table of records). **Cardinality** tells y
 | **Ops / Quality** | **de-identified aggregates only** | dashboards; no patient records |
 | **Admin** | no clinical data | users, roles, rules, config |
 
-### 1.2 The patient & current clinical state
-| Model | Cardinality | Key variables | Example |
+### 1.2 The patient and their current clinical state
+*(exactly one of each per patient)*
+| Record type | How many per patient | What it holds | Example |
 |---|---|---|---|
 | **Patient** (hub) | 1 per patient | `patient_code`, `age_at_diagnosis_years`, `healthcare_coverage`, `state`, `referral_source`, `registry_enrolment_date`, `diagnosis_date` | `PCR-001`, 68, CGHS, Delhi, Govt OPD |
 | **Pathology** | 1 per patient | `gleason_score`, `isup_grade_group`, `biopsy_type`, `pi_rads_score`, `cores_positive_total`, `perineural_invasion`, `ece`, `dre_findings`, `ipss_score`, `prostate_volume_cc` | Gleason 4+4=8, ISUP 4, MRI-fusion |
@@ -46,8 +78,8 @@ Each box below is one "data model" (a table of records). **Cardinality** tells y
 | **Treatment plan** | 1 per patient | `treatment_intent`, `mdt_tumour_board_status`, `date_of_mdt_review`, `clinical_trial_eligibility`, `treatment_start_date` | Disease control; MDT reviewed 2026-06-20 |
 | **Outcome** | 1 per patient | `best_response`, `psa_nadir_value/date`, `psa_doubling_time_months`, `biochemical_recurrence_status/date`, `crpc_progression_status/date`, `rt_outcome_status` | Nadir 0.8 @ 2026-05, no recurrence |
 
-### 1.3 History logs (the longitudinal tiers) — *dated, many rows per patient*
-| Model | Cardinality | Key variables | Why it's a log, not a cell |
+### 1.3 The dated histories — *many entries per patient, never overwritten*
+| Record type | How many per patient | What it holds | Why we keep a dated history instead of one box |
 |---|---|---|---|
 | **PSA reading** | many (dated) | `psa_date`, `psa_ng_ml`, `free_psa_pct`, `psa_density`, `context_remarks` | PSA moves over time; drives the trend chart |
 | **Staging assessment** | many (dated) | `assessed_on`, `clinical_t_stage`, `n_stage`, `m_stage`, `eau_risk_category`, `ecog_performance_status`, `castration_status` | Restaging & HSPC→CRPC are dated facts, not overwrites |
@@ -56,8 +88,8 @@ Each box below is one "data model" (a table of records). **Cardinality** tells y
 | **Supportive-care event** | many (dated) | `at`, `bone_protection_therapy`, `calcium_vitamin_d`, `next_follow_up_psa_date`, `testosterone_monitoring`, `phq9`, `nutrition` | Bone-protection start/stop needs an audit trail |
 | **Journey event** | many (dated) | `event_type`, `event_date`, `event_notes` | The human-readable milestone story |
 
-### 1.4 Care gaps, collaboration, evidence
-| Model | Cardinality | Key variables | Plain meaning |
+### 1.4 Care gaps, team messages, documents
+| Record type | How many per patient | What it holds | Plain meaning |
 |---|---|---|---|
 | **Nudge** | many | `nudge_id`, `rule_id`, `severity`, `current_status`, `opened_at`, `resolved_at` | One open care gap for one patient |
 | **Nudge event** | many | `nudge_id`, `at`, `action` (**opened · acknowledged · resolved**), `actor` | The lifecycle log behind trend charts + audit |
@@ -66,7 +98,7 @@ Each box below is one "data model" (a table of records). **Cardinality** tells y
 | **Guideline rule** | config | `rule_id`, condition, `severity`, version, sign-off | The 8 care-gap rules as governed config |
 | **Audit event** | many | actor, action, target, `at` | Who did what, when (incl. identity reveal) |
 
-### 1.5 How the models relate (visual)
+### 1.5 How everything links together
 ```mermaid
 erDiagram
   USER ||--o{ PATIENT : "primary clinician (1:N)"
@@ -109,13 +141,14 @@ visit_status(patient):
 
 ---
 
-### 1.7 Cardinality & provenance — every model, how it is populated
+### 1.7 Where every piece of information comes from
+*(and how many of each a patient can have)*
 
-**The two rules that keep the model honest:**
-1. **Nothing exists that isn't either *entered on a named screen* or *derived*.** No orphan tables, no invisible layers.
-2. **1:1 when the fact can only be true once at a time** (current state) · **1:N when the fact recurs over time** (history). This is what prevents duplicate rows.
+**Two rules keep the record honest:**
+1. **Every piece of information is either typed on a named screen, or calculated by the system.** Nothing is hidden or unexplained.
+2. **One-to-one** when the fact can only be true once at a time · **one-to-many** when it repeats over time. This is what prevents duplicate and contradictory entries.
 
-| Model | Per patient | How it is populated (UX flow) | Or derived from | Editable? |
+| Record type | How many per patient | Where the clinician enters it | Or calculated from | Can it be edited? |
 |---|---|---|---|---|
 | **Patient** (hub) | **1:1** | *Add New Patient* → Demographics form | — | edit window → lock |
 | **Pathology** | **1:1** | *Clinical Assessment* → Complaint / DRE / Biopsy | — | edit window → lock |
@@ -154,9 +187,9 @@ A patient has MANY treatment LINES (ADT → ARSI → chemo → RT)      → 1:N
 
 ---
 
-### 1.8 Record edit window, lock & HOD unlock *(new requirement)*
+### 1.8 How long data stays editable (record lock)
 
-Once data is entered it should not stay editable forever — the record must become audit-grade. But clinicians need a correction path.
+Once data is entered it should not stay editable forever — the record has to become trustworthy for audit. But clinicians still need a way to correct genuine mistakes.
 
 | Concept | Rule (all values configurable) |
 |---|---|
@@ -172,9 +205,9 @@ Fields carried on every entered record: `created_at`, `created_by`, `last_edited
 
 ---
 
-## 2. The one core idea — "current state" is computed from history
+## 2. The one core idea — today's status is read from the history
 
-Everything the header shows ("current stage," "current line," "current castration status") is **the latest dated row**, not a stored cell. This is the single most important design rule, so a worked example:
+Everything the patient header shows — current stage, current treatment, current castration status — is simply **the most recent dated entry**. We never store a separate "current" box that could go stale. A worked example:
 
 ```
 STAGING history for PCR-001:
@@ -188,7 +221,7 @@ CURRENT STAGE  = latest row by assessed_on  = Row B (Very High, HSPC)
   never overwriting Row B — so the HSPC→CRPC transition date is preserved.
 ```
 
-Pseudo-code used everywhere current-state is needed:
+**🔧 For engineers** — the rule, stated precisely:
 ```
 FUNCTION current(model, patient):
     RETURN newest row in `model` WHERE patient_code = patient  ORDER BY <date> DESC  LIMIT 1
@@ -201,6 +234,8 @@ FUNCTION current(model, patient):
 Each workflow states: **Trigger → Inputs → Logic (pseudo-code) → Outputs → Derived data touched.**
 
 ### W1 · Patient onboarding
+**In plain terms:** you register a new patient. The system creates their record, links them to you as treating clinician, and emails the MDT that a new patient has joined.
+
 ```mermaid
 flowchart LR
   A[Add New Patient] --> B{Valid + not duplicate?}
@@ -210,6 +245,7 @@ flowchart LR
   D --> E[Notify MDT: new patient]
   C --> F[Appears in roster + cohort counts]
 ```
+**🔧 For engineers — the exact logic** *(clinicians can skip this box; the plain summary is above)*
 ```
 TRIGGER: user submits Add-New-Patient
 INPUTS : patient_code, age_at_diagnosis, coverage, state, referral_source,
@@ -224,6 +260,8 @@ DERIVED: registrations-this-month, cohort volume recompute
 ```
 
 ### W2 · Clinical workup & staging
+**In plain terms:** you enter the biopsy, staging and imaging. Staging and imaging are saved as **new dated entries** (so restaging never erases the old stage). Saving immediately re-checks the care-gap rules.
+
 ```mermaid
 flowchart LR
   A[Enter biopsy/DRE/complaint] --> P[Save Pathology 1:1]
@@ -233,6 +271,7 @@ flowchart LR
   I --> R
   R --> N[Run care-gap engine → W5]
 ```
+**🔧 For engineers — the exact logic** *(clinicians can skip this box; the plain summary is above)*
 ```
 TRIGGER: clinician saves clinical assessment
 INPUTS : pathology fields; staging fields (assessed_on defaults today);
@@ -249,12 +288,15 @@ DERIVED: triggers W5 (care-gap re-evaluation)
 ```
 
 ### W3 · PSA capture & trend
+**In plain terms:** each PSA you add is a new dated entry. The trend chart is drawn straight from these entries — nothing is duplicated or typed twice.
+
 ```mermaid
 flowchart LR
   A[Add PSA row: date + value] --> L[Append PSA_reading - dated]
   L --> T[PSA trend chart reads this table]
   L --> D[Cohort PSA median/percentile recompute]
 ```
+**🔧 For engineers — the exact logic** *(clinicians can skip this box; the plain summary is above)*
 ```
 TRIGGER: clinician adds a PSA entry
 INPUTS : psa_date, psa_ng_ml, free_psa_pct?, psa_density?
@@ -265,6 +307,8 @@ DERIVED: cohort PSA median, percentile bands, diagnostic-PSA distribution
 ```
 
 ### W4 · Treatment planning & lines
+**In plain terms:** the agreed plan (intent, MDT status) is stored once. Each therapy you start — ADT, then ARSI, then chemotherapy — is added as its own dated treatment line, so the sequence is preserved.
+
 ```mermaid
 flowchart LR
   A[Agree pathway] --> P[Update Treatment_plan 1:1: intent, MDT, start]
@@ -273,6 +317,7 @@ flowchart LR
   L --> N[Run care-gap engine → W5]
   S --> N
 ```
+**🔧 For engineers — the exact logic** *(clinicians can skip this box; the plain summary is above)*
 ```
 TRIGGER: team records/updates treatment
 INPUTS : plan header (intent, mdt_status, mdt_date, treatment_start_date);
@@ -286,6 +331,8 @@ DERIVED: ADT duration, time-to-treatment, CGHS delay, ARSI uptake → W5 + §5
 ```
 
 ### W5 · Care-gap (nudge) engine — the heart of the product
+**In plain terms:** every time you save, the system re-reads the patient's *current* status and checks the 8 agreed rules. A gap that now applies opens a nudge; a gap that no longer applies **closes itself**. Nobody has to tick anything off.
+
 ```mermaid
 flowchart TD
   T1[On clinical/treatment save] --> E[Evaluate 8 rules on CURRENT state]
@@ -297,6 +344,7 @@ flowchart TD
   O --> B[Recount severity + refresh badges/banner]
   R --> B
 ```
+**🔧 For engineers — the exact logic** *(clinicians can skip this box; the plain summary is above)*
 ```
 TRIGGER: any staging/imaging/treatment/supportive save  (on-write only —
          all 8 rules are state-based, not time-based, so no daily cron is
@@ -324,6 +372,8 @@ NOTE  : "Acknowledge" (W6) does NOT resolve a nudge — only a changed source fi
 ```
 
 ### W6 · Nudge lifecycle (acknowledge → route → resolve)
+**In plain terms:** acknowledging a nudge records that you saw it and opens the message to the team. It does **not** close the nudge — only changing the underlying clinical field does that.
+
 ```mermaid
 stateDiagram-v2
   [*] --> Open : rule fires (on write)
@@ -334,6 +384,7 @@ stateDiagram-v2
   Resolved --> [*]
 ```
 > **No `snoozed` or `dismissed` state.** Clinical non-applicability is already expressed **in the data** — `bone_protection = "Not indicated"`, `mdt_status = "Not applicable"`, `germline = "Pending"` — so the rule simply never fires. Resolution is always data-driven. *(See `SIMPLIFICATION_REVIEW.md` T1/T2.)*
+**🔧 For engineers — the exact logic** *(clinicians can skip this box; the plain summary is above)*
 ```
 TRIGGER: clinician clicks Acknowledge & log on a nudge
 INPUTS : nudge_id, actor
@@ -344,6 +395,8 @@ DERIVED: nudge-trend "acted" count increments
 ```
 
 ### W7 · MDT notify & discussion (explicit steps + email via AWS SES)
+**In plain terms:** you pick one colleague or the whole MDT, write the reason and note, preview it, and send. Each recipient gets an inbox item and an email. Everything is kept in the patient's discussion trail.
+
 ```mermaid
 flowchart LR
   A[From nudge or patient] --> M{Recipient?}
@@ -359,6 +412,7 @@ flowchart LR
   IN --> L[Append discussion_entry]
   DS --> L
 ```
+**🔧 For engineers — the exact logic** *(clinicians can skip this box; the plain summary is above)*
 ```
 TRIGGER: acknowledge-from-nudge (W6)  OR  "Discuss with Team"  OR  new-patient (W1)
 INPUTS : recipient_mode, recipient(s), reason, subject, note, patient_code
@@ -393,6 +447,8 @@ DERIVED: MDT-review-rate, collaboration audit, notification delivery metrics
 - **In-app inbox** is the primary channel (each notification creates an inbox item and, where relevant, a task); **email (SES)** mirrors it so nothing is missed. SMS / WhatsApp are future channels behind the same `Notification` record.
 
 ### W8 · Cohort analytics (derivation)
+**In plain terms:** all the dashboard numbers are calculated from the entries above — none are typed by hand. Every chart can be clicked through to the patients behind it.
+
 ```mermaid
 flowchart LR
   A[All patient + event data] --> V[Nightly/On-write derivations]
@@ -402,6 +458,7 @@ flowchart LR
   N --> D
   D --> P[Drill any chart → patient list]
 ```
+**🔧 For engineers — the exact logic** *(clinicians can skip this box; the plain summary is above)*
 ```
 TRIGGER: on-write + scheduled refresh
 INPUTS : every model in §1
@@ -420,6 +477,7 @@ flowchart LR
   S3 --> S4[Step: trials]
   S4 --> J[Jump back to patient file]
 ```
+**🔧 For engineers — the exact logic** *(clinicians can skip this box; the plain summary is above)*
 ```
 TRIGGER: user opens AI Buddy
 INPUTS : structured record (read-only) + approved evidence/guideline packs
@@ -431,6 +489,8 @@ DERIVED: none (read-only); every step audited
 ```
 
 ### W10 · Record edit window, lock & HOD unlock
+**In plain terms:** a record you save stays editable for a couple of days, then locks. If a genuine mistake needs fixing later, the HOD can reopen it for 24 hours with a stated reason, and that is recorded.
+
 ```mermaid
 stateDiagram-v2
   [*] --> Editable : record created
@@ -440,6 +500,7 @@ stateDiagram-v2
   Editable --> Editable : edit by clinician (audited)
   Unlocked --> Unlocked : corrective edit (audited)
 ```
+**🔧 For engineers — the exact logic** *(clinicians can skip this box)*
 ```
 CONFIG : EDIT_WINDOW = 48h        // editable after creation
          UNLOCK_WINDOW = 24h      // HOD-granted correction window

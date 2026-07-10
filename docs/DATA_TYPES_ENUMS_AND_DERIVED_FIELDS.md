@@ -1,10 +1,16 @@
 # ProstaCare — Data Types, Enum Closure & Derived-Field Formulas
 
-**Purpose:** prove the field dictionary is **closed** (every field typed, every dropdown backed by a value list) and capture the **explicit formula for every derived field**. Audited programmatically against `ProstaCare_Schema_08072026_V2.xlsx`.
+**Purpose (in plain terms):** two checks, so the clinical team can sign off with confidence.
+1. **Is every question in the data-entry pack complete?** — does each field have a defined answer type, and does every dropdown have its full list of allowed answers? *(Yes — see §1–§2.)*
+2. **Is every automatically-calculated number clearly defined?** — for each figure the system works out on your behalf, exactly how is it calculated? *(§3.)*
+
+Checked automatically against the workbook `ProstaCare_Schema_08072026_V2.xlsx`, so this is verified, not assumed.
+
+> **A note on wording:** an *"enum"* just means **a dropdown with a fixed list of allowed answers**. *"Derived"* means **the system calculates it — nobody types it.** *"Band"* means **a grouping range**, e.g. ages 65–69.
 
 ---
 
-## 1. Data-type closure ✅
+## 1. Every field has a defined answer type ✅
 
 | Data type | Fields |
 |---|---|
@@ -22,7 +28,7 @@
 
 ---
 
-## 2. Enum closure ✅
+## 2. Every dropdown has its complete list of answers ✅
 
 | Check | Result |
 |---|---|
@@ -31,8 +37,8 @@
 | Value_Lists defined but **never used** (orphans) | **0** |
 | **Value lists matched** | **53 / 53** |
 
-### 2.1 Rule-critical enum values — verified verbatim
-The care-gap engine compares against literal strings. If any string didn't exist in the enum, the rule would **silently never fire**. All verified present:
+### 2.1 The exact words the care-gap rules depend on — all present ✅
+The rules look for specific answers word-for-word (e.g. *"Not done"*). If one of those answers were spelled differently in the dropdown, **the rule would never fire and the gap would never be flagged** — a silent safety failure. We checked all of them:
 
 | Enum list | Value the rules depend on | ✓ |
 |---|---|---|
@@ -60,13 +66,14 @@ A metastatic patient who progresses to castration-resistance keeps a risk label 
 
 ---
 
-## 3. Derived-field catalogue — every formula
+## 3. Every automatically-calculated figure, and how it is worked out
 
 The workbook names **22** derived fields but only describes them in prose ("bucket into configured bands") — **the band edges were never defined**. Below: the explicit formula for each, with **proposed band edges recovered from the demo dashboard**, marked for clinical confirmation.
 
 Notation: `current(M)` = latest dated row of model `M` for the patient (see functional spec §2).
 
-### 3.1 Current-state projections *(platform-derived; drive header badges + rule inputs)*
+### 3.1 Today's status — read from the most recent entry
+*(these drive the patient header and feed the care-gap rules)*
 | Derived | Formula |
 |---|---|
 | `current_risk` | `current(staging_assessment).eau_risk_category` |
@@ -76,7 +83,7 @@ Notation: `current(M)` = latest dated row of model `M` for the patient (see func
 | `latest_psa` | `current(psa_reading).psa_ng_ml` |
 | `imaging_status(m)` | `current(imaging_study WHERE modality=m).result` **else `'Not done'`** *(absence = not done)* |
 
-### 3.2 Per-patient computed values
+### 3.2 Figures calculated for one patient
 | Derived | Formula | Notes |
 |---|---|---|
 | `adt_duration_months` | `DATEDIFF(month, treatment_line[ADT].start_date, COALESCE(end_date, today))` | |
@@ -88,7 +95,7 @@ Notation: `current(M)` = latest dated row of model `M` for the patient (see func
 | `visit_status` | `next_follow_up_psa_date > today → 'Upcoming'`; `< today → 'Missed/Overdue'`; else `'Last Visit'` (use `last_follow_up_date`) | why no Encounter entity is needed |
 | `diagnostic_psa` | earliest `psa_reading` within the diagnosis window (or flagged diagnostic) | ⚠ needs a rule — see §4 |
 
-### 3.3 Normalisations
+### 3.3 Tidying answers into groups for reporting
 | Derived | Formula |
 |---|---|
 | `risk_group` | identity map over `eau_risk_category` (6 values) — **no collapsing** |
@@ -99,7 +106,8 @@ Notation: `current(M)` = latest dated row of model `M` for the patient (see func
 | `bone_gap_category` | `no bone Rx` / `no DEXA` / `no Ca+VitD` / `protected (on zoledronate/denosumab)` |
 | `period_month` | `to_char(date, 'YYYY-MM')` — the only date granularity that leaves a tenant |
 
-### 3.4 Band definitions — **proposed edges (confirm with clinical)**
+### 3.4 Grouping ranges ("bands") — **we propose these; please confirm**
+The workbook says *"bucket into configured bands"* but never says what the ranges are. These are recovered from the demo dashboard:
 | Derived bucket | Proposed bands (recovered from the demo) | Confirm |
 |---|---|---|
 | `age_band` | 40-44 · 45-49 · 50-54 · 55-59 · 60-64 · 65-69 · 70-74 · 75-79 · 80+ | ☐ |
@@ -117,7 +125,7 @@ Notation: `current(M)` = latest dated row of model `M` for the patient (see func
 
 > ⚠️ Two demo arrays were ambiguous (`nadir_time_band` vs `psadt_band`). The mapping above is our best reading — **please confirm which band set belongs to which metric.**
 
-### 3.5 Cohort aggregates
+### 3.5 Department-level figures (across all patients)
 | Derived | Formula |
 |---|---|
 | `open_gap_count` | `COUNT(nudge WHERE current_status='open') GROUP BY severity` |
@@ -129,7 +137,7 @@ Notation: `current(M)` = latest dated row of model `M` for the patient (see func
 | `km_bcr_free_survival` | Kaplan-Meier over `outcome.biochemical_recurrence_date − treatment_start_date`, stratified by `risk_group` |
 | `registrations_per_month` | `COUNT(patient) GROUP BY period_month(registry_enrolment_date)` |
 
-### 3.6 Sponsor export (leaves the tenant)
+### 3.6 The only thing the sponsor ever receives
 ```
 sponsor_metric(institution_code, period_month, metric_key, dim1, dim2,
                numerator, denominator, patient_n, suppressed)
@@ -140,7 +148,7 @@ IF suppressed THEN numerator = NULL, denominator = NULL
 
 ---
 
-## 4. Open items (need a clinical/analytics answer)
+## 4. Five questions we need the clinical team to answer
 
 | # | Item | Why |
 |---|---|---|
