@@ -1,8 +1,18 @@
 # ProstaCare — Cross-Tenant Data Aggregation Spec (Sponsor / Zygo Data Cloud)
 
+> **Who this is for:** clinical, business and legal teams. **No technical background needed.**
+> Any unfamiliar term (*tenant, derived, one-to-one, aggregate…*) is explained in the glossary at the top of
+> **`PROSTACARE_FUNCTIONAL_LOGIC_SPEC.md` §0 — Plain-English glossary**.
+
+
 **Purpose:** define how **de-identified summary data** from each institution tenant is aggregated across institutions for the **sponsor** (project funder — inferred **Novartis/NVS**, to confirm), via **Zygo Data Cloud**. This closes gap **G3** in `NOVAEDGE_ALIGNMENT_REVIEW.md` (cross-institution reporting is not native because tenant = institution) and is the surface referenced in `PROSTACARE_BUILD_SPEC_V1.md §10`.
 
-**Golden rule:** **only de-identified aggregates ever leave a tenant.** No `patient_code`, no PHI, no free text, no exact dates, no small cells. The sponsor reads **Zygo Data Cloud only** — never a tenant.
+**Golden rule, in plain terms:** **the sponsor never sees a patient.** Only *summary counts and percentages* ever leave a hospital — no names, no patient codes, no free-text notes, no exact dates, and no figures so small they could identify someone. The sponsor looks at a separate reporting system (Zygo Data Cloud); they can never reach into a hospital's records.
+
+**Three terms used below:**
+- **Tenant** = one hospital's own separate, isolated copy of the system.
+- **Aggregate** = a count or percentage across many patients (e.g. *"18 of 62 high-risk patients are on ARSI"*), never one person's data.
+- **Small-cell suppression** = if a figure is based on too few patients, we hide it, because a very small group could accidentally identify an individual. *Example: if only 6 high-risk patients were seen in a month, that month's percentage is withheld.*
 
 ---
 
@@ -30,9 +40,9 @@ flowchart LR
 
 ---
 
-## 2. The in-tenant aggregate table — `sponsor_metric`
+## 2. The summary table each hospital produces — `sponsor_metric`
 
-One long-format fact table per tenant (easy to export, flexible to extend):
+Each hospital builds **one simple summary table**. Every row is a single figure: *"for this month, this measure, this patient group — how many out of how many."*
 
 | Column | Meaning | Example |
 |---|---|---|
@@ -47,9 +57,9 @@ One long-format fact table per tenant (easy to export, flexible to extend):
 | `suppressed` | TRUE if `patient_n` < threshold → num/den nulled | `false` |
 | `computed_at` | Aggregation run timestamp | `2026-06-30` |
 
-**Small-cell suppression:** if `patient_n < THRESHOLD` (default **11**, configurable by governance), `numerator`/`denominator` are set null and `suppressed = true`. Prevents re-identification from thin cells. Applied **in-tenant**, before export.
+**Small-cell suppression (the privacy safeguard):** if a figure is based on **fewer than 11 patients** (the threshold is set by governance), the numbers are withheld and the row is marked *suppressed*. This prevents anyone working backwards to an individual. It is applied **inside the hospital, before anything is sent** — so unsafe figures never leave.
 
-**Encoding on NOVA Edge:** `sponsor_metric` is a normal entity; a scheduled workflow (`policies` cron, e.g. nightly) runs `sql_exec INSERT … SELECT … FROM <de-identified mat-views> …` with the suppression `CASE`. It reads only the RLS-scoped, de-identified views — never patient rows.
+**🔧 For engineers:** `sponsor_metric` is a normal entity; a nightly scheduled workflow builds it from the de-identified summary views and applies the suppression rule. It never reads patient rows.
 
 ---
 

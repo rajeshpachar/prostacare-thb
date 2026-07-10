@@ -1,8 +1,20 @@
 # ProstaCare — Simplification Review (are we over-building?)
 
-**Method:** every construct we have specified, cross-checked against what the requirements actually ask for — `FUNCTIONAL_REQUIREMENTS.md` (with its Must / Should / **Future** priorities), `PRD.md`, `SCOPE.md`, `ProstaCare_Nudge_Logic_Handoff.md`, and the V2 workbook. If nothing requires it, it is a candidate to cut or defer.
+> **Who this is for:** clinical, business and legal teams. **No technical background needed.**
+> Any unfamiliar term (*tenant, derived, one-to-one, aggregate…*) is explained in the glossary at the top of
+> **`PROSTACARE_FUNCTIONAL_LOGIC_SPEC.md` §0 — Plain-English glossary**.
 
-**Headline:** we were over-building in **13 places**. Cutting them removes ~1 entity, ~1 background job, 2 nudge states, a partition scheme, an import transform, and a whole AI subsystem from v1 — with **no loss against any stated requirement**.
+
+**What this is:** we checked every feature we had designed against what the agreed requirements actually ask for — `FUNCTIONAL_REQUIREMENTS.md` (with its Must / Should / **Future** priorities), `PRD.md`, `SCOPE.md`, `ProstaCare_Nudge_Logic_Handoff.md`, and the V2 workbook. If nothing requires it, it is a candidate to cut or defer.
+
+**Headline:** we had designed **13 things nobody asked for**. Removing them makes the first release smaller, faster and easier to use — **without losing anything the requirements ask for.**
+
+**What this means for the clinical team, in one line each:**
+- **Nudges will have no "snooze" and no "dismiss" button.** If a step genuinely doesn't apply, you record that in the field itself (*"Not indicated"*, *"Not applicable"*) and the nudge simply never appears.
+- **AI Buddy is postponed** to a later release — it isn't in the agreed requirements, and it's the single biggest piece of work.
+- **Three roles, not five:** Clinician, HOD (extra powers), Admin.
+- **Comorbidities stay as the familiar Yes/No tick-boxes.**
+- **The system checks the rules when you press Save** — there is no overnight batch job to wait for.
 
 ---
 
@@ -25,11 +37,11 @@
 | **T2** | **Nudge `dismissed` state** | Nothing | ❌ **Cut** | Clinical non-applicability is **already expressed in the data**: `bone_protection = "Not indicated"`, `mdt_status = "Not applicable"`, `germline = "Pending"`. The rules simply don't fire. No dismiss action needed. *(Cheap to add later if clinicians ask.)* |
 | **T3** | **SLA / escalation** for unactioned urgent nudges | Nothing | ⏸ **Defer** | No requirement. Add when clinicians ask for it. |
 | **T4** | **`encounter` entity** (even optional) | Nothing | ⏸ **Defer** | Visit timing already comes from `next_follow_up_psa_date` + `last_follow_up_date`. Don't build it in v1; document as future (HIS appointment sync). |
-| **T5** | **Table partitioning** on `psa_reading` / `nudge_event` | Nothing | ❌ **Cut** | At ~347 patients / a few thousand rows this is pure overhead — and it forces a composite PK + a lookback gotcha. Plain indexed tables. Revisit at 6-figure volumes. |
+| **T5** | **Splitting big tables into date-partitions** (a database speed trick) | Nothing | ❌ **Cut** | Pointless at a few hundred patients, and it introduces awkward side-effects. Revisit only at very large scale. |
 | **T6** | **`patient_condition`** normalized table (+ import transform) | Nothing | ❌ **Cut** | The workbook and the UI both use **Yes/No flag columns** (9 comorbidities, 6 family-history). Keep them as boolean columns. Removes an entity **and** gap **G6** (the pivot transform). The list is fixed; the comorbidity/pair charts are trivial SQL over booleans. |
 | **T7** | **`mdt_panel` / `mdt_panel_member` table** | Nothing | ❌ **Cut** | Since MDT is only a *notification group* (no access implication), make it a boolean **`user.is_mdt_member`**. One less table and join. |
 | **T8** | **5 roles** (Clinician, HOD, Coordinator, Ops/Quality, Admin) | FR implies few | ✂️ **Trim to 3** | **Clinician · HOD (privileged) · Admin.** Coordinator = a Clinician. Add **Ops/Quality** only if in-product de-identified dashboards are needed (sponsor reads Data Cloud anyway). |
-| **T9** | Care-gap engine on **write-subscriptions *and* a daily cron** | Nothing | ✂️ **Trim** | All 8 rules are **state-based, not time-based** — they only change when data changes. **On-write is sufficient.** Add the cron only when a time-based rule appears (e.g. "DEXA older than 2 years"). |
+| **T9** | Checking the rules **both when you save *and* every night** | Nothing | ✂️ **Trim** | All 8 rules depend only on *what the data says*, not on *how much time has passed* — so they can only change when someone saves. **Checking on save is enough.** We'd add a nightly check only if a time-based rule appears (e.g. *"DEXA older than 2 years"*). |
 | **T10** | `nudge_event` actions: opened / **viewed** / acted / **routed** / resolved | FR-022 (Should) | ✂️ **Trim to 3** | Keep **opened · acknowledged · resolved** (enough for the trend chart and audit). "Viewed" is per-user telemetry; "routed" is inferable from the `notification` row. |
 | **T11** | Notifications: in-app inbox **+ SES email + live SSE push + task creation + digest** | FR-070..075 (Must/Should), FR-076 (Future) | ✂️ **Trim** | v1 = **SES email + a simple in-app notification list**. Drop live SSE push, auto-task creation, and the digest scheduler. |
 | **T12** | **AI Buddy** (ADK agent, 4 lenses, `evidence_pack` / `guideline_pack`) | **0 mentions in FR/PRD/SCOPE** | ⏸ **Defer to Phase 2** | The largest single build in the spec, required by nothing in the agreed requirements. Ship the registry + care-gap engine + dashboards first. |
@@ -54,7 +66,7 @@
 
 ## 4. The simplified v1 model
 
-**Entities (down from ~22 to ~15):**
+**Record types (down from ~22 to ~15):**
 ```
 Config/users : app_user (role, email, is_mdt_member) · guideline_rule
 1:1 per pt   : patient · pathology (+comorbidity/family flags) · treatment_plan · outcome

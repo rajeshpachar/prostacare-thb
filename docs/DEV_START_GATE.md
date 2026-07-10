@@ -1,6 +1,13 @@
 # ProstaCare — Open Questions & Confirmations Required Before Development Starts
 
-**Purpose:** one consolidated list of everything we need from the client (business / clinical / legal) before, and shortly after, development begins. Every item carries a **recommended default** so the client can simply **confirm or amend** rather than design from scratch.
+> **Who this is for:** clinical, business and legal teams. **No technical background needed.**
+> Any unfamiliar term (*tenant, derived, one-to-one, aggregate…*) is explained in the glossary at the top of
+> **`PROSTACARE_FUNCTIONAL_LOGIC_SPEC.md` §0 — Plain-English glossary**.
+
+
+**Purpose:** one list of everything we need answered before we start building. **Each question comes with our recommended answer**, so in most cases you only need to say *"confirm"* or *"change it to…"*.
+
+**Three terms used below:** **Tenant** = one hospital's own isolated copy of the system · **De-identified** = no name, ABHA/Aadhaar or phone — only a patient code · **Aggregate** = counts and percentages across many patients, never one person's record.
 
 **Status summary**
 - ✅ **13 decisions already settled** (§1) — no need to revisit.

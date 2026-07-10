@@ -1,5 +1,9 @@
 # ProstaCare ↔ NOVA Edge — Architecture Alignment & Gap Review
 
+> **Who this is for:** the NOVA Edge platform / engineering team. **Clinicians do not need to read this document.**
+> The clinical content lives in **Functional & Logic Spec** and the **Patient Data Walkthrough**.
+
+
 **Purpose:** verify the ProstaCare canonical model + workflows (`PROSTACARE_FUNCTIONAL_LOGIC_SPEC.md`, `PROSTACARE_BUILD_SPEC_V1.md`) map **seamlessly** onto NOVA Edge primitives (schemas, scopes, workflows, subscriptions/cron, materialized views, ADK agents), and to surface every gap before the preset build.
 
 **Verdict:** **Strongly aligned.** Every entity maps to a NOVA Edge schema and every workflow to existing operators/triggers — no new platform primitive is required. There are **two items that need an explicit design decision/component** before it is truly "seamless" (cross-institution aggregation; rule-config encoding) and **three "encode-it-this-way" notes** (down from six after the `SIMPLIFICATION_REVIEW.md` trims closed G5/G6). All are called out below with resolutions. None is a blocker.

@@ -1,5 +1,10 @@
 # ProstaCare — Flow Clarity, Boundaries & Open Questions (Pre-Build Discovery)
 
+> **Who this is for:** clinical, business and legal teams. **No technical background needed.**
+> Any unfamiliar term (*tenant, derived, one-to-one, aggregate…*) is explained in the glossary at the top of
+> **`PROSTACARE_FUNCTIONAL_LOGIC_SPEC.md` §0 — Plain-English glossary**.
+
+
 **Status: BLOCKING gate before any NOVA Edge preset work.**
 We will not start the `prostate_cancer` preset until the team model, data boundaries, permission boundaries, and end-to-end flows are signed off by the business/clinical team.
 

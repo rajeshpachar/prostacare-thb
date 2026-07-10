@@ -1,6 +1,23 @@
 # ProstaCare Field Dictionary (from workbook V2)
 
-Every UI field mapped to its control, data type, requiredness, and allowed values. Field keys match the canonical schema exactly. Source: `ProstaCare_Schema_08072026_V2.xlsx` · `Field_Dictionary`.
+> **Who this is for:** clinical, business and legal teams. **No technical background needed.**
+> Any unfamiliar term (*tenant, derived, one-to-one, aggregate…*) is explained in the glossary at the top of
+> **`PROSTACARE_FUNCTIONAL_LOGIC_SPEC.md` §0 — Plain-English glossary**.
+
+
+**How to read this table.** Each row is **one box on a screen**.
+
+| Column | What it tells you |
+|---|---|
+| **Section** | Which part of the form the box sits in |
+| **Field Key** | The system's internal name for the box — so clinical and technical teams refer to the same thing |
+| **Label** | What the clinician actually sees on screen |
+| **Control** | How you fill it in: free text, a date, a number, or a **dropdown** (a fixed list of allowed answers) |
+| **Type** | The kind of answer expected (`categorical` simply means *pick from the dropdown*) |
+| **UI Req** | Whether the screen insists on an answer |
+| **Allowed Options** | For dropdowns: the complete list of permitted answers |
+
+Field names match the system's data model exactly. Source: `ProstaCare_Schema_08072026_V2.xlsx` · `Field_Dictionary`.
 
 
 ## Demographics_Entry

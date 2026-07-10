@@ -1,5 +1,9 @@
 # ProstaCare — Canonical Schema & NOVA Edge Build Spec (v1, for internal approval)
 
+> **Who this is for:** the NOVA Edge platform / engineering team. **Clinicians do not need to read this document.**
+> The clinical content lives in **Functional & Logic Spec** and the **Patient Data Walkthrough**.
+
+
 **Audience:** ProstaCare product/clinical leads + the NOVA Edge (NOVAGE) platform team, for internal sign-off **before** preset build starts.
 **Derived from:** `ProstaCare_Schema_08072026_V2.xlsx` (the "Platform Bible" workbook — product narrative, 110-field dictionary, value lists, 46-widget dashboard inventory, care-gap tracker) + the prior discovery/feasibility docs in this folder (`FLOW-CLARITY-AND-OPEN-QUESTIONS.md`, `NOVA-EDGE-FEASIBILITY.md`, `PRODUCT-PRD.md`, `ProstaCare_Nudge_Logic_Handoff.md`).
 **Goal:** define the *canonical data model, tenancy/onboarding model, rules/analytics/intelligence layers, and NOVA Edge mapping* — structured so it is easy to build and manage, with the workbook as one entry surface that maps onto the canonical schema (not the system of record).

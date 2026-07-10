@@ -1,8 +1,13 @@
 # ProstaCare — Tenant Onboarding Plan (Institution Provisioning)
 
+> **Who this is for:** clinical, business and legal teams. **No technical background needed.**
+> Any unfamiliar term (*tenant, derived, one-to-one, aggregate…*) is explained in the glossary at the top of
+> **`PROSTACARE_FUNCTIONAL_LOGIC_SPEC.md` §0 — Plain-English glossary**.
+
+
 **Purpose:** define how a new **institution** (= one tenant) is onboarded from a **golden preset blueprint** of schemas, workflows, rules, dashboards, and roles — so each hospital goes live in **1–2 days** with **config + user setup only, no code**.
 
-**Model recap:** tenant = institution (one Postgres schema per hospital). Everything clinical is identical across institutions (the golden preset); only institution-specific config and the user roster vary. Cross-institution reporting flows through Zygo Data Cloud (`CROSS_TENANT_AGGREGATION_SPEC.md`).
+**In plain terms:** each hospital gets its **own separate, isolated copy of the system** (a "tenant"). Nothing about one hospital is visible to another. Everything clinical is identical across institutions (the golden preset); only institution-specific config and the user roster vary. Cross-institution reporting flows through Zygo Data Cloud (`CROSS_TENANT_AGGREGATION_SPEC.md`).
 
 ---
 
@@ -58,8 +63,8 @@ flowchart LR
 - **Gate:** intake complete + sign-offs in hand.
 
 ### Day 1 AM — Provision the tenant
-1. `POST /bootstrap/system` → create the institution's tenant (schema, canonical entities, roles).
-2. Seed the golden preset: `seed-preset.py prostate_cancer` → all entities, workflows, rules, mat-views, dashboards, theme.
+1. **Create the hospital's own copy of the system** (its tenant), with the standard record types and roles.
+2. **Load the standard ProstaCare blueprint** — all record types, the 8 care-gap rules, the dashboards and the branding. Identical at every hospital.
 3. Configure institution: `config.json` (name/branding), `institution_code`, facility/enum overrides.
 4. Wire aggregation: enable the nightly `sponsor_metric` job + S3 export prefix for this tenant.
 5. Configure auth: Azure AD SSO **or** email/local accounts. *(SES sender domain is already provisioned platform-wide — nothing per-tenant.)*
@@ -116,7 +121,7 @@ VERIFY (Day 1 PM – Day 2)
 ## 5. Why 1–2 days is realistic
 - **No build per institution** — schemas, workflows, the 8 rules, and dashboards are all in the golden preset; provisioning is a seed + config.
 - **Config, not code** — institution profile, facilities, users, roles, and the aggregation hook are all JSON/console settings.
-- **Repeatable & idempotent** — `bootstrap` + `seed-preset` are idempotent; the runbook is a checklist.
+- **Repeatable and safe to re-run** — if a step is run twice, nothing breaks or duplicates. The runbook is a simple checklist.
 - **The only variable work** is the **user roster + SSO** and **optional data migration**, which is what can push a complex site toward the 2-day end.
 
 ---
