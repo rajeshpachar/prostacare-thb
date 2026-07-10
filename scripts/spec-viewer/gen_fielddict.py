@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Regenerate docs/FIELD_DICTIONARY.md from the ProstaCare V2 workbook.
+"""Regenerate docs/FIELD_DICTIONARY.md from the ProstaCare V3 (proposed) workbook.
 Skips silently if the workbook or openpyxl is unavailable (the committed
 FIELD_DICTIONARY.md is then reused as-is). Override path with WORKBOOK env var."""
 import os, sys, pathlib
@@ -7,7 +7,7 @@ from collections import OrderedDict
 
 HERE = pathlib.Path(__file__).resolve().parent
 ROOT = HERE.parent.parent
-WB = os.environ.get("WORKBOOK", os.path.expanduser("~/Downloads/ProstaCare_Schema_08072026_V2.xlsx"))
+WB = os.environ.get("WORKBOOK", str(ROOT / "docs" / "ProstaCare_Schema_V3_proposed.xlsx"))
 
 if not pathlib.Path(WB).exists():
     print(f"  ! workbook not found ({WB}) — keeping existing FIELD_DICTIONARY.md")
@@ -33,17 +33,38 @@ groups = OrderedDict()
 for r in data:
     groups.setdefault(cell(r, 0), []).append(r)
 
-out = ["# ProstaCare Field Dictionary (from workbook V2)\n",
-       "Every UI field mapped to its control, data type, requiredness, and allowed values. "
-       "Field keys match the canonical schema exactly. Source: `ProstaCare_Schema_08072026_V2.xlsx` · `Field_Dictionary`.\n"]
+HEADER = """# ProstaCare Field Dictionary (workbook **V3 — proposed**)
+
+> **Who this is for:** clinical, business and legal teams. **No technical background needed.**
+> Any unfamiliar term is explained in the glossary at the top of `PROSTACARE_FUNCTIONAL_LOGIC_SPEC.md` §0.
+
+**How to read this table.** Each row is **one box on a screen**.
+
+| Column | What it tells you |
+|---|---|
+| **Status** | ✅ already agreed (v2) · 🆕 **Proposed** (new, awaiting your sign-off) · ✏️ *Amended* |
+| **Section** | Which part of the form the box sits in |
+| **Field Key** | The system's internal name — so clinical and technical teams refer to the same thing |
+| **Label** | What the clinician sees on screen |
+| **Control** | How you fill it in: free text, a date, a number, or a **dropdown** (a fixed list of allowed answers) |
+| **Type** | The kind of answer expected (`categorical` simply means *pick from the dropdown*) |
+| **UI Req** | Whether the screen insists on an answer |
+| **Allowed Options** | For dropdowns: the complete list of permitted answers |
+
+**🆕 Proposed fields** come from the prostate-cancer MDT care pathway — see `CLINICAL_PATHWAY_GAP_ANALYSIS.md`.
+They are **not yet approved**: please confirm, amend or reject each. Source workbook: `ProstaCare_Schema_V3_proposed.xlsx` (the original V2 is unchanged).
+"""
+out = [HEADER]
 for sheet, rs in groups.items():
     out.append(f"\n## {sheet}\n")
-    out.append("| Section | Field Key | Label | Control | Type | UI Req | Allowed Options / List | Notes |")
+    out.append("| Status | Section | Field Key | Label | Control | Type | UI Req | Allowed Options / List |")
     out.append("|---|---|---|---|---|---|---|---|")
     for r in rs:
         opts = cell(r, 9).replace("|", " / ")
         notes = cell(r, 10).replace("|", " / ")
-        out.append(f"| {cell(r,1)} | `{cell(r,2)}` | {cell(r,3)} | {cell(r,4)} | {cell(r,6)} | {cell(r,7)} | {opts} | {notes} |")
+        st = cell(r,11)
+        badge = "🆕 **Proposed**" if st.startswith("PROPOSED") else ("✏️ *Amended*" if st.startswith("AMENDED") else "✅")
+        out.append(f"| {badge} | {cell(r,1)} | `{cell(r,2)}` | {cell(r,3)} | {cell(r,4)} | {cell(r,6)} | {cell(r,7)} | {opts} |")
 
 vl = rows(wb["Value_Lists"])
 vh = next(i for i, r in enumerate(vl) if "Option Value" in r or "List Name" in r)
