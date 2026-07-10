@@ -32,6 +32,8 @@ Field types available: `string/text/integer/number/float/boolean/datetime/date/j
 | ~~`evidence_pack` / `guideline_pack`~~ | config entities | **Phase 2** (with AI Buddy) | ⏸ deferred |
 | ~~`encounter`~~ | — | **not in v1**; visit timing derives from follow-up dates | ⏸ deferred |
 | `audit_event` | platform `activity` + subscriptions | ensure full coverage (G7) | ✅ aligned |
+| **record-lock fields** (`locked`, `locked_at`, `unlocked_until`, `unlock_reason`, `created_by`) | columns on every entered entity | drive W10; `unlock` gated on role | ✅ aligned |
+| `sponsor_metric` | entity + scheduled `sql_exec` aggregation | de-identified, small-cell suppressed; exported to Zygo Data Cloud (G3) | ✅ aligned |
 | `patient_identity` *(only if identified model)* | isolated entity + `read_roles`/`context_mask` | audited reveal | ✅ aligned |
 
 ---
@@ -46,10 +48,12 @@ Triggers: API run · entity `subscriptions` (on_create/update) · schema `polici
 | W2 workup/staging | save → `on_create` sub on staging/imaging | `upsert`(pathology) + `create`(dated) + fire W5 | ✅ aligned |
 | W3 PSA capture | save → `on_create` sub | `create`; scheduled mat-view refresh | ✅ aligned |
 | W4 treatment | save → `on_create` sub | `create`(line/supportive) + fire W5 | ✅ aligned |
-| **W5 care-gap engine** | `on_write` subs (staging/imaging/treatment/supportive) — **no cron in v1** (all 8 rules are state-based) | `sql_exec` `INSERT…SELECT…WHERE <rule> AND NOT EXISTS(open)` + `sql_exec` auto-resolve `UPDATE` | ✅ aligned — see G2 (rule encoding) + G4 (current-state) |
+| **W5 care-gap engine** | `on_write` subs (staging/imaging/treatment/supportive) — **no cron in v1** (all 8 rules are state-based; W10/W11 *do* use cron) | `sql_exec` `INSERT…SELECT…WHERE <rule> AND NOT EXISTS(open)` + `sql_exec` auto-resolve `UPDATE` | ✅ aligned — see G2 (rule encoding) + G4 (current-state) |
 | W6 nudge lifecycle | Acknowledge API | `create`(nudge_event) + open W7 | ✅ aligned |
 | W7 MDT notify | from nudge/patient | `query`(users WHERE is_mdt_member) + `for_each` + `email` (SES) + `in_app_notification` + `create`(discussion_entry). *No `sse_publish`, no auto-task, no digest in v1.* | ✅ aligned |
 | W8 analytics | on-write + cron refresh | **materialized views** (RLS-scoped) + `reports` | ✅ aligned — see G1 (charts) + G3 (cross-tenant) |
+| **W10 record lock / unlock** | `policies` cron (hourly auto-lock + auto re-lock) + `unlock` API | `sql_exec` UPDATE (auto-lock) · `branch` role-gate (HOD) + `create`(audit_event) on unlock | ✅ aligned |
+| **W11 sponsor aggregation** | `policies` cron (nightly) | `sql_exec` INSERT…SELECT from de-identified mat-views + suppression `CASE` → `sponsor_metric` | ✅ aligned |
 | ~~W9 AI Buddy~~ | user opens | ADK `agent` + read tools + evidence packs | ⏸ **Phase 2** (absent from functional requirements) |
 
 ---
@@ -94,6 +98,8 @@ Triggers: API run · entity `subscriptions` (on_create/update) · schema `polici
 | MDT notify via comms steps | 🟢 |
 | AI Buddy via bounded ADK agent | ⏸ Phase 2 |
 | Onboarding = provision tenant per institution + seed preset | 🟢 |
+| Record lock / HOD unlock (W10) | 🟢 |
+| In-tenant `sponsor_metric` aggregation (W11) | 🟢 |
 | Cross-institution de-identified rollup | 🟡 net-new component (G3) |
 | Clinical chart renderers (line/KM) | 🟡 frontend confirm (G1) |
 

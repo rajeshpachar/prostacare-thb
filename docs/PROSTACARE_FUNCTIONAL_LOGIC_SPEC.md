@@ -25,16 +25,15 @@ Each box below is one "data model" (a table of records). **Cardinality** tells y
 | Model | Cardinality | Key variables | Plain meaning |
 |---|---|---|---|
 | **User** | many per tenant | `user_id`, name, **`email` (login identity)**, specialty, `role` | Anyone who logs in |
-| **Role** | config | Clinician · **HOD (privileged)** · Coordinator · Ops/Quality · Admin | What you may do |
-| **MDT panel member** | many | `user_id` | The "notify all MDT" group — **no access implication** |
+| **Role** | config | **Clinician · HOD (privileged) · Admin** *(Ops/Quality optional)* | What you may do |
+| **MDT membership** | flag on User | `is_mdt_member` (boolean) | The "notify all MDT" group — **no access implication, no separate table** |
 | **Primary clinician** | 1 per patient | `patient.primary_clinician_id` | The treating clinician (attribution, not restriction) |
 
 **Access by role (the whole model):**
 | Role | Sees | May do |
 |---|---|---|
 | **Clinician** | all patients in the institution | enter/edit clinical data **within the edit window** (§1.8); act on nudges; notify a member |
-| **HOD** | all patients | everything a Clinician can **+ privileged:** **unlock a locked record** (time-bound), notify all MDT, view audit |
-| **Coordinator** | all patients | clinical entry + manage roster / MDT panel |
+| **HOD** | all patients | everything a Clinician can **+ privileged:** **unlock a locked record** (time-bound), notify all MDT, view audit, manage roster/MDT flags |
 | **Ops / Quality** | **de-identified aggregates only** | dashboards; no patient records |
 | **Admin** | no clinical data | users, roles, rules, config |
 
@@ -43,7 +42,7 @@ Each box below is one "data model" (a table of records). **Cardinality** tells y
 |---|---|---|---|
 | **Patient** (hub) | 1 per patient | `patient_code`, `age_at_diagnosis_years`, `healthcare_coverage`, `state`, `referral_source`, `registry_enrolment_date`, `diagnosis_date` | `PCR-001`, 68, CGHS, Delhi, Govt OPD |
 | **Pathology** | 1 per patient | `gleason_score`, `isup_grade_group`, `biopsy_type`, `pi_rads_score`, `cores_positive_total`, `perineural_invasion`, `ece`, `dre_findings`, `ipss_score`, `prostate_volume_cc` | Gleason 4+4=8, ISUP 4, MRI-fusion |
-| **Patient condition** | many | `type` (comorbidity/family), `condition`, `present` | Diabetes = Yes; Breast Ca (family) = Yes |
+| **Comorbidity / family history** | **flags on Pathology** | 9 comorbidity + 6 family-history Yes/No columns | Diabetes = Yes; Breast Ca (family) = Yes *(no separate table)* |
 | **Treatment plan** | 1 per patient | `treatment_intent`, `mdt_tumour_board_status`, `date_of_mdt_review`, `clinical_trial_eligibility`, `treatment_start_date` | Disease control; MDT reviewed 2026-06-20 |
 | **Outcome** | 1 per patient | `best_response`, `psa_nadir_value/date`, `psa_doubling_time_months`, `biochemical_recurrence_status/date`, `crpc_progression_status/date`, `rt_outcome_status` | Nadir 0.8 @ 2026-05, no recurrence |
 
@@ -61,7 +60,7 @@ Each box below is one "data model" (a table of records). **Cardinality** tells y
 | Model | Cardinality | Key variables | Plain meaning |
 |---|---|---|---|
 | **Nudge** | many | `nudge_id`, `rule_id`, `severity`, `current_status`, `opened_at`, `resolved_at` | One open care gap for one patient |
-| **Nudge event** | many | `nudge_id`, `at`, `action` (opened/viewed/acknowledged/routed/resolved), `actor` | The lifecycle log behind trend charts + audit |
+| **Nudge event** | many | `nudge_id`, `at`, `action` (**opened · acknowledged · resolved**), `actor` | The lifecycle log behind trend charts + audit |
 | **Notification / discussion** | many | sender, recipients, reason, subject, note, delivery, `at` | An MDT message + the per-patient discussion trail |
 | **Document** | many | file ref, type, size, uploader, `at` | Rx / report uploads |
 | **Guideline rule** | config | `rule_id`, condition, `severity`, version, sign-off | The 8 care-gap rules as governed config |
@@ -71,11 +70,9 @@ Each box below is one "data model" (a table of records). **Cardinality** tells y
 ```mermaid
 erDiagram
   USER ||--o{ PATIENT : "primary clinician (1:N)"
-  USER ||--o{ MDT_PANEL_MEMBER : "notify group"
   PATIENT ||--|| PATHOLOGY : "1:1"
   PATIENT ||--|| TREATMENT_PLAN : "1:1"
   PATIENT ||--|| OUTCOME : "1:1"
-  PATIENT ||--o{ PATIENT_CONDITION : has
   PATIENT ||--o{ PSA_READING : "dated log"
   PATIENT ||--o{ STAGING_ASSESSMENT : "dated log"
   PATIENT ||--o{ IMAGING_STUDY : "dated log"
@@ -90,7 +87,7 @@ erDiagram
 
 ### 1.6 Do we need a Visit / Encounter concept? (design decision)
 
-**Short answer: not as a *mandatory container* in v1 — but an *optional* Encounter is worth adding as a context layer.** ProstaCare is a **registry**, so it is organised by **clinical event date** (each PSA, staging, imaging, treatment line, supportive-care entry carries its own date). That is lower-burden than a full EMR and is exactly what the care-gap engine and cohort analytics need. Forcing every entry inside a visit would add data-entry friction and doesn't help the current-state or rules logic.
+**Short answer: NOT IN v1 — deferred (`SIMPLIFICATION_REVIEW.md` T4).** ProstaCare is a **registry**, so it is organised by **clinical event date** (each PSA, staging, imaging, treatment line, supportive-care entry carries its own date). That is lower-burden than a full EMR and is exactly what the care-gap engine and cohort analytics need. Forcing every entry inside a visit would add data-entry friction and doesn't help the current-state or rules logic.
 
 **What still needs "visit timing":** the Patient List segments (Last Visit / Upcoming / Missed-Overdue). These can be driven **today, without a full Encounter entity**, from existing date fields — `last_follow_up_date` (Outcome) and `next_follow_up_psa_date` (Supportive-care):
 ```
@@ -106,9 +103,9 @@ visit_status(patient):
 | **Registry-by-event** (recommended v1) | Every clinical fact keyed by its own date; **no mandatory encounter**; visit-timing from follow-up-date fields | Registry + care-gap + analytics use case (this product) |
 | **EMR-by-encounter** | Every entry tied to a visit/encounter; richer visit grouping | Only if the product must reflect exact visit boundaries, scheduling, or billing |
 
-**Recommended (hybrid, low-cost):** add an **optional `Encounter`** — `encounter_id`, `encounter_date`, `type` (OPD / review / procedure / MDT), `clinician` — and a **nullable `encounter_id`** on each dated event. Events may reference an encounter (to group "everything done at the 2026-06-15 visit") but are **not required** to (registry backfill has no clean visits). Turn it on per-site when visit grouping or HIS-appointment sync is needed. This maps cleanly to the platform's appointment/encounter model later without reworking the event tiers.
+**Deferred design (Phase 2, if HIS-appointment sync is needed):** an optional `Encounter` — `encounter_id`, `encounter_date`, `type` (OPD / review / procedure / MDT), `clinician` — and a **nullable `encounter_id`** on each dated event. Events may reference an encounter (to group "everything done at the 2026-06-15 visit") but are **not required** to (registry backfill has no clean visits). **Not built in v1.** It maps cleanly onto the platform's appointment model later without reworking the event tiers.
 
-> **Sign-off question (added to §7):** confirm registry-by-event for v1 with an optional Encounter, or require encounter-bound entry.
+> **Sign-off question (§7):** confirm **registry-by-event, no Encounter entity in v1**.
 
 ---
 
@@ -124,14 +121,13 @@ visit_status(patient):
 | **Pathology** | **1:1** | *Clinical Assessment* → Complaint / DRE / Biopsy | — | edit window → lock |
 | **Treatment plan** (intent, MDT status/date, trial) | **1:1** | *Treatment Plan* → Intent & MDT | — | edit window → lock |
 | **Outcome** | **1:1** | *Outcomes* form | — | edit window → lock |
-| **Patient condition** (comorbidity / family hx) | **1:N** | *Clinical Assessment* → chip groups | — | edit window → lock |
+| **Comorbidity / family history** | **flags on `pathology`** | *Clinical Assessment* → chip groups | — | edit window → lock |
 | **PSA reading** | **1:N dated** | *Clinical Assessment* → “+ Add PSA Entry” | — | append-only |
 | **Staging assessment** | **1:N dated** | *Clinical Assessment* → TNM & Risk (each save = new dated row) | — | append-only |
 | **Imaging study** | **1:N dated** | *Clinical Assessment* → Imaging & Molecular | — | append-only |
 | **Treatment line** | **1:N dated** | *Treatment Plan* → ADT / Anti-androgen / ARSI / Chemo / RT | — | append-only |
 | **Supportive-care event** | **1:N dated** | *Treatment Plan* → Bone Health & Supportive Care | — | append-only |
 | **Journey event** | **1:N dated** | *Patient Journey* → Add Event | — | append-only |
-| **Encounter** *(optional)* | **1:N dated** | Visit entry (optional) | — | append-only |
 | **Notification / discussion** | **1:N** | *Team modal* → Send | — | immutable |
 | **Document (Rx)** | **1:N** | *Upload Rx* | — | immutable (removal audited) |
 | **Nudge** | **1:N** | ❌ never entered | care-gap rules over current state | system |
@@ -221,7 +217,7 @@ INPUTS : patient_code, age_at_diagnosis, coverage, state, referral_source,
 LOGIC  :
   IF patient_code already exists within this tenant → reject "duplicate code"
   ELSE create Patient(hub) with inputs; set registry_enrolment_date = today
-       create empty Pathology, Treatment_plan shells
+       create empty Pathology, Treatment_plan, Outcome shells
        route MDT new-patient notification (see W7)
 OUTPUT : new Patient visible in roster; cohort counts +1
 DERIVED: registrations-this-month, cohort volume recompute
@@ -369,7 +365,7 @@ INPUTS : recipient_mode, recipient(s), reason, subject, note, patient_code
 LOGIC (explicit steps):
   1. RESOLVE recipients:
         IF mode = member → [selected app_user]
-        IF mode = all    → mdt_panel(department) members
+        IF mode = all    → all users WHERE is_mdt_member = true
      recipient_emails = [u.email for u in recipients]        // email = the login identity
   2. RENDER template(reason, subject, note, patient_code, de-identified summary link)
   3. CREATE Notification(status = queued, recipients, body, at = now)
@@ -380,7 +376,7 @@ LOGIC (explicit steps):
         c. ON SES accept  → delivery_status = sent (store SES messageId)
            ON SES failure → delivery_status = failed → retry (transient) / flag (hard bounce)
   5. APPEND discussion_entry to the patient's discussion trail
-  6. IF source = nudge → LOG Nudge_event(routed_to_mdt)
+  6. IF source = nudge → LOG Nudge_event(acknowledged)   // 'routed' is inferable from the notification row
 OUTPUT : MDT informed (inbox + email); per-patient discussion log; per-recipient delivery status; toast
 DERIVED: MDT-review-rate, collaboration audit, notification delivery metrics
 ```
@@ -391,7 +387,7 @@ DERIVED: MDT-review-rate, collaboration audit, notification delivery metrics
 | Care-gap routed to MDT | W6 acknowledge | in-app + **email (SES)** |
 | New patient registered | W1 | in-app + email (SES) to MDT panel |
 | MDT review request / case discussion | Patient File "Discuss with Team" | in-app + email (SES) |
-| Urgent escalation *(if SLA enabled)* | unactioned urgent nudge after N days | in-app + email (SES) to HOD/coordinator |
+| ~~Urgent escalation (SLA)~~ | — | **Not in v1** (`SIMPLIFICATION_REVIEW.md` T3) |
 
 - **Email transport = AWS SES.** Users log in with their **email ID** (the identity), and every configured notification is delivered to that email via SES. Sender is a verified SES domain/address; `messageId` + status (sent / bounced / complaint / failed) are stored on `Notification` for audit and delivery metrics; transient failures retry, hard bounces are flagged.
 - **In-app inbox** is the primary channel (each notification creates an inbox item and, where relevant, a task); **email (SES)** mirrors it so nothing is missed. SMS / WhatsApp are future channels behind the same `Notification` record.
@@ -579,10 +575,10 @@ Please confirm, amend, or reject each:
 6. **Derived metrics (§5)** — formulas acceptable; benchmark targets (ARSI 60%, PSMA 85%, bone 85%, MDT 95%) confirmed by clinical governance?
 7. **Governance** — who signs off the rule pack + evidence packs (independent of any sponsor)?
 8. **Identity model** — de-identified registry (recommended) vs identified — confirm (drives everything downstream).
-9. **Visit / Encounter (§1.6)** — confirm **registry-by-event with an optional Encounter** for v1 (recommended), or require every entry to be encounter-bound.
+9. **Visit / Encounter (§1.6)** — confirm **registry-by-event, no `Encounter` entity in v1** (deferred to Phase 2).
 10. **Tenancy** — confirmed **tenant = institution** (no `institution_id`); cross-institution reporting via a de-identified aggregation layer — agreed?
 11. **Roles & access (§1.1)** — **no department**; every clinician sees that institution's patients; **HOD is the privileged role** (unlock, notify-all-MDT, audit); Ops/Quality see de-identified aggregates only. Agreed?
-12. **Record locking (§1.8)** — confirm **`EDIT_WINDOW` = 48 h**, **`UNLOCK_WINDOW` = 24 h**, **unlock restricted to HOD** with a mandatory reason. Do these durations suit clinic practice? Should Coordinator also unlock?
+12. **Record locking (§1.8)** — confirm **`EDIT_WINDOW` = 48 h**, **`UNLOCK_WINDOW` = 24 h**, **unlock restricted to HOD** with a mandatory reason. Do these durations suit clinic practice? Should any other role be allowed to unlock?
 13. **Cardinality & provenance (§1.7)** — confirm every model is either entered on a named screen or derived, and the 1:1 / 1:N calls — in particular **one treatment *plan* (1:1) vs many treatment *lines* (1:N)**.
 
 Once §7 is signed, this spec becomes the build contract; engineering maps it to the platform per `PROSTACARE_BUILD_SPEC_V1.md` / `NOVA-EDGE-FEASIBILITY.md`.

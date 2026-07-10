@@ -45,6 +45,7 @@ flowchart LR
 **Records created**
 ```
 patient (1:1)                → 1 row   [PCR-005]
+pathology (1:1 shell)        → 1 empty row
 treatment_plan (1:1 shell)   → 1 empty row
 outcome (1:1 shell)          → 1 empty row
 audit_event                  → "patient.created"
@@ -111,16 +112,16 @@ notification → MDT           → "New patient registered — PCR-005" (email v
 | `ecog_performance_status` | 1 – Restricted strenuous activity |
 | `castration_status` | **Not on ADT** *(pre-treatment)* |
 
-**2b. Imaging & molecular** → appends **`imaging_study` (1:N dated)** rows
+**2b. Imaging & molecular** → appends **`imaging_study` (1:N dated)** rows — **only for studies actually performed**
 
 | `study_date` | `modality` | `result` |
 |---|---|---|
-| 2026-06-25 | mpMRI Pelvis | Done — abnormal |
-| 2026-06-26 | CT Abdomen / Pelvis | Done — lymphadenopathy |
-| — | Bone Scan / SPECT | **Not done** |
-| — | PSMA PET-CT | **Not done** |
-| — | DEXA | **Not done** |
-| — | Germline / Somatic | **Not done** |
+| 2026-06-25 | `mpmri_pelvis` | Done — abnormal |
+| 2026-06-26 | `ct_abdomen_pelvis` | Done — lymphadenopathy |
+
+> **Important:** "Not done" is **the absence of a row**, not a row with an empty date.
+> `bone_scan_spect`, `psma_pet_ct`, `dexa_bone_density`, `germline_somatic_testing` have **no rows yet** → the engine reads them as `Not done`:
+> `imaging_status(m) = latest imaging_study row for modality m, else "Not done"`
 
 ### ⚠ The care-gap engine runs (on save). Current state → 8 rules:
 
@@ -267,7 +268,9 @@ flowchart LR
 **Restaging** → `staging_assessment` **row #3** (rows #1 and #2 untouched)
 | `assessed_on` | `eau_risk_category` | `castration_status` |
 |---|---|---|
-| 2028-01-15 | M1 – Metastatic HSPC → *M1* | **Castration-resistant (CRPC)** |
+| 2028-01-15 | `M1 – Metastatic HSPC` *(see note)* | **Castration-resistant (CRPC)** |
+
+> ⚠️ **Enum limitation for the clinical team (E3):** the `eauRiskCategory` list has only `M1 – Metastatic HSPC` — there is **no `M1 – CRPC` value**. So a metastatic patient who becomes castration-resistant carries a risk label that still says "HSPC", while `castration_status` correctly says CRPC. **Should we add `M1 – Metastatic CRPC` to the risk enum, or is castration_status alone sufficient?**
 
 **New line** → `treatment_line` row #4: `chemo` · Docetaxel 75 mg/m² q3w · start 2028-02-01
 
@@ -276,6 +279,52 @@ flowchart LR
 `biochemical_recurrence_status` Biochemical recurrence · `crpc_progression_status` **Progressed to CRPC** · `crpc_progression_date` 2028-01-15
 
 **Engine effect:** `arsi_readiness` **cannot re-fire** (castration ≠ HSPC). The HSPC→CRPC transition is preserved as a **dated fact**, which is exactly why staging is a log.
+
+## B3 — Completing the record (the fields the first pass skipped)
+
+These close every remaining gap against the Field Dictionary. `PCR-001` is **CGHS**, so the pre-auth flow applies.
+
+**CGHS pre-auth for RT** → updates the RT `treatment_line`
+| Field | Value |
+|---|---|
+| `cghs_preauth_status` | Not initiated → **Pending** → **Approved** |
+| `cghs_request_date` | 2026-09-20 |
+| `cghs_approval_date` | 2026-11-06 |
+→ **derived** `cghs_delay = 47 days` (feeds the access-delay chart)
+
+**RT delivered & assessed** → RT `treatment_line` + `outcome`
+| Field | Value |
+|---|---|
+| `rt_status` | Completed |
+| `rt_completion_date` | 2027-01-20 |
+| `rt_outcome_status` | Complete biochemical response |
+
+**Testosterone & toxicity** → `supportive_care_event` + `treatment_line`
+| Field | Value |
+|---|---|
+| `testosterone_level` | 18 ng/dL |
+| `testosterone_monitoring` | Castrate confirmed (<50 ng/dL) |
+| `safety_side_effects` | Grade 1 fatigue; hot flushes — no dose change |
+
+**Chemotherapy detail** (the 2028 line) → `treatment_line` (`line_type` = chemo)
+| Field | Value |
+|---|---|
+| `chemotherapy_regimen` | Docetaxel 75 mg/m² q3w |
+| `number_of_cycles_completed` | 6 |
+| `last_cycle_date` | 2028-06-12 |
+
+**Follow-up & recurrence** → `outcome` (1:1)
+| Field | Value |
+|---|---|
+| `last_follow_up_date` | 2028-06-20 |
+| `best_response` | Biochemical recurrence |
+| `biochemical_recurrence_date` | 2027-11-01 |
+
+> `last_follow_up_date` + `next_follow_up_psa_date` are what drive the **Patient List** segments (Last Visit / Upcoming / Missed-Overdue) — which is why we need **no Encounter entity**.
+
+**PSA remarks** → `psa_reading.context_remarks` — e.g. *"post-RT, on ADT + abiraterone"*
+**Journey events** → `journey_event` (`event_type`, `event_date`, `event_notes`) — e.g. `Adverse Event` · 2028-03-04 · *"Grade 2 neutropenia, cycle delayed 1 week"*
+**Rx upload** → `document` — `rx_upload` accepts PDF/image; stored with uploader + timestamp, audited.
 
 ---
 
@@ -417,3 +466,210 @@ With threshold **11**: an institution reporting `psma_completion_rate` for High-
 ---
 
 *Companion: `PROSTACARE_FUNCTIONAL_LOGIC_SPEC.md` (models + workflow pseudo-code), `FIELD_DICTIONARY.md` (all 108 fields + value lists), `DEV_START_GATE.md` (the full open-question list), `SIMPLIFICATION_REVIEW.md` (what we cut and why).*
+
+---
+
+# PART F — Field Dictionary coverage: **every field, where it lands**
+
+All **108** workbook fields mapped to their canonical entity and the journey stage that captures them. This is the traceability check: **no field is orphaned, and no entity holds a field that isn't entered.**
+
+
+### → (linkage key)  *( 6 fields )*
+
+| Field key | Label | Captured at |
+|---|---|---|
+| `patient_code` | Unique Patient Code | every record |
+| `patient_code` | Unique Patient Code | every record |
+| `patient_code` | Unique Patient Code | every record |
+| `patient_code` | Unique Patient Code | every record |
+| `patient_code` | Unique Patient Code | every record |
+| `patient_code` | Unique Patient Code | every record |
+
+### → `patient` (1:1)  *( 9 fields )*
+
+| Field key | Label | Captured at |
+|---|---|---|
+| `registry_enrolment_date` | Registry Enrolment Date | S0 Registration |
+| `age_at_diagnosis_years` | Age at Diagnosis (years) | S0 Registration |
+| `language_preference` | Language Preference | S0 Registration |
+| `healthcare_coverage` | Healthcare Coverage | S0 Registration |
+| `referring_hospital_centre` | Referring Hospital / Centre | S0 Registration |
+| `referral_source` | Referral Source | S0 Registration |
+| `state` | State | S0 Registration |
+| `travel_distance_km` | Travel Distance to Centre (km) | S0 Registration |
+| `diagnosis_date` | Date of Diagnosis | S0/S1 — moved to hub |
+
+### → `pathology` (1:1)  *( 15 fields )*
+
+| Field key | Label | Captured at |
+|---|---|---|
+| `primary_complaint` | Primary Complaint | S1 Clinical workup |
+| `duration` | Duration | S1 Clinical workup |
+| `ipss_score` | IPSS Score | S1 Clinical workup |
+| `bowel_rectal_symptoms` | Bowel / Rectal Symptoms | S1 Clinical workup |
+| `dre_findings` | DRE Findings | S1 Clinical workup |
+| `prostate_volume_cc` | Prostate Volume (TRUS / MRI cc) | S1 Clinical workup |
+| `biopsy_date` | Biopsy Date | S1 Clinical workup |
+| `biopsy_type` | Biopsy Type | S1 Clinical workup |
+| `pi_rads_score` | PI-RADS Score (mpMRI) | S1 Clinical workup |
+| `gleason_score` | Gleason Score | S1 Clinical workup |
+| `isup_grade_group` | ISUP Grade Group | S1 Clinical workup |
+| `cores_positive_total` | Cores Positive / Total | S1 Clinical workup |
+| `core_involvement_pct` | % Core Involvement | S1 Clinical workup |
+| `perineural_invasion` | Perineural Invasion | S1 Clinical workup |
+| `ece_extracapsular_extension` | ECE (Extracapsular Extension) | S1 Clinical workup |
+
+### → `staging_assessment` (1:N dated)  *( 6 fields )*
+
+| Field key | Label | Captured at |
+|---|---|---|
+| `clinical_t_stage` | Clinical T Stage | S2 Staging |
+| `n_stage` | N Stage | S2 Staging |
+| `m_stage` | M Stage | S2 Staging |
+| `eau_risk_category` | EAU Risk Category | S2 Staging |
+| `ecog_performance_status` | ECOG Performance Status | S2 Staging |
+| `castration_status` | Castration Status | S2 Staging |
+
+### → `imaging_study` (1:N dated)  *( 6 fields )*
+
+| Field key | Label | Captured at |
+|---|---|---|
+| `mpmri_pelvis` | mpMRI Pelvis | S2 Imaging — row per study performed |
+| `bone_scan_spect` | Bone Scan / SPECT | S2 Imaging — row per study performed |
+| `psma_pet_ct` | PSMA PET-CT | S2 Imaging — row per study performed |
+| `ct_abdomen_pelvis` | CT Abdomen / Pelvis | S2 Imaging — row per study performed |
+| `dexa_bone_density` | DEXA Bone Density | S2 Imaging — row per study performed |
+| `germline_somatic_testing` | Germline / Somatic Testing | S2 Imaging — row per study performed |
+
+### → `pathology` — boolean flag  *( 15 fields )*
+
+| Field key | Label | Captured at |
+|---|---|---|
+| `comorbidity_1` | Active Comorbidity: Type 2 Diabetes | S1 Clinical workup |
+| `comorbidity_2` | Active Comorbidity: Hypertension | S1 Clinical workup |
+| `comorbidity_3` | Active Comorbidity: CAD / IHD | S1 Clinical workup |
+| `comorbidity_4` | Active Comorbidity: CKD (Stage) | S1 Clinical workup |
+| `comorbidity_5` | Active Comorbidity: COPD | S1 Clinical workup |
+| `comorbidity_6` | Active Comorbidity: Stroke / TIA | S1 Clinical workup |
+| `comorbidity_7` | Active Comorbidity: Anaemia | S1 Clinical workup |
+| `comorbidity_8` | Active Comorbidity: Osteoporosis | S1 Clinical workup |
+| `comorbidity_9` | Active Comorbidity: None significant | S1 Clinical workup |
+| `family_history_1` | Family History: Prostate Ca (first-degree) | S1 Clinical workup |
+| `family_history_2` | Family History: Breast Ca (family) | S1 Clinical workup |
+| `family_history_3` | Family History: Ovarian cancer | S1 Clinical workup |
+| `family_history_4` | Family History: Colon cancer | S1 Clinical workup |
+| `family_history_5` | Family History: Pancreatic cancer | S1 Clinical workup |
+| `family_history_6` | Family History: None known | S1 Clinical workup |
+
+### → `treatment_plan` (1:1)  *( 5 fields )*
+
+| Field key | Label | Captured at |
+|---|---|---|
+| `treatment_intent` | Treatment Intent | S3 MDT review |
+| `mdt_tumour_board_status` | MDT / Tumour Board Status | S3 MDT review |
+| `date_of_mdt_review` | Date of MDT Review | S3 MDT review |
+| `clinical_trial_eligibility` | Clinical Trial Eligibility | S3 MDT review |
+| `treatment_start_date` | Treatment Start Date | S3 MDT review |
+
+### → `treatment_line` (1:N, `line_type`=ADT / anti-androgen / ARSI)  *( 6 fields )*
+
+| Field key | Label | Captured at |
+|---|---|---|
+| `adt_type` | ADT Type | S4 Treatment start |
+| `formulation_dose` | Formulation / Dose | S4 Treatment start |
+| `adt_start_date` | ADT Start Date | S4 Treatment start |
+| `anti_androgen` | Anti-androgen | S4 Treatment start |
+| `arsi_intensification` | ARSI Intensification | S4 Treatment start |
+| `testosterone_level` | Testosterone Level | S4 Treatment start |
+
+### → `treatment_line` (1:N, `line_type`=chemo)  *( 3 fields )*
+
+| Field key | Label | Captured at |
+|---|---|---|
+| `chemotherapy_regimen` | Chemotherapy Regimen | B2 Progression |
+| `number_of_cycles_completed` | Number of Cycles Completed | B2 Progression |
+| `last_cycle_date` | Last Cycle Date | B2 Progression |
+
+### → `treatment_line` (1:N, `line_type`=RT)  *( 11 fields )*
+
+| Field key | Label | Captured at |
+|---|---|---|
+| `rt_indication` | RT Indication | S5 RT plan → B2 RT completion |
+| `rt_status` | RT Status | S5 RT plan → B2 RT completion |
+| `rt_modality` | RT Modality | S5 RT plan → B2 RT completion |
+| `target_volume` | Target Volume | S5 RT plan → B2 RT completion |
+| `dose_fractionation` | Dose / Fractionation | S5 RT plan → B2 RT completion |
+| `rt_facility` | RT Facility | S5 RT plan → B2 RT completion |
+| `planned_rt_start_date` | Planned RT Start Date | S5 RT plan → B2 RT completion |
+| `rt_completion_date` | RT Completion Date | S5 RT plan → B2 RT completion |
+| `cghs_preauth_status` | CGHS Pre-auth Status | S5 RT plan → B2 RT completion |
+| `cghs_request_date` | CGHS Request Date | S5 RT plan → B2 RT completion |
+| `cghs_approval_date` | CGHS Approval Date | S5 RT plan → B2 RT completion |
+
+### → `supportive_care_event` (1:N dated)  *( 6 fields )*
+
+| Field key | Label | Captured at |
+|---|---|---|
+| `bone_protection_therapy` | Bone Protection Therapy | S4/B1 Supportive care |
+| `calcium_vitamin_d` | Calcium & Vitamin D | S4/B1 Supportive care |
+| `next_follow_up_psa_date` | Next Follow-up PSA Date | S4/B1 Supportive care |
+| `testosterone_monitoring` | Testosterone Monitoring | S4/B1 Supportive care |
+| `psychosocial_screening_phq9` | Psychosocial Screening (PHQ-9) | S4/B1 Supportive care |
+| `nutritional_assessment` | Nutritional Assessment | S4/B1 Supportive care |
+
+### → `treatment_line` (1:N)  *( 1 fields )*
+
+| Field key | Label | Captured at |
+|---|---|---|
+| `safety_side_effects` | Safety / Side Effects Observed | B2 Toxicity review |
+
+### → `outcome` (1:1)  *( 10 fields )*
+
+| Field key | Label | Captured at |
+|---|---|---|
+| `last_follow_up_date` | Last Follow-up Date | B2 Follow-up / progression |
+| `best_response` | Best Response | B2 Follow-up / progression |
+| `psa_nadir_value` | PSA Nadir Value | B2 Follow-up / progression |
+| `psa_nadir_date` | PSA Nadir Date | B2 Follow-up / progression |
+| `psa_doubling_time_months` | PSA Doubling Time | B2 Follow-up / progression |
+| `biochemical_recurrence_status` | Biochemical Recurrence Status | B2 Follow-up / progression |
+| `biochemical_recurrence_date` | Biochemical Recurrence Date | B2 Follow-up / progression |
+| `crpc_progression_status` | CRPC Progression Status | B2 Follow-up / progression |
+| `crpc_progression_date` | CRPC Progression Date | B2 Follow-up / progression |
+| `rt_outcome_status` | RT Outcome Status | B2 Follow-up / progression |
+
+### → `psa_reading` (1:N dated)  *( 5 fields )*
+
+| Field key | Label | Captured at |
+|---|---|---|
+| `psa_date` | Date | S1 / B2 every PSA |
+| `psa_ng_ml` | PSA (ng/mL) | S1 / B2 every PSA |
+| `free_psa_pct` | Free PSA % | S1 / B2 every PSA |
+| `psa_density` | PSA Density | S1 / B2 every PSA |
+| `context_remarks` | Context / Remarks | S1 / B2 every PSA |
+
+### → `journey_event` (1:N dated)  *( 3 fields )*
+
+| Field key | Label | Captured at |
+|---|---|---|
+| `event_type` | Event Type | S5 / throughout |
+| `event_date` | Event Date | S5 / throughout |
+| `event_notes` | Notes | S5 / throughout |
+
+### → `document` (1:N)  *( 1 fields )*
+
+| Field key | Label | Captured at |
+|---|---|---|
+| `rx_upload` | Prescription / Rx Upload | Rx upload (any stage) |
+
+### Key transformations (workbook column → canonical entity)
+| Workbook shape | Canonical shape | Why |
+|---|---|---|
+| 6 imaging columns (`mpmri_pelvis`, `bone_scan_spect`, `psma_pet_ct`, `ct_abdomen_pelvis`, `dexa_bone_density`, `germline_somatic_testing`) | **`imaging_study` rows** (`study_date`, `modality`, `result`) | gives each study a date; "Not done" = **no row** |
+| `adt_type` + `formulation_dose` + `adt_start_date` + `anti_androgen` + `arsi_intensification` | **`treatment_line` rows** (`line_type` = ADT / anti-androgen / ARSI) | therapy is sequential |
+| `chemotherapy_regimen` + `number_of_cycles_completed` + `last_cycle_date` | **`treatment_line`** (`line_type` = chemo) | same |
+| All `rt_*` + `cghs_*` fields | **`treatment_line`** (`line_type` = RT) | RT is a line with approval metadata |
+| TNM + risk + ECOG + castration | **`staging_assessment` rows** (dated) | restaging & HSPC→CRPC are dated facts |
+| Bone health + supportive fields | **`supportive_care_event` rows** (dated) | bone-protection start/stop needs an audit trail |
+| 9 comorbidity + 6 family-history columns | **boolean flags on `pathology`** | fixed list; kept exactly as the workbook/UI |
+| `diagnosis_date` (Clinical_Entry) | **moved to `patient`** | it is a patient-level fact |
