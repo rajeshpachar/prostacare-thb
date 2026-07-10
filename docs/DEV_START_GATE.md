@@ -18,10 +18,10 @@
 | # | Decision |
 |---|---|
 | 1 | **Tenant = institution** — one schema per hospital; no `institution_id` |
-| 2 | **Clinical access = department/team scoped** (HOD/coordinator may be tenant-wide) |
+| 2 | **Clinical access = role-based, tenant-wide** (no department); **HOD = privileged** |
 | 3 | **Ops / quality / pharma sponsor = de-identified aggregate only** (PHI firewall) |
 | 4 | Identifiers **masked-by-default + audited reveal** *(applies only if the identified model is chosen — see B1)* |
-| 5 | **Notifications = in-app inbox + email via AWS SES**; **login identity = email** |
+| 5 | **Notifications = email via AWS SES + simple in-app list**; **login identity = email** (no SSE push / auto-task / digest in v1) |
 | 6 | **Cross-tenant aggregation** = in-tenant `sponsor_metric` → Zygo Data Cloud → sponsor (architecture spec'd) |
 | 7 | **8 care-gap rules** specified (conditions/severities) — pending clinical sign-off (B8) |
 | 8 | **Nudge lifecycle** = open → acknowledged → **auto-resolve** (no snooze, no dismiss); engine runs **on-write** (no cron) |
@@ -35,8 +35,8 @@
 | ID | Question | Why it blocks dev | Owner | Our recommended default |
 |---|---|---|---|---|
 | **B1** | **Identity model:** does ProstaCare store PHI? (A) de-identified registry — `patient_code` only, identity stays in hospital HIS; (B) identified EMR-lite; (C) de-identified core + optional isolated identity module | Determines the entire schema, consent basis, and compliance surface. **The single biggest decision.** | Clinical + Legal | **A** (or **C** if any site needs bedside identification). Matches the V2 workbook, makes the sponsor firewall near-trivial, lightest DPDP burden. |
-| **B2** | **Multi-user or single console?** Do clinicians/MDT members log in, have a panel and an inbox — or is "team" just a notify list? | Determines roles, scopes, inbox, and the whole collaboration model | Business | **Multi-user, role-based** (the department-scoped access decision already implies it) |
-| **B3** | **Roles & MDT (simplified):** confirm **no `department`** — all clinical roles see the institution's patients, **HOD is the privileged role**, and the MDT panel is only a **notification group** (no access implication). Who manages MDT membership? | Determines roles, access model, and the "notify all" target | Clinical | Clinician · **HOD (privileged)** · Coordinator · Ops/Quality · Admin. MDT panel = notify group, admin-managed. Each patient has one **primary clinician** (attribution, not restriction). |
+| **B2** | **Multi-user or single console?** Do clinicians/MDT members log in, have a panel and an inbox — or is "team" just a notify list? | Determines roles, inbox, and the whole collaboration model | Business | **Multi-user, role-based** (the role-based access decision already implies it) |
+| **B3** | **Roles & MDT (simplified):** confirm **no `department`** — all clinical roles see the institution's patients, **HOD is the privileged role**, and the MDT panel is only a **notification group** (no access implication). Who manages MDT membership? | Determines roles, access model, and the "notify all" target | Clinical | **Clinician · HOD (privileged) · Admin** (Coordinator folded into Clinician). MDT = `is_mdt_member` flag, admin-managed. Each patient has one **primary clinician** (attribution, not restriction). |
 | **B3b** | **Record locking:** confirm **edit window = 48 h**, **HOD unlock window = 24 h**, unlock **restricted to HOD** with a mandatory reason. Should Coordinator also unlock? | Determines the lock/unlock workflow + audit model | Clinical + Business | As stated. Append-only tiers need **no** unlock to continue care — unlock exists only to correct mistakes. |
 | **B3c** | **Cardinality confirmation:** every model is either entered on a named screen or derived; **one treatment *plan* (1:1)** vs **many treatment *lines* (1:N)**; duplicates blocked by unique keys | Prevents duplicate/ambiguous rows; confirms no orphan layers | Clinical | Confirm the provenance/cardinality table (`PROSTACARE_FUNCTIONAL_LOGIC_SPEC.md §1.7`) |
 | **B4** | **Patient source of truth:** created in ProstaCare, or **synced from hospital HIS/registry**? If synced — match key (`patient_code`? UHID? ABHA?) and which fields are read-only | Determines onboarding flow, integration scope, and patient entity ownership | Business + IT | **Created in ProstaCare** for v1 (registry), keyed on `patient_code`; HIS sync as a later phase |
@@ -45,7 +45,7 @@
 | **B7** | **Sponsor:** confirm **NVS = Novartis**; their role (funder / data consumer / both); and the **independent clinical governance** that owns the rule pack (conflict-of-interest control) | Determines the aggregation contract, governance model, and consent basis | Business + Legal | Sponsor receives **de-identified aggregate only**; rule pack owned by an **independent clinical committee** with versioned sign-off; hard firewall |
 | **B8** | **Clinical sign-off on the 8 care-gap rules** — conditions, severities, next-step wording — and the **benchmark targets** (ARSI 60%, PSMA 85%, bone protection 85%, MDT review 95%) | The care-gap engine is the core product; rules cannot be coded unsigned | Clinical | Confirm as specified in `PROSTACARE_FUNCTIONAL_LOGIC_SPEC.md §4`; amend thresholds/wording as needed |
 | **B9** | **Aggregation contract:** confirm the `metric_key` catalogue; **small-cell suppression threshold** (default **11**); institution shown as **anonymised code** vs named | Determines what `sponsor_metric` computes and exports | Clinical + Legal | Catalogue as spec'd; threshold **11**; **anonymised `institution_code`** |
-| **B10** | **Launch institution + user roster + identity source:** which hospital(s) go first, the doctor/coordinator roster (name, specialty, role, email), and **Azure AD SSO vs email/local accounts** | Cannot provision a tenant or onboard users without it. No roster exists in any document today. | Business + IT | Start with **one department at one institution**; SSO if available, else email/local. Also needs an **SES verified sender domain + SES production access** (see P1-9). |
+| **B10** | **Launch institution + user roster + identity source:** which hospital(s) go first, the doctor/coordinator roster (name, specialty, role, email), and **Azure AD SSO vs email/local accounts** | Cannot provision a tenant or onboard users without it. No roster exists in any document today. | Business + IT | Start with **one institution**; SSO if available, else email/local. Also needs an **SES verified sender domain + SES production access** (see P2-1). |
 
 ---
 
@@ -53,10 +53,10 @@
 
 | ID | Question | Owner | Recommended default |
 |---|---|---|---|
-| P1-1 | **Nudge ownership** — who is responsible when a gap fires (treating clinician / relevant specialist / coordinator)? | Clinical | Treating clinician, with coordinator visibility |
-| P1-2 | **SLA / escalation / snooze** — do unactioned urgent nudges escalate? After how long, to whom? Is "snooze" allowed? Does dismissal need a reason? | Clinical | Escalate urgent to HOD/coordinator after N days; dismissal requires an audited reason; no snooze in v1 |
-| P1-3 | **Notification detail** — digest vs real-time; which triggers email vs in-app only; any patient-facing comms? | Business | Real-time for urgent, **daily digest** otherwise; clinician-only (no patient-facing) in v1 |
-| P1-4 | **Edit permissions** — is record editing gated by specialty (e.g. only Radiation Onc edits the RT plan)? Should "notify all MDT" be restricted? | Clinical | No specialty gating in v1; restrict "notify all MDT" to HOD/coordinator |
+| P1-1 | **Nudge ownership** — who is responsible when a gap fires? | Clinical | The patient's **primary clinician**; visible to all clinicians |
+| P1-2 | *(cut from v1 — see B6)* SLA / escalation / snooze / dismiss | Clinical | **None in v1.** Nudges auto-resolve when the source field changes. Revisit if clinicians ask. |
+| P1-3 | **Notification detail** — which triggers send email vs in-app only; any patient-facing comms? | Business | Send on event (no digest scheduler in v1); clinician-only, no patient-facing comms |
+| P1-4 | **Edit permissions** — is editing gated by specialty? Should "notify all MDT" be restricted? | Clinical | **No specialty gating** in v1; restrict "notify all MDT" to **HOD** |
 | P1-5 | **Cardinality confirmations** — `pathology` 1-per-patient (re-biopsy → new row), `outcome` 1-per-patient, **supportive-care dated** | Clinical | As recommended (dated supportive-care gives the bone-protection audit trail) |
 | P1-6 | **Data migration** — greenfield, or import an existing registry at the launch site? | Business | Greenfield for v1 |
 | P1-7 | **Rule governance mechanism** — clinicians tune severity/wording/thresholds in config; changing rule *logic shape* is a versioned engineering change. Acceptable? | Clinical | Yes (see `NOVAEDGE_ALIGNMENT_REVIEW.md` G2) |
@@ -94,10 +94,10 @@
 
 | Unblocked by | Work that can start |
 |---|---|
-| **B1 + B2 + B4 + B6** | **P0 Foundation** — tenancy, roles/scopes, patient hub, Tier-1 current-state entities, onboarding console |
+| **B1 + B2 + B4 + B6** | **P0 Foundation** — tenancy, 3 roles, patient hub, 1:1 entities, record lock, onboarding console |
 | **B1 + B6** | **P1 Longitudinal** — PSA, staging, imaging, treatment lines, supportive care, journey |
 | **B8** | **P2 Care-gap engine** — the 8 rules, nudge lifecycle |
-| **B3 + B10 + P2-1** | **MDT notify** (SES) + user onboarding |
+| **B3 + B10 + P2-1** | **MDT notify** (SES email) + user onboarding |
 | **B7 + B9** | **Aggregation** — `sponsor_metric` + Zygo Data Cloud pipeline |
 | **B5** | Schema core shape (single-disease vs templatable overlay) |
 
