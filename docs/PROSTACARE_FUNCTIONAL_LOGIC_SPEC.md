@@ -521,6 +521,8 @@ LATER: clinician records bone_scan = "Done — no metastases" and saves.
 
 ## 5. Derived data — every computed number + its formula
 
+> **Full catalogue:** all **22** workbook derived fields (plus platform-derived current-state and cohort metrics), with explicit formulas and **band edges**, live in **`DATA_TYPES_ENUMS_AND_DERIVED_FIELDS.md`**. The table below is the summary.
+
 Nothing here is typed; all is computed from §1 (pseudo-code).
 
 | Derived value | Formula (pseudo-code) | Feeds |

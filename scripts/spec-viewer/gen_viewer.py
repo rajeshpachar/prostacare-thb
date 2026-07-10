@@ -17,6 +17,7 @@ ORDER = [
     ("Cross-Tenant Aggregation", "CROSS_TENANT_AGGREGATION_SPEC.md"),
     ("Tenant Onboarding Plan", "TENANT_ONBOARDING_PLAN.md"),
     ("Field Dictionary", "FIELD_DICTIONARY.md"),
+    ("Types · Enums · Derived", "DATA_TYPES_ENUMS_AND_DERIVED_FIELDS.md"),
     ("Flow Clarity & Open Questions", "FLOW-CLARITY-AND-OPEN-QUESTIONS.md"),
 ]
 
