@@ -44,6 +44,13 @@ flowchart LR
 | `state` | Uttar Pradesh |
 | `travel_distance_km` | 180 |
 | `primary_clinician_id` | Dr. A. Sharma (the logged-in user) |
+| `religion` ⭐ | Hindu |
+| `marital_status` ⭐ | Married |
+| `education_level` ⭐ | Secondary |
+| `occupation` ⭐ | Agriculture |
+| `tobacco_use` ⭐ | Former |
+
+> ⭐ **These five fields are proposed additions, not yet in the workbook.** The demo captured Religion, Marital Status, Occupation and Education; the V2 workbook dropped all four. The care pathway's first registry capture point is *"patient demographics **& risk factors**"* — so they belong here. See `CLINICAL_PATHWAY_GAP_ANALYSIS.md` §1.
 
 **Records created**
 ```

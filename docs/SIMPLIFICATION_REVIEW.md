@@ -14,7 +14,7 @@
 - **AI Buddy is postponed** to a later release — it isn't in the agreed requirements, and it's the single biggest piece of work.
 - **Three roles, not five:** Clinician, HOD (extra powers), Admin.
 - **Comorbidities stay as the familiar Yes/No tick-boxes.**
-- **The system checks the rules when you press Save** — there is no overnight batch job to wait for.
+- **The system checks the rules when you press Save** — *plus* a nightly check for follow-up appointments that have fallen overdue.
 
 ---
 
@@ -41,7 +41,7 @@
 | **T6** | **`patient_condition`** normalized table (+ import transform) | Nothing | ❌ **Cut** | The workbook and the UI both use **Yes/No flag columns** (9 comorbidities, 6 family-history). Keep them as boolean columns. Removes an entity **and** gap **G6** (the pivot transform). The list is fixed; the comorbidity/pair charts are trivial SQL over booleans. |
 | **T7** | **`mdt_panel` / `mdt_panel_member` table** | Nothing | ❌ **Cut** | Since MDT is only a *notification group* (no access implication), make it a boolean **`user.is_mdt_member`**. One less table and join. |
 | **T8** | **5 roles** (Clinician, HOD, Coordinator, Ops/Quality, Admin) | FR implies few | ✂️ **Trim to 3** | **Clinician · HOD (privileged) · Admin.** Coordinator = a Clinician. Add **Ops/Quality** only if in-product de-identified dashboards are needed (sponsor reads Data Cloud anyway). |
-| **T9** | Checking the rules **both when you save *and* every night** | Nothing | ✂️ **Trim** | All 8 rules depend only on *what the data says*, not on *how much time has passed* — so they can only change when someone saves. **Checking on save is enough.** We'd add a nightly check only if a time-based rule appears (e.g. *"DEXA older than 2 years"*). |
+| **T9** | Checking the rules **both when you save *and* every night** | ⚠️ **REVERSED** | ↩️ **Restored** | The 8 original rules are state-based, so on-save was sufficient. **But the clinical care pathway adds a follow-up-interval rule** (*"PSA every 3 months in mHSPC"*) that fires **because time passes**, not because anyone saved. **A nightly check is required after all.** See `CLINICAL_PATHWAY_GAP_ANALYSIS.md` §4. |
 | **T10** | `nudge_event` actions: opened / **viewed** / acted / **routed** / resolved | FR-022 (Should) | ✂️ **Trim to 3** | Keep **opened · acknowledged · resolved** (enough for the trend chart and audit). "Viewed" is per-user telemetry; "routed" is inferable from the `notification` row. |
 | **T11** | Notifications: in-app inbox **+ SES email + live SSE push + task creation + digest** | FR-070..075 (Must/Should), FR-076 (Future) | ✂️ **Trim** | v1 = **SES email + a simple in-app notification list**. Drop live SSE push, auto-task creation, and the digest scheduler. |
 | **T12** | **AI Buddy** (ADK agent, 4 lenses, `evidence_pack` / `guideline_pack`) | **0 mentions in FR/PRD/SCOPE** | ⏸ **Defer to Phase 2** | The largest single build in the spec, required by nothing in the agreed requirements. Ship the registry + care-gap engine + dashboards first. |
@@ -95,7 +95,7 @@ stateDiagram-v2
 
 | Benefit | Detail |
 |---|---|
-| **Fewer moving parts** | −7 entities, −1 background job, −2 nudge states, −1 partition scheme, −1 import transform |
+| **Fewer moving parts** | −7 record types, −2 nudge states, −1 partition scheme, −1 import transform *(the nightly job is restored — see T9)* |
 | **Gaps closed for free** | **G5** (partition PK/lookback) and **G6** (flag→row transform) disappear entirely |
 | **Smaller v1 scope** | AI Buddy (the biggest subsystem) moves to Phase 2 |
 | **Fewer client questions** | T3/T4/T12 remove three items from the dev-start gate |

@@ -10,6 +10,7 @@ DOCS = ROOT / "docs"
 ORDER = [
     ("▶ Dev-Start Gate (open questions)", "DEV_START_GATE.md"),
     ("👤 Patient Data Walkthrough", "PATIENT_JOURNEY_DATA_WALKTHROUGH.md"),
+    ("🩺 Clinical Pathway Gaps", "CLINICAL_PATHWAY_GAP_ANALYSIS.md"),
     ("✂ Simplification Review", "SIMPLIFICATION_REVIEW.md"),
     ("Functional & Logic Spec", "PROSTACARE_FUNCTIONAL_LOGIC_SPEC.md"),
     ("NOVA Edge Alignment Review", "NOVAEDGE_ALIGNMENT_REVIEW.md"),
