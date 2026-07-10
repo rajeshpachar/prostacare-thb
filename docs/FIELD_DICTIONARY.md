@@ -88,6 +88,7 @@ They are **not yet approved**: please confirm, amend or reject each. Source work
 | ✅ | Comorbidities & Family History | `family_history_5` | Family History: Pancreatic cancer | multi-select chip group | categorical | No |  /  Yes  /  No |
 | ✅ | Comorbidities & Family History | `family_history_6` | Family History: None known | multi-select chip group | categorical | No |  /  Yes  /  No |
 | 🆕 **Proposed** | Imaging & Molecular Workup | `imaging_response` | Imaging Response (PCWG3 / RECIST) | dropdown | categorical | No | Not assessed  /  Complete response  /  Partial response  /  Stable disease  /  Progressive disease |
+| 🆕 **Proposed** | Workbook Linkage | `visit_id` | Visit (optional link) | dropdown | text | No | Reference to a row in Visits |
 
 ## Treatment_Entry
 
@@ -132,6 +133,7 @@ They are **not yet approved**: please confirm, amend or reject each. Source work
 | 🆕 **Proposed** | Radioligand Therapy | `radioligand_cycles_completed` | Radioligand Cycles Completed | number | whole number | No | 0 to 6 |
 | 🆕 **Proposed** | Radioligand Therapy | `radioligand_dose` | Radioligand Dose per Cycle | text | text | No | GBq / mCi |
 | 🆕 **Proposed** | Radioligand Therapy | `radioligand_last_cycle_date` | Radioligand Last Cycle Date | date | date | No | yyyy-mm-dd |
+| 🆕 **Proposed** | Workbook Linkage | `visit_id` | Visit (optional link) | dropdown | text | No | Reference to a row in Visits |
 
 ## Outcomes_Entry
 
@@ -163,6 +165,7 @@ They are **not yet approved**: please confirm, amend or reject each. Source work
 | ✅ | PSA History & Trend | `free_psa_pct` | Free PSA % | number | decimal number | No | Whole-number percent, e.g. 12 |
 | ✅ | PSA History & Trend | `psa_density` | PSA Density | text | decimal number | No |  |
 | ✅ | PSA History & Trend | `context_remarks` | Context / Remarks | text | text | No |  |
+| 🆕 **Proposed** | PSA History & Trend | `visit_id` | Visit (optional link) | dropdown | text | No | Reference to a row in Visits |
 
 ## Journey_Events
 
@@ -172,6 +175,7 @@ They are **not yet approved**: please confirm, amend or reject each. Source work
 | ✅ | Add New Journey Event | `event_type` | Event Type | dropdown | categorical | No | Outpatient Visit  /  Lab / PSA  /  Imaging  /  Biopsy / Procedure  /  Treatment Initiation  /  Treatment Change  /  Hospital Admission  /  MDT Review  /  Adverse Event  /  Palliative Referral |
 | ✅ | Add New Journey Event | `event_date` | Event Date | date | date | No | yyyy-mm-dd |
 | ✅ | Add New Journey Event | `event_notes` | Notes | text | text | No |  |
+| 🆕 **Proposed** | Patient Journey | `visit_id` | Visit (optional link) | dropdown | text | No | Reference to a row in Visits |
 
 ## Field_Dictionary only
 
@@ -189,6 +193,7 @@ They are **not yet approved**: please confirm, amend or reject each. Source work
 | 🆕 **Proposed** | Lab Results | `value` | Value | number | decimal number | No |  |
 | 🆕 **Proposed** | Lab Results | `unit` | Unit | text | text | No | e.g. ng/mL, g/dL |
 | 🆕 **Proposed** | Lab Results | `remarks` | Remarks | text | text | No |  |
+| 🆕 **Proposed** | Lab Results | `visit_id` | Visit (optional link) | dropdown | text | No | Reference to a row in Visits |
 
 ## Adverse_Events
 
@@ -200,6 +205,7 @@ They are **not yet approved**: please confirm, amend or reject each. Source work
 | 🆕 **Proposed** | Adverse Events | `onset_date` | Onset Date | date | date | No | yyyy-mm-dd |
 | 🆕 **Proposed** | Adverse Events | `related_treatment` | Related Treatment | dropdown | categorical | No | ADT  /  ARPI / ARSI  /  Chemotherapy  /  Radiotherapy  /  Radioligand therapy  /  Surgery  /  Other / Unknown |
 | 🆕 **Proposed** | Adverse Events | `action_taken` | Action Taken | dropdown | categorical | No | None  /  Dose reduced  /  Treatment interrupted  /  Treatment discontinued  /  Hospitalisation  /  Concomitant medication |
+| 🆕 **Proposed** | Adverse Events | `visit_id` | Visit (optional link) | dropdown | text | No | Reference to a row in Visits |
 
 ## Bone_Events
 
@@ -236,6 +242,34 @@ They are **not yet approved**: please confirm, amend or reject each. Source work
 | 🆕 **Proposed** | Referrals | `referral_date` | Referral Date | date | date | No | yyyy-mm-dd |
 | 🆕 **Proposed** | Referrals | `referral_service` | Service | dropdown | categorical | No | Dietician  /  Physiotherapy  /  Psychology  /  Social work  /  Genetic counselling  /  Palliative care  /  Nursing |
 | 🆕 **Proposed** | Referrals | `referral_status` | Status | dropdown | categorical | No | Referred  /  Seen  /  Declined  /  Pending |
+
+## Visits
+
+| Status | Section | Field Key | Label | Control | Type | UI Req | Allowed Options / List |
+|---|---|---|---|---|---|---|---|
+| 🆕 **Proposed** | Visits | `patient_code` | Unique Patient Code | text | text | No |  |
+| 🆕 **Proposed** | Visits | `visit_date` | Visit Date | date | date | No | yyyy-mm-dd |
+| 🆕 **Proposed** | Visits | `visit_type` | Visit Type | dropdown | categorical | No | First consultation  /  Follow-up review  /  Treatment / day-care  /  MDT review  /  Investigation only  /  Emergency / unplanned  /  Telemedicine |
+| 🆕 **Proposed** | Visits | `seen_by` | Seen By (clinician) | text | text | No |  |
+| 🆕 **Proposed** | Visits | `disease_state_at_visit` | Disease State at Visit | dropdown | categorical | No | Localized — on active surveillance  /  Localized / locally advanced — on curative treatment  /  mHSPC (metastatic hormone-sensitive)  /  mCRPC (metastatic castration-resistant)  /  On radioligand therapy (Pluvicto)  /  Long-term survivor / surveillance |
+| 🆕 **Proposed** | Visits | `visit_reason` | Reason for Visit | text | text | No |  |
+| 🆕 **Proposed** | Visits | `visit_outcome` | Visit Outcome | dropdown | categorical | No | Continue current plan  /  Treatment plan changed  /  Referred to another service  /  Admitted  /  Discharged from follow-up  /  Deceased |
+| 🆕 **Proposed** | Visits | `next_visit_due_date` | Next Visit Due | date | date | No | yyyy-mm-dd |
+| 🆕 **Proposed** | Visits | `visit_notes` | Notes | text | text | No |  |
+
+## Treatment_Plans
+
+| Status | Section | Field Key | Label | Control | Type | UI Req | Allowed Options / List |
+|---|---|---|---|---|---|---|---|
+| 🆕 **Proposed** | Treatment Plans | `patient_code` | Unique Patient Code | text | text | No |  |
+| 🆕 **Proposed** | Treatment Plans | `plan_date` | Plan Date | date | date | No | yyyy-mm-dd |
+| 🆕 **Proposed** | Treatment Plans | `line_of_therapy` | Line of Therapy | dropdown | categorical | No | 1st line  /  2nd line  /  3rd line  /  4th line or later |
+| 🆕 **Proposed** | Treatment Plans | `treatment_intent` | Treatment Intent | dropdown | categorical | No | treatmentIntent |
+| 🆕 **Proposed** | Treatment Plans | `mdt_tumour_board_status` | MDT / Tumour Board Status | dropdown | categorical | No | mdtStatus |
+| 🆕 **Proposed** | Treatment Plans | `date_of_mdt_review` | Date of MDT Review | date | date | No | yyyy-mm-dd |
+| 🆕 **Proposed** | Treatment Plans | `reason_for_plan_change` | Reason for This Plan | dropdown | categorical | No | Initial plan  /  Disease progression  /  Toxicity / intolerance  /  Patient preference  /  Access / affordability  /  Completed planned course  /  Comorbidity |
+| 🆕 **Proposed** | Treatment Plans | `plan_status` | Plan Status | dropdown | categorical | No | Active  /  Superseded  /  Completed  /  Stopped — toxicity  /  Stopped — patient choice |
+| 🆕 **Proposed** | Treatment Plans | `plan_summary` | Plan Summary | text | text | No |  |
 
 
 # Value Lists (dropdown option sets)
@@ -314,3 +348,9 @@ They are **not yet approved**: please confirm, amend or reject each. Source work
 | `healthcareContactType` | Hospitalisation · Emergency (ER) visit · Day-care admission |
 | `referralService` | Dietician · Physiotherapy · Psychology · Social work · Genetic counselling · Palliative care · Nursing |
 | `referralStatus` | Referred · Seen · Declined · Pending |
+| `visitType` | First consultation · Follow-up review · Treatment / day-care · MDT review · Investigation only · Emergency / unplanned · Telemedicine |
+| `diseaseStateAtVisit` | Localized — on active surveillance · Localized / locally advanced — on curative treatment · mHSPC (metastatic hormone-sensitive) · mCRPC (metastatic castration-resistant) · On radioligand therapy (Pluvicto) · Long-term survivor / surveillance |
+| `visitOutcome` | Continue current plan · Treatment plan changed · Referred to another service · Admitted · Discharged from follow-up · Deceased |
+| `lineOfTherapy` | 1st line · 2nd line · 3rd line · 4th line or later |
+| `planStatus` | Active · Superseded · Completed · Stopped — toxicity · Stopped — patient choice |
+| `reasonForPlanChange` | Initial plan · Disease progression · Toxicity / intolerance · Patient preference · Access / affordability · Completed planned course · Comorbidity |

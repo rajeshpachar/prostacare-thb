@@ -75,7 +75,7 @@ Each box below is one **record type**. The "How many per patient" column tells y
 | **Patient** (hub) | 1 per patient | `patient_code`, `age_at_diagnosis_years`, `healthcare_coverage`, `state`, `referral_source`, `registry_enrolment_date`, `diagnosis_date` | `PCR-001`, 68, CGHS, Delhi, Govt OPD |
 | **Pathology** | 1 per patient | `gleason_score`, `isup_grade_group`, `biopsy_type`, `pi_rads_score`, `cores_positive_total`, `perineural_invasion`, `ece`, `dre_findings`, `ipss_score`, `prostate_volume_cc` | Gleason 4+4=8, ISUP 4, MRI-fusion |
 | **Comorbidity / family history** | **flags on Pathology** | 9 comorbidity + 6 family-history Yes/No columns | Diabetes = Yes; Breast Ca (family) = Yes *(no separate table)* |
-| **Treatment plan** | 1 per patient | `treatment_intent`, `mdt_tumour_board_status`, `date_of_mdt_review`, `clinical_trial_eligibility`, `treatment_start_date` | Disease control; MDT reviewed 2026-06-20 |
+
 | **Outcome** | 1 per patient | `best_response`, `psa_nadir_value/date`, `psa_doubling_time_months`, `biochemical_recurrence_status/date`, `crpc_progression_status/date`, `rt_outcome_status` | Nadir 0.8 @ 2026-05, no recurrence |
 
 ### 1.3 The dated histories — *many entries per patient, never overwritten*
@@ -87,6 +87,8 @@ Each box below is one **record type**. The "How many per patient" column tells y
 | **Treatment line** | many (dated) | `line_type` (ADT/anti-androgen/ARSI/chemo/RT), `agent`, `start_date`, `end_date`, `status` (+ RT & CGHS fields) | Therapy is sequential: ADT → ARSI → chemo |
 | **Supportive-care event** | many (dated) | `at`, `bone_protection_therapy`, `calcium_vitamin_d`, `next_follow_up_psa_date`, `testosterone_monitoring`, `phq9`, `nutrition` | Bone-protection start/stop needs an audit trail |
 | **Journey event** | many (dated) | `event_type`, `event_date`, `event_notes` | The human-readable milestone story |
+| **Visit** ⭐ | many (dated) | `visit_date`, `visit_type`, `disease_state_at_visit`, `seen_by`, `visit_outcome`, `next_visit_due_date` | **The patient comes back again and again.** Each attendance is its own entry. |
+| **Treatment plan** ⭐ | many (dated) | `plan_date`, `line_of_therapy`, `treatment_intent`, `mdt_tumour_board_status`, `date_of_mdt_review`, `reason_for_plan_change`, `plan_status` | A **new plan** is agreed at progression or toxicity. The old plan is kept, marked *Superseded*. |
 
 ### 1.4 Care gaps, team messages, documents
 | Record type | How many per patient | What it holds | Plain meaning |
@@ -117,25 +119,33 @@ erDiagram
   GUIDELINE_RULE ||--o{ NUDGE : "produces"
 ```
 
-### 1.6 Do we need a Visit / Encounter concept? (design decision)
+### 1.6 Visits — the patient comes back again and again ⭐ *(now included)*
 
-**Short answer: NOT IN v1 — deferred (`SIMPLIFICATION_REVIEW.md` T4).** ProstaCare is a **registry**, so it is organised by **clinical event date** (each PSA, staging, imaging, treatment line, supportive-care entry carries its own date). That is lower-burden than a full EMR and is exactly what the care-gap engine and cohort analytics need. Forcing every entry inside a visit would add data-entry friction and doesn't help the current-state or rules logic.
+**Decision changed.** We previously deferred a Visit record, because visit *timing* could be inferred from follow-up dates. The clinical team has asked for **visits to be recorded properly** — so a **Visit** is now a first-class dated record. ProstaCare is a **registry**, so it is organised by **clinical event date** (each PSA, staging, imaging, treatment line, supportive-care entry carries its own date). That is lower-burden than a full EMR and is exactly what the care-gap engine and cohort analytics need. Forcing every entry inside a visit would add data-entry friction and doesn't help the current-state or rules logic.
 
-**What still needs "visit timing":** the Patient List segments (Last Visit / Upcoming / Missed-Overdue). These can be driven **today, without a full Encounter entity**, from existing date fields — `last_follow_up_date` (Outcome) and `next_follow_up_psa_date` (Supportive-care):
+**How visits work**
+- Each attendance is one **Visit** entry: date, type (first consultation · follow-up · day-care · MDT review · emergency · telemedicine), who saw the patient, the **disease state at that visit**, the outcome, and **when the next visit is due**.
+- Everything captured that day — PSA, labs, imaging, a treatment change — can **optionally point at that visit** (`visit_id`), so you can see *"everything that happened on 15 June."* Entries remain valid **without** a visit, so historical data can still be loaded.
+- `last_follow_up_date` is no longer typed: it is simply **the most recent visit**.
+
+**How visits drive follow-up** (this is the loop the clinical pathway asks for):
 ```
+Expected next visit  =  last visit date  +  protocol interval for the disease state
+      curative follow-up → 3–6 months        mHSPC   → 3 months
+      mCRPC             → 1–3 months          Pluvicto → 6 weeks
+      long-term survivor → 12 months
+
 visit_status(patient):
-   IF next_follow_up_psa_date in future        → "Upcoming"
-   ELSE IF next_follow_up_psa_date in past      → "Missed / Overdue"
-   ELSE                                         → "Last Visit" (use last_follow_up_date)
+   no visit yet                                   → "New"
+   next_visit_due_date in the future              → "Upcoming"
+   next_visit_due_date has passed, no visit since → "Missed / Overdue"   ← raises a nudge
+   otherwise                                      → "Last visit <date>"
 ```
+Because this gap opens **as time passes** (not when someone saves), it is checked **nightly** — see W12.
 
-**Two models to choose between:**
-| Model | What it means | When to pick |
-|---|---|---|
-| **Registry-by-event** (recommended v1) | Every clinical fact keyed by its own date; **no mandatory encounter**; visit-timing from follow-up-date fields | Registry + care-gap + analytics use case (this product) |
-| **EMR-by-encounter** | Every entry tied to a visit/encounter; richer visit grouping | Only if the product must reflect exact visit boundaries, scheduling, or billing |
+**The design that gives us both:** a Visit is recorded, and clinical entries **may** link to it — but are never *forced* to. So we get real visit tracking and follow-up chasing, without blocking data entry or historical loading.
 
-**Deferred design (Phase 2, if HIS-appointment sync is needed):** an optional `Encounter` — `encounter_id`, `encounter_date`, `type` (OPD / review / procedure / MDT), `clinician` — and a **nullable `encounter_id`** on each dated event. Events may reference an encounter (to group "everything done at the 2026-06-15 visit") but are **not required** to (registry backfill has no clean visits). **Not built in v1.** It maps cleanly onto the platform's appointment model later without reworking the event tiers.
+**Included from v1:** a `Visit` record — `encounter_id`, `encounter_date`, `type` (OPD / review / procedure / MDT), `clinician` — and a **nullable `encounter_id`** on each dated event. Events may reference an encounter (to group "everything done at the 2026-06-15 visit") but are **not required** to (registry backfill has no clean visits). It maps cleanly onto a hospital appointment system later, if HIS sync is added.
 
 > **Sign-off question (§7):** confirm **registry-by-event, no Encounter entity in v1**.
 
@@ -152,7 +162,8 @@ visit_status(patient):
 |---|---|---|---|---|
 | **Patient** (hub) | **1:1** | *Add New Patient* → Demographics form | — | edit window → lock |
 | **Pathology** | **1:1** | *Clinical Assessment* → Complaint / DRE / Biopsy | — | edit window → lock |
-| **Treatment plan** (intent, MDT status/date, trial) | **1:1** | *Treatment Plan* → Intent & MDT | — | edit window → lock |
+| **Treatment plan** ⭐ | **1:N dated** | *Treatment Plan* → new plan at MDT / progression | — | append-only (old plan kept, marked Superseded) |
+| **Visit** ⭐ | **1:N dated** | *Add Visit* | — | append-only |
 | **Outcome** | **1:1** | *Outcomes* form | — | edit window → lock |
 | **Comorbidity / family history** | **flags on `pathology`** | *Clinical Assessment* → chip groups | — | edit window → lock |
 | **PSA reading** | **1:N dated** | *Clinical Assessment* → “+ Add PSA Entry” | — | append-only |
@@ -534,6 +545,45 @@ NOTE: append-only tiers (PSA, staging, imaging, treatment_line, supportive_care,
       new dated row. Unlock exists to correct mistakes, not to continue care.
 ```
 
+### W12 · Record a visit, and chase the follow-up ⭐
+**In plain terms:** you record that the patient attended, what state their disease is in, and when they should come back. Overnight, the system checks who has passed their due date and flags them as overdue.
+
+```mermaid
+flowchart LR
+  A[Patient attends] --> V[Add Visit: date, type, disease state, outcome]
+  V --> N[Set next visit due date]
+  N --> P{Protocol interval for this disease state}
+  P --> D[(Expected next visit)]
+  D --> C[Nightly check]
+  C -->|due date passed, no visit| O[⚠ Follow-up overdue nudge<br/>+ patient shows as Missed/Overdue]
+  C -->|still in future| U[Shows as Upcoming]
+  V --> L[Entries that day may link to this visit]
+```
+
+**🔧 For engineers — the exact logic** *(clinicians can skip this box)*
+```
+TRIGGER: (a) clinician saves a Visit   (b) nightly scheduled check
+INPUTS : visit_date, visit_type, disease_state_at_visit, visit_outcome,
+         next_visit_due_date (typed, or defaulted from the protocol interval)
+LOGIC  :
+  ON SAVE:
+     APPEND visit row
+     IF next_visit_due_date is blank:
+         next_visit_due_date = visit_date + protocol_interval(disease_state_at_visit)
+     IF visit_outcome = 'Treatment plan changed':
+         mark current treatment_plan.plan_status = 'Superseded'
+         prompt to APPEND a new treatment_plan (next line_of_therapy)
+
+  NIGHTLY (this is the time-based rule):
+     FOR EACH patient WHERE current(visit).next_visit_due_date < today
+                        AND no visit recorded since that due date:
+         open nudge 'follow_up_overdue'   (auto-resolves when the next visit is recorded)
+
+OUTPUT : visit history; accurate Last visit / Upcoming / Missed-Overdue segments;
+         overdue nudges
+DERIVED: last_follow_up_date = latest visit date · visit_status · attendance rate
+```
+
 ---
 
 ## 4. The 8 care-gap rules (full) + worked example
@@ -638,7 +688,7 @@ Please confirm, amend, or reject each:
 6. **Derived metrics (§5)** — formulas acceptable; benchmark targets (ARSI 60%, PSMA 85%, bone 85%, MDT 95%) confirmed by clinical governance?
 7. **Governance** — who signs off the rule pack + evidence packs (independent of any sponsor)?
 8. **Identity model** — de-identified registry (recommended) vs identified — confirm (drives everything downstream).
-9. **Visit / Encounter (§1.6)** — confirm **registry-by-event, no `Encounter` entity in v1** (deferred to Phase 2).
+9. **Visits (§1.6)** — confirm the visit types, the follow-up intervals by disease state, and that a treatment plan is **one-to-many** (a new dated plan at each progression).
 10. **Tenancy** — confirmed **tenant = institution** (no `institution_id`); cross-institution reporting via a de-identified aggregation layer — agreed?
 11. **Roles & access (§1.1)** — **no department**; every clinician sees that institution's patients; **HOD is the privileged role** (unlock, notify-all-MDT, audit); Ops/Quality see de-identified aggregates only. Agreed?
 12. **Record locking (§1.8)** — confirm **`EDIT_WINDOW` = 48 h**, **`UNLOCK_WINDOW` = 24 h**, **unlock restricted to HOD** with a mandatory reason. Do these durations suit clinic practice? Should any other role be allowed to unlock?
